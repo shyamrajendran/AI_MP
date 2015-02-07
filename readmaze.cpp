@@ -92,9 +92,9 @@ public:
                 //cout<<line<<endl;
                 for (int i = 0;i<line.size();i++) {
                     map[cur_row][i] = line[i];
-                    if (line[i] == '.' && !start.isInit()) {
+                    if (line[i] == 'P' && !start.isInit()) {
                         start.setXY(i, cur_row); 
-                    } else if (line[i] == 'P' && !dest.isInit()) {
+                    } else if (line[i] == '.' && !dest.isInit()) {
                         dest.setXY(i, cur_row);
                     }
                 }
@@ -145,7 +145,11 @@ public:
     }
 
     bool isTarget(point s) {
-        if (map[s.y][s.x] == 'P') return true;
+        if (s == dest) return true;
+        return false;
+    }
+    bool isSource(point s) {
+        if (s == start) return true;
         return false;
     }
 
@@ -224,7 +228,7 @@ public:
         for (int i = 0; i < maze_ydim; i++) {
             for (int j = 0;j< maze_xdim;j++) {
                 point p(j, i);
-                if (isPointInPath(p, path) && !isTarget(p)) {
+                if (isPointInPath(p, path) && !isSource(p)) {
                     cout<<".";
                 } else {
                     cout<<map[i][j];
