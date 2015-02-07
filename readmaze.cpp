@@ -313,7 +313,7 @@ public:
             cout<<"no path"<<endl;
         }
     }
-/*
+
     bool getPathGreedyBFS(point s,
                     priority_queue<Node, vector<Node>, GreedyBFSComparator> &frontier,
                     vector<point>&path,
@@ -321,15 +321,16 @@ public:
                     bool *visited) {
         if (!isWithinBounds(s)) return false;
         visited[start.y * maze_xdim + start.x] = true;
-        frontier.push(start);
+        Node s_n(s, heuristic[s.y][s.x]);
+        frontier.push(s_n);
         while(!frontier.empty()) {
-            Node w = frontier.front();
+            Node w = frontier.top();
             frontier.pop();
             //cout<<"---------enter:"<<w.x<<","<<w.y<<endl;
-            if (isTarget(w.point)) {
+            if (isTarget(w.p)) {
                 //poulate path vector
-                path.push_back(w);
-                std::map<point, point>::iterator it = backtrack.find(w);
+                path.push_back(w.p);
+                std::map<point, point>::iterator it = backtrack.find(w.p);
                 while(it != backtrack.end()) {
                     //cout<<"found";
                     path.push_back(it->second);
@@ -339,26 +340,46 @@ public:
             }
 
             point v[8];
-            v[0].setXY(w.x - 1, w.y - 1);
-            v[1].setXY(w.x, w.y - 1);
-            v[2].setXY(w.x + 1, w.y - 1);
-            v[3].setXY(w.x - 1, w.y);
-            v[4].setXY(w.x + 1, w.y);
-            v[5].setXY(w.x - 1, w.y + 1);
-            v[6].setXY(w.x, w.y + 1);
-            v[7].setXY(w.x + 1, w.y + 1);
+            v[0].setXY(w.p.x - 1, w.p.y - 1);
+            v[1].setXY(w.p.x, w.p.y - 1);
+            v[2].setXY(w.p.x + 1, w.p.y - 1);
+            v[3].setXY(w.p.x - 1, w.p.y);
+            v[4].setXY(w.p.x + 1, w.p.y);
+            v[5].setXY(w.p.x - 1, w.p.y + 1);
+            v[6].setXY(w.p.x, w.p.y + 1);
+            v[7].setXY(w.p.x + 1, w.p.y + 1);
             for (int i = 0; i < 8; i++) {
                 if (isWithinBounds(v[i]) && isPathPresent(v[i]) &&
                     visited[v[i].y * maze_xdim + v[i].x] == false) {
                     visited[v[i].y * maze_xdim + v[i].x] = true;
-                    frontier.push(v[i]);
-                    backtrack.insert(std::pair<point, point>(v[i], w)); 
+                    Node n(v[i], heuristic[v[i].y][v[i].x]);
+                    frontier.push(n);
+                    backtrack.insert(std::pair<point, point>(v[i], w.p)); 
                 }
             }
             
         }
         return false;
-    }*/
+    }
+
+    void printPathGreedyBFS() {
+        bool visited[maze_ydim * maze_xdim];
+        for (int i = 0; i< maze_ydim * maze_xdim; i++) {
+            visited[i] = false;
+        }
+        
+        vector<point> p;
+        std::map<point, point> backtrack;
+        priority_queue<Node, vector<Node>, GreedyBFSComparator> frontier;
+        if (getPathGreedyBFS(start, frontier, p, backtrack, visited)) {
+            cout<<"Greedy BFS path Found"<<endl;
+            //printMap(backtrack);
+            //printPath(p);
+            overlayPathOnMap(p);
+        } else {
+            cout<<"no path"<<endl;
+        }
+    }
 };
 
 int main() {
@@ -367,7 +388,8 @@ int main() {
     smallm.printMaze();
     smallm.printPathBFS();
     smallm.printPathDFS();
-
+    smallm.printPathGreedyBFS();
+/*
     maze medium("mediumMaze.txt");
     medium.printMazeParams();
     medium.printMaze();
@@ -378,5 +400,5 @@ int main() {
     bigm.printMazeParams();
     bigm.printMaze();
     bigm.printPathBFS();
-    bigm.printPathDFS();
+    bigm.printPathDFS();*/
 }
