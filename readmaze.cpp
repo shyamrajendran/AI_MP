@@ -61,7 +61,7 @@ class Node {
     Node(point p1, int startcost, int score, bool isgreedy) {
         p.setXY(p1.x, p1.y);
         startCost = startcost;
-        heuristicScore = (isGreedy == true) ? 0 : score;
+        heuristicScore = (isgreedy == true) ? 0 : score;
         isGreedy = isgreedy;
     } 
     
@@ -373,7 +373,7 @@ public:
             v[3].setXY(w.p.x, w.p.y + 1);
             for (int i = 0; i < 4; i++) {
                 if (isWithinBounds(v[i]) && isPathPresent(v[i])  && visited[v[i].y * maze_xdim + v[i].x] == false) {
-                    Node n(v[i], w.startCost + 1, heuristic[s.y][s.x], isGreedy);
+                    Node n(v[i], w.startCost + 1, heuristic[v[i].y][v[i].x], isGreedy);
                     findandUpdate(frontier, n, w, backtrack);
                 }
             }
