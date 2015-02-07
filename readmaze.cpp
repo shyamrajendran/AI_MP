@@ -81,7 +81,7 @@ class maze {
 
 public:
     maze(string filename) {
-        ifstream ip(filename);
+        ifstream ip(filename.c_str());
         int cur_row = 0;
         string line; 
         int last_xdim = 0;
