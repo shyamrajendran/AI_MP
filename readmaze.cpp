@@ -9,6 +9,7 @@
 using namespace std;
 #define MAX_MAZE_DIM 100
 
+bool DEBUG = true; // DISABLE TO STOP DEBUG MSG
 class point {
 public:
     int x;
@@ -101,7 +102,7 @@ public:
             while(getline(ip, line)) {
                 for (int i = 0;i<line.size();i++) {
                     map[cur_row][i] = line[i];
-                    if (line[i] == 'P' && !start.isInit()) {
+                    if (line[i] == 'P' && !start.isInit()) { // why ?
                         start.setXY(i, cur_row); 
                     } else if (line[i] == '.' && !dest.isInit()) {
                         dest.setXY(i, cur_row);
@@ -336,10 +337,13 @@ public:
                     bool *visited) {
         if (!isWithinBounds(s)) return false;
         visited[start.y * maze_xdim + start.x] = true;
+        int nodesExpanded = 0;
         Node s_n(s, heuristic[s.y][s.x]);
         frontier.push(s_n);
         while(!frontier.empty()) {
+
             Node w = frontier.top();
+            nodesExpanded++;
             frontier.pop();
             //cout<<"---------enter:"<<w.x<<","<<w.y<<endl;
             if (isTarget(w.p)) {
@@ -351,6 +355,7 @@ public:
                     path.push_back(it->second);
                     it = backtrack.find(it->second);
                 }
+                cout << "GREEDY BFS NODES EXPANDED " << nodesExpanded << endl;
                 return true;
             }
 
@@ -420,16 +425,19 @@ public:
                     std::map<point, point>& backtrack,
                     bool *visited) {
         if (!isWithinBounds(s)) return false;
+		int nodesExpanded = 0;
         visited[start.y * maze_xdim + start.x] = true;
         Node s_n(s, 0, heuristic[s.y][s.x]);
         frontier.push_back(s_n);
         while(!frontier.empty()) {
             frontier.sort();
             Node w = frontier.front();
+			nodesExpanded++;
             frontier.pop_front();
             //cout<<"---------enter:"<<w.x<<","<<w.y<<endl;
             if (isTarget(w.p)) {
                 //poulate path vector
+				cout << "NODES EXPANDED IN A*" << nodesExpanded << endl;
                 path.push_back(w.p);
                 std::map<point, point>::iterator it = backtrack.find(w.p);
                 while(it != backtrack.end()) {
@@ -450,8 +458,7 @@ public:
             //bottom
             v[3].setXY(w.p.x, w.p.y + 1);
             for (int i = 0; i < 4; i++) {
-                if (isWithinBounds(v[i]) && isPathPresent(v[i]) &&
-                    visited[v[i].y * maze_xdim + v[i].x] == false) {
+                if (isWithinBounds(v[i]) && isPathPresent(v[i])  && visited[v[i].y * maze_xdim + v[i].x] == false) {
                     visited[v[i].y * maze_xdim + v[i].x] = true;
                     Node n(v[i], w.startCost + 1, heuristic[v[i].y][v[i].x]);
                     findandUpdate(frontier, n);
@@ -472,8 +479,12 @@ public:
         list<Node>::iterator it = l.begin();
         while (it != l.end()) {
             Node &n = *it;
+			cout << "V," << v.p.x << "," << n.p.x <<  "||" << v.p.y << "," << n.p.y << endl;
             if (v.p == n.p) {
                 // found match. now check score
+				if(DEBUG) {
+					cout << "v.startCost,n.startCost : " << v.startCost << n.startCost << endl;
+				}
                 if (v.startCost < n.startCost) {
                     n.startCost = v.startCost;
                     flag = 1;
@@ -491,26 +502,26 @@ public:
 
 int main() {
     maze smallm("smallMaze.txt");
-    smallm.printMazeParams();
-    smallm.printMaze();
-    smallm.printPathBFS();
-    smallm.printPathDFS();
-    smallm.printPathGreedyBFS();
-    smallm.printPathAstar();
+  //  smallm.printMazeParams();
+ //   smallm.printMaze();
+//    smallm.printPathBFS();
+   // smallm.printPathDFS();
+    // smallm.printPathGreedyBFS();
+     smallm.printPathAstar();
     
-    maze medium("mediumMaze.txt");
-    medium.printMazeParams();
-    medium.printMaze();
-    medium.printPathBFS();
-    medium.printPathDFS();
-    medium.printPathGreedyBFS();
-    medium.printPathAstar();
-    
-    maze bigm("bigMaze.txt");
-    bigm.printMazeParams();
-    bigm.printMaze();
-    bigm.printPathBFS();
-    bigm.printPathDFS();
-    bigm.printPathGreedyBFS();
-    bigm.printPathAstar();
+    //maze medium("mediumMaze.txt");
+    //medium.printMazeParams();
+    //medium.printMaze();
+    //medium.printPathBFS();
+    //medium.printPathDFS();
+    //medium.printPathGreedyBFS();
+    //medium.printPathAstar();
+    //
+//    maze bigm("bigMaze.txt");
+    //bigm.printMazeParams();
+    //bigm.printMaze();
+    //bigm.printPathBFS();
+    //bigm.printPathDFS();
+ //   bigm.printPathGreedyBFS();
+  //  bigm.printPathAstar();
 }
