@@ -426,21 +426,29 @@ public:
      * if not found adds to frontier
      **/
     void findandUpdate(list<Node>& l, Node& v, Node& src, std::map<point, point>& backtrack) {
-        int flag = 0;
         list<Node>::iterator it = l.begin();
         while (it != l.end()) {
-            Node n = *it;
+            //Node n = *it;
 			//cout << "V," << v.p.x << "," << n.p.x <<  "||" << v.p.y << "," << n.p.y << endl;
-            if (v.p == n.p) {
+            if (v.p == it->p) {
                 // found match. now check score
 //				if(DEBUG) {
 //					cout << "v.startCost,n.startCost : " << v.startCost << n.startCost << endl;
 //				}
-                if (v.startCost < n.startCost) {
+                int totalscoreNew, totalscoreOld;
+                if (v.isGreedy) {
+                    totalscoreNew = v.startCost;
+                    totalscoreOld = it->startCost;
+                } else {
+                    totalscoreNew = v.startCost + v.heuristicScore;
+                    totalscoreOld = it->startCost + it->heuristicScore;
+                }
+                
+                if (totalscoreNew < totalscoreOld) {
                     l.erase(it);
                     l.push_back(v);
-                    std::map<point, point>::iterator it = backtrack.find(v.p);
-                    backtrack.erase(it);
+                    std::map<point, point>::iterator it1 = backtrack.find(v.p);
+                    backtrack.erase(it1);
                     backtrack.insert(std::pair<point, point>(v.p, src.p)); 
                 }
                 return;
