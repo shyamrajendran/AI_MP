@@ -56,12 +56,12 @@ class Node {
     public:
     point p;
     bool isGreedy; 
-    int startCost;
-    int heuristicScore;//set to zero for greedy
+    int startCost;//set to zero for greedy
+    int heuristicScore;
     Node(point p1, int startcost, int score, bool isgreedy) {
         p.setXY(p1.x, p1.y);
-        startCost = startcost;
-        heuristicScore = (isgreedy == true) ? 0 : score;
+        startCost = (isgreedy == true) ? 0 : startcost;
+        heuristicScore = score;
         isGreedy = isgreedy;
     } 
     
@@ -75,12 +75,6 @@ class Node {
     }
 };
 
-class GreedyBFSComparator {
-public:
-    bool operator () (Node& n1, Node& n2) {
-        return n1.heuristicScore > n2.heuristicScore;
-    }
-};
 
 class maze {
     char map[MAX_MAZE_DIM][MAX_MAZE_DIM];
@@ -436,14 +430,9 @@ public:
 //					cout << "v.startCost,n.startCost : " << v.startCost << n.startCost << endl;
 //				}
                 int totalscoreNew, totalscoreOld;
-                if (v.isGreedy) {
-                    totalscoreNew = v.startCost;
-                    totalscoreOld = it->startCost;
-                } else {
-                    totalscoreNew = v.startCost + v.heuristicScore;
-                    totalscoreOld = it->startCost + it->heuristicScore;
-                }
-                
+                //startcost is 0 for greedy BFS.
+                totalscoreNew = v.startCost + v.heuristicScore;
+                totalscoreOld = it->startCost + it->heuristicScore;
                 if (totalscoreNew < totalscoreOld) {
                     l.erase(it);
                     l.push_back(v);
