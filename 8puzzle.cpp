@@ -97,6 +97,7 @@ class puzzleboard {
     int board[BOARD_SIZE][BOARD_SIZE];
     int goal[BOARD_SIZE][BOARD_SIZE];
     int pathcost;
+    //point blank;
     puzzleboard(int *a) {
         pathcost = 0;
         initGoalBoard();
@@ -106,11 +107,13 @@ class puzzleboard {
             row = i / BOARD_SIZE;
             col = i % BOARD_SIZE;
             board[row][col] = a[i];
+            //if(a[i] == 0) blank.setXY(col,row);
         }
     }
 
     puzzleboard(const puzzleboard& o) {
         pathcost = o.pathcost;
+        //blank = o.blank;
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
                 this->board[i][j] = o.board[i][j];
@@ -410,6 +413,7 @@ bool getPathAstar(puzzleboard s,
 //        }
         
         if (w.isTarget()) {
+            cout<<"found:nodes expadned"<<nodesExpanded<<endl;
             path.push_back(w);
             std::map<puzzleboard, puzzleboard>::iterator it = backtrack.find(w);
             while(it != backtrack.end()) {
@@ -529,14 +533,20 @@ vector<pair<int,int>> plotHelper(puzzleboard p){
     
 }
 int main() {
-    int a[] = {8,1,3,4,0,2,7,6,5};//works 10000
+    //int a[] = {8,1,3,4,0,2,7,6,5};//works 10000
+    //int a[] = {0,1,2,4,5,3,7,8,6};//works
+    //int a[] = {4,1,2,0,5,3,7,8,6};//works
     //int a[] = {1,2,0,5,6,3,4,7,8};//works
     //int a[] = {1,2,3,4,6,8,7,0,5};//works
-    //int a[] = {8,1,3,4,0,2,7,6,5};//works 10000
     //int a[] = {0,1,3,4,2,5,7,8,6};//works 10000
     //int a[] = {2,3,5,1,0,4,7,8,6};//works
     //int a[] = {1,0,2,7,5,4,8,6,3};//works
+    int a[] = {5,1,8,2,7,3,0,4,6};//works
     //int a[] = {5,1,8,2,7,3,4,0,6};//works
+    //int a[] = {5,1,8,7,0,3,2,4,6};//works
+    //int a[] = {5,1,8,0,7,3,2,4,6};//works
+    //int a[] = {5,1,8,7,3,0,2,4,6};//works
+    //int a[] = {3,1,2,0,4,5,6,7,8};//
     //int a[] = {5,6,2,1,8,4,7,3,0};//no path
     //int a[] = {1,2,7,0,4,3,6,5,8};
     //int a[] = {1,6,4,7,0,8,2,3,5};
