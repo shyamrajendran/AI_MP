@@ -401,10 +401,13 @@ void printPath(vector<puzzleboard> p) {
     }
 }
 
-void printPathAstar(puzzleboard start, boardScoreType t) {
+pair<int,int>  printPathAstar(puzzleboard start, boardScoreType t) {
     vector<puzzleboard> visited;
     vector<puzzleboard> path;
     map<puzzleboard, puzzleboard> backtrack;
+    pair<int,int> res;
+    res.first = 0;
+    res.second = 0;
     list<puzzleboard> frontier;
     if (getPathAstar(start,
                      frontier,
@@ -414,8 +417,13 @@ void printPathAstar(puzzleboard start, boardScoreType t) {
         cout<<"Astar path Found:length="<<path.size()<<endl;
         printPath(path);
         //overlayPathOnMap(p);
+        
+        res.first = path.size();
+        res.second = visited.size();
+        return res;
     } else {
         cout<<"no path"<<endl;
+        return res;
     }
 }
 
@@ -434,7 +442,7 @@ void printVector(vector<int> v){
                 cout << *it << " ";
     }
 }
-vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=50){
+vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=10){
     vector<puzzleboard> result;
     vector<vector<int>> alreadyGeneratedList;
     vector<int> l;
@@ -463,6 +471,17 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=50
     return result;
 }
 
+vector<pair<int,int>> plotHelper(puzzleboard p){
+    vector<pair<int,int>>  res;
+    pair<int, int> respair;
+    vector<puzzleboard> listOfBoards = generateRandomBoards(p);
+    int i = 0;
+    for(std::vector<puzzleboard>::iterator it = listOfBoards.begin(); it != listOfBoards.end(); ++it,i++) {
+        res.push_back(printPathAstar((*it), MISPLACED_TILES));
+    }
+    return res;
+    
+}
 int main() {
     int a[] = {1,2,0,3,4,5,6,7,8};
     int b[] = {0,2,3,4,1,5,6,7,8};
@@ -478,6 +497,11 @@ int main() {
     //std::map<puzzleboard, puzzleboard> m;
     //p.printNextMoves();
     printPathAstar(p, MISPLACED_TILES);
+    int i = 1;
+    vector<pair<int,int>> res = plotHelper(p);
+    for(std::vector<pair<int,int>>::iterator it = res.begin(); it != res.end(); ++it,i++) {
+        cout << "BOARD - "<<i << " : "<< (*it).first << "," << (*it).second << endl;
+    }
     //p.printNextMoves();
     /*
     vector<puzzleboard> listOfBoards = generateRandomBoards(p);
