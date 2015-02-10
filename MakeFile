@@ -1,0 +1,13 @@
+CFLAGS =  -Wall -g -std=c++11
+all: Application
+Application: 8puzzle.o readmaze.o
+	g++ -o Application 8puzzle.o readmaze.o ${CFLAGS}
+
+readmaze.o: readmaze.cpp 
+	g++ -c readmaze.cpp ${CFLAGS}
+
+8puzzle.o: 8puzzle.cpp 
+	g++ -c 8puzzle.cpp ${CFLAGS}
+
+clean:
+	rm -rf *.o  
