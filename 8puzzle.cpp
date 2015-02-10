@@ -2,14 +2,13 @@
 #include<iostream>
 #include<map>
 #include<vector>
+#include<list>
+#include<set>
 #include <cstdlib>
 #include <set>
 #include <random>
 #include <iostream>     // std::cout
-#include <algorithm>    // std::shuffle
 #include <array>        // std::array
-#include <random>       // std::default_random_engine
-#include <chrono>       // std::chrono::system_clock
 using namespace std;
 
 
@@ -95,8 +94,9 @@ class puzzleboard {
     public:
     int board[BOARD_SIZE][BOARD_SIZE];
     int goal[BOARD_SIZE][BOARD_SIZE];
-
+    int pathcost;
     puzzleboard(int *a) {
+        pathcost = 0;
         initGoalBoard();
         //default type is misplaced tiles
         int row = 0, col = 0;
@@ -108,6 +108,7 @@ class puzzleboard {
     }
 
     puzzleboard(const puzzleboard& o) {
+        pathcost = o.pathcost;
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
                 this->board[i][j] = o.board[i][j];
@@ -116,6 +117,14 @@ class puzzleboard {
         }
     }
 
+    int getPathCost() {
+        return pathcost;
+    }
+    
+    void setPathCost(int cost) {
+        this->pathcost = cost;
+    }
+    
     // array is expected to have enough space
     bool serialize(int *a) {
         if (a == NULL) return false;
@@ -242,7 +251,7 @@ class puzzleboard {
     }
 
     bool isWithinBounds(point& p) {
-        if (p.x > BOARD_SIZE || p.y > BOARD_SIZE || p.x < 0 || p.y < 0) return false;
+        if (p.x >= BOARD_SIZE || p.y >= BOARD_SIZE || p.x < 0 || p.y < 0) return false;
         return true;
     }
 
@@ -257,7 +266,6 @@ class puzzleboard {
         pp[1].setXY(blank.x - 1, blank.y);
         pp[2].setXY(blank.x + 1, blank.y);
         pp[3].setXY(blank.x, blank.y + 1);
-
         for (int i = 0; i < 4; i++) {
             if (isWithinBounds(pp[i])) {
                 b.swapPoints(pp[i], blank);
@@ -276,8 +284,138 @@ class puzzleboard {
             i.printBoard();
         }
     }
+    
+    bool isTarget() {
+        for (int i = 0; i < BOARD_SIZE;i++) {
+            for (int j = 0; j < BOARD_SIZE;j++) {
+                if (board[i][j] != goal[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 };
 
+void findandUpdate(list<puzzleboard>& frontier,
+                   puzzleboard& v,
+                   puzzleboard& src,
+                   vector<pair<puzzleboard, puzzleboard> >& backtrack,
+                   boardScoreType t) {
+
+    list<puzzleboard>::iterator it = frontier.begin();
+    while (it != frontier.end()) {
+        if (v == *it) {
+            int totalscoreNew, totalscoreOld;
+            totalscoreNew = v.getPathCost() + v.getScore(t);
+            totalscoreOld = it->getPathCost() + it->getScore(t);
+            if (totalscoreNew < totalscoreOld) {
+                frontier.erase(it);
+                frontier.push_back(v);
+                /*std::map<puzzleboard, puzzleboard>::iterator it1 = backtrack.find(v);
+                find(backtrack.begin(), backtrack.end(),)
+                backtrack.erase(it1);
+                backtrack.insert(std::pair<puzzleboard, puzzleboard>(v, src));*/
+            }
+            return;
+        }
+        it++;
+    }
+    // i.e. node not in frontier
+    frontier.push_back(v);
+    //backtrack.insert(std::pair<puzzleboard, puzzleboard>(v, src));
+}
+
+void sortFrontier(list<puzzleboard>& frontier, boardScoreType t) {
+    switch (t) {
+        case MISPLACED_TILES:
+            frontier.sort([](puzzleboard& b1, puzzleboard& b2) {
+                return b1.getMisplacedDist() + b1.getPathCost() < b2.getMisplacedDist() + b2.getPathCost();
+            });
+            break;
+        case MANHATTAN:
+            frontier.sort([](puzzleboard& b1, puzzleboard& b2) {
+                return b1.getManhattanDist() + b1.getPathCost() < b2.getManhattanDist() + b2.getPathCost();
+            });
+            break;
+        case GASHNIG:
+            frontier.sort([](puzzleboard& b1, puzzleboard& b2) {
+                return b1.getManhattanDist() + b1.getPathCost() < b2.getManhattanDist() + b2.getPathCost();
+            });
+            break;
+        default:
+            break;
+    }
+}
+
+
+bool getPathAstar(puzzleboard s,
+                list<puzzleboard>& frontier,
+                vector<puzzleboard>& path,
+                vector<std::pair<puzzleboard, puzzleboard> >& backtrack,
+                vector<puzzleboard>& visited,
+                boardScoreType t) {
+    
+    int nodesExpanded = 0;
+    frontier.push_back(s);
+    while(!frontier.empty()) {
+        sortFrontier(frontier, t);
+        puzzleboard w = frontier.front();
+        frontier.pop_front();
+        nodesExpanded++;
+        if (find(visited.begin(), visited.end(), w) == visited.end()) {
+            visited.push_back(w);
+        }
+        
+        if (w.isTarget()) {
+            path.push_back(w);
+            //std::map<puzzleboard, puzzleboard>::iterator it = backtrack.find(w);
+            /*vector<pair<puzzleboard, puzzleboard> >::iterator it = find(backtrack.begin(), backtrack.end(), w);
+            while(it != backtrack.end()) {
+                //cout<<"found";
+                path.push_back(it->second);
+                //it = backtrack.find(it->second);
+                it = find(backtrack.begin(), backtrack.end(), it->second);
+            }*/
+            return true;
+        }
+
+        //get next moves
+        vector<puzzleboard> vv = w.generateNextMoves();
+        for (auto v : vv) {
+            if (find(visited.begin(), visited.end(), v) == visited.end()) {
+                v.setPathCost(w.getPathCost() + 1);
+                findandUpdate(frontier, v, w, backtrack, t);
+            }
+        }
+    }
+    return false;
+}
+
+void printPath(vector<puzzleboard> p) {
+    cout<<"solution path is :"<<endl;
+    for (auto i : p) {
+        i.printBoard();
+    }
+}
+
+void printPathAstar(puzzleboard start, boardScoreType t) {
+    vector<puzzleboard> visited;
+    vector<puzzleboard> path;
+    vector<pair<puzzleboard, puzzleboard> > backtrack;
+    list<puzzleboard> frontier;
+    if (getPathAstar(start,
+                     frontier,
+                     path,
+                     backtrack,
+                     visited, t)) {
+        cout<<"Astar path Found:length="<<path.size()<<endl;
+        printPath(path);
+        //overlayPathOnMap(p);
+    } else {
+        cout<<"no path"<<endl;
+    }
+}
 
 bool findInVector(vector<vector<int>> v, vector<int> s){
     vector<vector<int>>::iterator it;
@@ -330,14 +468,13 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=50
 }
 
 int main() {
-
-    int a[] = {1,2,6,8,0,7,3,4,9};
+    int a[] = {1,2,3,4,0,5,6,7,8};
     puzzleboard p(a);
- 
-    
     p.printBoardStats();
     cout<<"dis from goal"<<p.getMisplacedDist()<<endl;
     //std::map<puzzleboard, puzzleboard> m;
+    //p.printNextMoves();
+    printPathAstar(p, MISPLACED_TILES);
     p.printNextMoves();
     
     vector<puzzleboard> listOfBoards = generateRandomBoards(p);
