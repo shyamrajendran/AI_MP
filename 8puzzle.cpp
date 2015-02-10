@@ -344,8 +344,9 @@ int main() {
     
     vector<puzzleboard> listOfBoards = generateRandomBoards(p);
     cout << listOfBoards.size();
-    cout << "help";
-    for(std::vector<puzzleboard>::iterator it = listOfBoards.begin(); it != listOfBoards.end(); ++it) {
+    int i = 1;
+    for(std::vector<puzzleboard>::iterator it = listOfBoards.begin(); it != listOfBoards.end(); ++it,i++) {
+        cout << "RANDOM BOARD " << i << endl;
         (*it).printBoard();
     }
     
