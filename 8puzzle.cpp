@@ -281,13 +281,11 @@ class puzzleboard {
 
 bool findInVector(vector<vector<int>> v, vector<int> s){
     vector<vector<int>>::iterator it;
-    
-    cout << "PRINTING VECTOR" << endl;
     for (std::vector<vector<int>>::iterator it=v.begin(); it!=v.end(); ++it){
         for (std::vector<int>::iterator itt=(*it).begin(); itt!=(*it).end(); ++itt){
             cout << *itt;
         }
-        cout << "++++++++++";
+
     }
     
     it = find (v.begin(), v.end(), s);
@@ -298,13 +296,11 @@ bool findInVector(vector<vector<int>> v, vector<int> s){
     }
 }
 void printVector(vector<int> v){
-//    cout << "PRNTING VECTOR";
     for (std::vector<int>::iterator it=v.begin(); it!=v.end(); ++it){
                 cout << *it << " ";
     }
-//        cout << "PRNTING VECTOR END";
 }
-vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=5){
+vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=50){
     vector<puzzleboard> result;
     vector<vector<int>> alreadyGeneratedList;
     vector<int> l;
@@ -315,21 +311,13 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=5)
         
     }
     for(int j = 1;j<=number;j++){
-        cout << "-------------------------------------------------------------------" << endl;
-        cout << "SIZE OF SET" << l.size();
-        cout <<  endl << "VECTOR BEFORE " << endl;
-        printVector(l);
-        
         random_shuffle ( l.begin(), l.end() );
-        cout <<  endl << "VECTOR AFTER " << endl;
         printVector(l);
         
         if(findInVector(alreadyGeneratedList, l)){
-            cout << "already";
             j--;
             continue;
         }else{
-            // convert the generate set into list and pass arg to puzzle board constructor and append to result
             i=0;
             for (std::vector<int>::iterator it=l.begin(); it!=l.end(); ++it,i++){
                 some_array[i] = *it;
