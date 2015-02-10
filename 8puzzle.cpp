@@ -281,12 +281,12 @@ class puzzleboard {
 
 bool findInVector(vector<vector<int>> v, vector<int> s){
     vector<vector<int>>::iterator it;
-    for (std::vector<vector<int>>::iterator it=v.begin(); it!=v.end(); ++it){
-        for (std::vector<int>::iterator itt=(*it).begin(); itt!=(*it).end(); ++itt){
-            cout << *itt;
-        }
-
-    }
+//    for (std::vector<vector<int>>::iterator it=v.begin(); it!=v.end(); ++it){
+//        for (std::vector<int>::iterator itt=(*it).begin(); itt!=(*it).end(); ++itt){
+//            cout << *itt;
+//        }
+//
+//    }
     
     it = find (v.begin(), v.end(), s);
     if (it == v.end()){
@@ -312,8 +312,6 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=50
     }
     for(int j = 1;j<=number;j++){
         random_shuffle ( l.begin(), l.end() );
-        printVector(l);
-        
         if(findInVector(alreadyGeneratedList, l)){
             j--;
             continue;
