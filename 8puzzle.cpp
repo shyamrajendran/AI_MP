@@ -152,11 +152,35 @@ class puzzleboard {
         return true;
     }
 
+    // solvability: grid with odd width && even no inversion
+    
+    bool isSolvable() {
+        int a[BOARD_SIZE * BOARD_SIZE];
+        serialize(a);
+        vector<int> v;
+        for (auto i : a) {
+            if (i != 0)
+                v.push_back(i);
+        }
+        int inv = 0;
+        for (int i = 0; i < v.size() - 1;i++) {
+            for (int j = i + 1; j < v.size();j++) {
+                    if (v[j] < v[i]) {
+                        inv++;
+                    }
+            }
+        }
+
+        return (inv % 2 == 0) ? true : false;
+    }
+    
     void initGoalBoard() {
-        int count = 0;
+        int count = 1;
+        int size = BOARD_SIZE * BOARD_SIZE;
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
-                goal[i][j] = count++;
+                goal[i][j] = count % size;
+                count++;
             }
             cout<<endl;
         }
@@ -311,7 +335,7 @@ void findandUpdate(list<puzzleboard>& frontier,
 
     list<puzzleboard>::iterator it = frontier.begin();
     while (it != frontier.end()) {
-        cout << "SIZE :" << frontier.size() << endl;
+        //cout << "SIZE :" << frontier.size() << endl;
         if (v == *it) {
             int totalscoreNew, totalscoreOld;
             totalscoreNew = v.getPathCost() + v.getScore(t);
@@ -368,14 +392,15 @@ bool getPathAstar(puzzleboard s,
     int nodesExpanded = 0;
     frontier.push_back(s);
     while(!frontier.empty()) {
-        cout << " 372 SIZE :" << frontier.size() << "VISITED SIZE" << visited.size() <<   endl;
+        //cout << " 372 SIZE :" << frontier.size() << "VISITED SIZE" << visited.size() <<   endl;
         sortFrontier(frontier, t);
         puzzleboard w = frontier.front();
-        w.printBoard();
+        //w.printBoard();
         visited.push_back(w);
         frontier.pop_front();
         nodesExpanded++;
         if(nodesExpanded == 100){
+            cout<<"limit reached"<<endl;
             return false;
         }
 //        if (find(visited.begin(), visited.end(), w) == visited.end()) {
@@ -394,17 +419,17 @@ bool getPathAstar(puzzleboard s,
 
         //get next moves
         vector<puzzleboard> vv = w.generateNextMoves();
-        cout << "+++++++++++++MAX OF generate moves" << vv.size();
+        //cout << "+++++++++++++MAX OF generate moves" << vv.size();
         for (auto v : vv) {
-            cout << "========================================= LOOP BEGINNGING" << endl;
+            //cout << "========================================= LOOP BEGINNGING" << endl;
             if (find(visited.begin(), visited.end(), v) == visited.end()) {
                 v.setPathCost(w.getPathCost() + 1);
-                                cout << "BEFORE SIZE OF FRONTIER" << frontier.size() << endl;
+                 //cout << "BEFORE SIZE OF FRONTIER" << frontier.size() << endl;
                 findandUpdate(frontier, v, w, backtrack, t);
-                cout << "AFTER SIZE OF FRONTIER" << frontier.size() << endl;
+                //cout << "AFTER SIZE OF FRONTIER" << frontier.size() << endl;
                 
             }
-            cout << "END BEGINNGING" << endl;
+            //cout << "END BEGINNGING" << endl;
         }
     }
     return false;
@@ -433,7 +458,7 @@ pair<int,int>  printPathAstar(puzzleboard start, boardScoreType t) {
                      backtrack,
                      visited, t)) {
         cout<<"Astar path Found:length="<<path.size()<<endl;
-        printPath(path);
+        //printPath(path);
         //overlayPathOnMap(p);
         
         res.first = path.size();
@@ -468,7 +493,6 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=10
     int i=0 ;
     while(l.size() != 9){
         l.push_back(i++);
-        
     }
     for(int j = 1;j<=number;j++){
         random_shuffle ( l.begin(), l.end() );
@@ -495,31 +519,32 @@ vector<pair<int,int>> plotHelper(puzzleboard p){
     vector<puzzleboard> listOfBoards = generateRandomBoards(p);
     int i = 0;
     for(std::vector<puzzleboard>::iterator it = listOfBoards.begin(); it != listOfBoards.end(); ++it,i++) {
-        res.push_back(printPathAstar((*it), MISPLACED_TILES));
+        if (it->isSolvable()) {
+            res.push_back(printPathAstar((*it), MISPLACED_TILES));
+        } else {
+            cout<<"not solvable board:"<<i<<endl;
+        }
     }
     return res;
     
 }
 int main() {
-    int a[] = {1,2,0,3,4,5,6,7,8};
-    int b[] = {0,2,3,4,1,5,6,7,8};
+    //int a[] = {1,2,0,5,6,3,4,7,8};//works
+    int a[] = {1,2,3,4,6,8,7,0,5};//works
+    //int a[] = {8,1,3,4,0,2,7,6,5};
+    //int b[] = {0,2,3,4,1,5,6,7,8};
     puzzleboard p(a), p1(b);
-    
-    map<puzzleboard, puzzleboard> m;
-    m.insert(std::pair<puzzleboard, puzzleboard>(p,p1));
-    std::map<puzzleboard, puzzleboard>::iterator it;
-    it = m.find(p);
-    
-    p.printBoardStats();
-    cout<<"dis from goal"<<p.getMisplacedDist()<<endl;
-    //std::map<puzzleboard, puzzleboard> m;
-    //p.printNextMoves();
-    printPathAstar(p, MISPLACED_TILES);
-    int i = 1;
-    vector<pair<int,int>> res = plotHelper(p);
-    for(std::vector<pair<int,int>>::iterator it = res.begin(); it != res.end(); ++it,i++) {
-        cout << "BOARD - "<<i << " : "<< (*it).first << "," << (*it).second << endl;
+   
+    if (p.isSolvable()) { 
+        printPathAstar(p, MISPLACED_TILES);
+    } else {
+        cout<<"no solution"<<endl;
     }
+    int i = 1;
+    //vector<pair<int,int>> res = plotHelper(p);
+    /*for(std::vector<pair<int,int>>::iterator it = res.begin(); it != res.end(); ++it,i++) {
+        cout << "BOARD - "<<i << " : "<< (*it).first << "," << (*it).second << endl;
+    }*/
     //p.printNextMoves();
     /*
     vector<puzzleboard> listOfBoards = generateRandomBoards(p);

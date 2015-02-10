@@ -1,0 +1,51 @@
+diff --git a/8puzzle.cpp b/8puzzle.cpp
+index 422367a..b3fd4b3 100644
+--- a/8puzzle.cpp
++++ b/8puzzle.cpp
+@@ -319,6 +319,7 @@ void findandUpdate(list<puzzleboard>& frontier,
+                 }
+                 backtrack.erase(it1);
+                 backtrack.insert(std::pair<puzzleboard, puzzleboard>(v, src));
++                cout<<"updated cost!!!!!!"<<endl;
+             }
+             return;
+         }
+@@ -366,9 +367,10 @@ bool getPathAstar(puzzleboard s,
+         puzzleboard w = frontier.front();
+         frontier.pop_front();
+         nodesExpanded++;
+-        if (find(visited.begin(), visited.end(), w) == visited.end()) {
++        cout<<"node visited"<<endl;
++        //if (find(visited.begin(), visited.end(), w) == visited.end()) {
+             visited.push_back(w);
+-        }
++        //}
+         
+         if (w.isTarget()) {
+             path.push_back(w);
+@@ -464,9 +466,10 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=50
+ }
+ 
+ int main() {
+-    int a[] = {1,2,0,3,4,5,6,7,8};
+-    int b[] = {0,2,3,4,1,5,6,7,8};
+-    puzzleboard p(a), p1(b);
++    int a[] = {1,4,2,3,7,5,6,0,8};
++    int b[] = {1,2,5,3,7,4,6,8,0};
++    int c[] = {1,2,3,4,5,6,7,8,0};
++    puzzleboard p(a), p1(c);
+     
+     map<puzzleboard, puzzleboard> m;
+     m.insert(std::pair<puzzleboard, puzzleboard>(p,p1));
+@@ -477,7 +480,7 @@ int main() {
+     cout<<"dis from goal"<<p.getMisplacedDist()<<endl;
+     //std::map<puzzleboard, puzzleboard> m;
+     //p.printNextMoves();
+-    printPathAstar(p, MISPLACED_TILES);
++    printPathAstar(p1, MISPLACED_TILES);
+     //p.printNextMoves();
+     /*
+     vector<puzzleboard> listOfBoards = generateRandomBoards(p);
+diff --git a/a.out b/a.out
+index 619367b..18ce57c 100755
+Binary files a/a.out and b/a.out differ
