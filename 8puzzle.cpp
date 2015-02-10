@@ -389,7 +389,7 @@ bool getPathAstar(puzzleboard s,
                 list<puzzleboard>& frontier,
                 vector<puzzleboard>& path,
                 map<puzzleboard, puzzleboard>& backtrack,
-                vector<puzzleboard>& visited,
+                map<puzzleboard,int>& visited,
                 boardScoreType t) {
     
     int nodesExpanded = 0;
@@ -399,7 +399,7 @@ bool getPathAstar(puzzleboard s,
         sortFrontier(frontier, t);
         puzzleboard w = frontier.front();
         //w.printBoard();
-        visited.push_back(w);
+        visited.insert(std::pair<puzzleboard, int>(w,1));
         frontier.pop_front();
         //cout<<"POPPED FROM FRONTIER TO VISITED"<<endl;
         nodesExpanded++;
@@ -429,7 +429,8 @@ bool getPathAstar(puzzleboard s,
         //cout << "BEFORE SIZE OF FRONTIER" << frontier.size() << endl;
         for (auto v : vv) {
             //cout << "========================================= LOOP BEGINNGING" << endl;
-            if (find(visited.begin(), visited.end(), v) == visited.end()) {
+            //if (find(visited.begin(), visited.end(), v) == visited.end()) {
+            if (visited.find(v) == visited.end()) {
                 v.setPathCost(w.getPathCost() + 1);
                 findandUpdate(frontier, v, w, backtrack, t);
             }
@@ -450,7 +451,8 @@ void printPath(vector<puzzleboard> p) {
 }
 
 pair<int,int>  printPathAstar(puzzleboard start, boardScoreType t) {
-    vector<puzzleboard> visited;
+    //vector<puzzleboard> visited;
+    map<puzzleboard, int> visited;
     vector<puzzleboard> path;
     map<puzzleboard, puzzleboard> backtrack;
     pair<int,int> res;
@@ -541,7 +543,8 @@ int main() {
     //int a[] = {0,1,3,4,2,5,7,8,6};//works 10000
     //int a[] = {2,3,5,1,0,4,7,8,6};//works
     //int a[] = {1,0,2,7,5,4,8,6,3};//works
-    int a[] = {5,1,8,2,7,3,0,4,6};//works
+    //int a[] = {5,1,8,2,7,3,0,4,6};//works
+    int a[] = {3,1,2,4,7,5,6,0,8};//suhas
     //int a[] = {5,1,8,2,7,3,4,0,6};//works
     //int a[] = {5,1,8,7,0,3,2,4,6};//works
     //int a[] = {5,1,8,0,7,3,2,4,6};//works
@@ -558,6 +561,10 @@ int main() {
     } else {
         cout<<"no solution"<<endl;
     }
+    
+    /*map<puzzleboard, int> m;
+    m.insert(pair<puzzleboard,int>(p,1));
+    map<puzzleboard, int>::iterator it = m.find(p);*/
     int i = 1;
     //vector<pair<int,int>> res = plotHelper(p);
     /*for(std::vector<pair<int,int>>::iterator it = res.begin(); it != res.end(); ++it,i++) {
