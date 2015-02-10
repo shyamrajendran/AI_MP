@@ -227,6 +227,11 @@ class puzzleboard {
 
     // puzzle board must be of same size
     bool operator==(const puzzleboard &other) const {
+//        cout << "THIS";
+//        this->printBoard();
+//        cout << "THIS";
+//        other.printBoard();
+        
         return this->getHashCode() == other.getHashCode();
     }
     
@@ -306,6 +311,7 @@ void findandUpdate(list<puzzleboard>& frontier,
 
     list<puzzleboard>::iterator it = frontier.begin();
     while (it != frontier.end()) {
+        cout << "SIZE :" << frontier.size() << endl;
         if (v == *it) {
             int totalscoreNew, totalscoreOld;
             totalscoreNew = v.getPathCost() + v.getScore(t);
@@ -362,13 +368,19 @@ bool getPathAstar(puzzleboard s,
     int nodesExpanded = 0;
     frontier.push_back(s);
     while(!frontier.empty()) {
+        cout << " 372 SIZE :" << frontier.size() << "VISITED SIZE" << visited.size() <<   endl;
         sortFrontier(frontier, t);
         puzzleboard w = frontier.front();
+        w.printBoard();
+        visited.push_back(w);
         frontier.pop_front();
         nodesExpanded++;
-        if (find(visited.begin(), visited.end(), w) == visited.end()) {
-            visited.push_back(w);
+        if(nodesExpanded == 100){
+            return false;
         }
+//        if (find(visited.begin(), visited.end(), w) == visited.end()) {
+//            visited.push_back(w);
+//        }
         
         if (w.isTarget()) {
             path.push_back(w);
@@ -382,11 +394,17 @@ bool getPathAstar(puzzleboard s,
 
         //get next moves
         vector<puzzleboard> vv = w.generateNextMoves();
+        cout << "+++++++++++++MAX OF generate moves" << vv.size();
         for (auto v : vv) {
+            cout << "========================================= LOOP BEGINNGING" << endl;
             if (find(visited.begin(), visited.end(), v) == visited.end()) {
                 v.setPathCost(w.getPathCost() + 1);
+                                cout << "BEFORE SIZE OF FRONTIER" << frontier.size() << endl;
                 findandUpdate(frontier, v, w, backtrack, t);
+                cout << "AFTER SIZE OF FRONTIER" << frontier.size() << endl;
+                
             }
+            cout << "END BEGINNGING" << endl;
         }
     }
     return false;
