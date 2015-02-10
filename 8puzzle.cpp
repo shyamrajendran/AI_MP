@@ -392,14 +392,16 @@ bool getPathAstar(puzzleboard s,
     int nodesExpanded = 0;
     frontier.push_back(s);
     while(!frontier.empty()) {
-        //cout << " 372 SIZE :" << frontier.size() << "VISITED SIZE" << visited.size() <<   endl;
+        //cout << "FRONTIER SIZE :" << frontier.size() << "VISITED SIZE" << visited.size() <<   endl;
         sortFrontier(frontier, t);
         puzzleboard w = frontier.front();
         //w.printBoard();
         visited.push_back(w);
         frontier.pop_front();
+        //cout<<"POPPED FROM FRONTIER TO VISITED"<<endl;
         nodesExpanded++;
-        if(nodesExpanded == 100){
+
+        if(nodesExpanded == 30000){
             cout<<"limit reached"<<endl;
             return false;
         }
@@ -420,17 +422,16 @@ bool getPathAstar(puzzleboard s,
         //get next moves
         vector<puzzleboard> vv = w.generateNextMoves();
         //cout << "+++++++++++++MAX OF generate moves" << vv.size();
+        //cout << "BEFORE SIZE OF FRONTIER" << frontier.size() << endl;
         for (auto v : vv) {
             //cout << "========================================= LOOP BEGINNGING" << endl;
             if (find(visited.begin(), visited.end(), v) == visited.end()) {
                 v.setPathCost(w.getPathCost() + 1);
-                 //cout << "BEFORE SIZE OF FRONTIER" << frontier.size() << endl;
                 findandUpdate(frontier, v, w, backtrack, t);
-                //cout << "AFTER SIZE OF FRONTIER" << frontier.size() << endl;
-                
             }
             //cout << "END BEGINNGING" << endl;
         }
+        //cout << "AFTER SIZE OF FRONTIER" << frontier.size() << endl;
     }
     return false;
 }
@@ -506,7 +507,6 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=10
             }
             result.push_back(puzzleboard(some_array));
             alreadyGeneratedList.push_back(l);
-          
         }
        
     }
@@ -516,7 +516,7 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=10
 vector<pair<int,int>> plotHelper(puzzleboard p){
     vector<pair<int,int>>  res;
     pair<int, int> respair;
-    vector<puzzleboard> listOfBoards = generateRandomBoards(p);
+    vector<puzzleboard> listOfBoards = generateRandomBoards(p,5);
     int i = 0;
     for(std::vector<puzzleboard>::iterator it = listOfBoards.begin(); it != listOfBoards.end(); ++it,i++) {
         if (it->isSolvable()) {
@@ -529,9 +529,17 @@ vector<pair<int,int>> plotHelper(puzzleboard p){
     
 }
 int main() {
+    int a[] = {8,1,3,4,0,2,7,6,5};//works 10000
     //int a[] = {1,2,0,5,6,3,4,7,8};//works
-    int a[] = {1,2,3,4,6,8,7,0,5};//works
-    //int a[] = {8,1,3,4,0,2,7,6,5};
+    //int a[] = {1,2,3,4,6,8,7,0,5};//works
+    //int a[] = {8,1,3,4,0,2,7,6,5};//works 10000
+    //int a[] = {0,1,3,4,2,5,7,8,6};//works 10000
+    //int a[] = {2,3,5,1,0,4,7,8,6};//works
+    //int a[] = {1,0,2,7,5,4,8,6,3};//works
+    //int a[] = {5,1,8,2,7,3,4,0,6};//works
+    //int a[] = {5,6,2,1,8,4,7,3,0};//no path
+    //int a[] = {1,2,7,0,4,3,6,5,8};
+    //int a[] = {1,6,4,7,0,8,2,3,5};
     int b[] = {0,2,3,4,1,5,6,7,8};
     puzzleboard p(a), p1(b);
    
