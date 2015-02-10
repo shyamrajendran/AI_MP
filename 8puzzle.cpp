@@ -1,6 +1,7 @@
 #include <algorithm>
 #include<iostream>
 #include<map>
+#include <math.h>
 #include<vector>
 #include<list>
 #include<set>
@@ -92,6 +93,7 @@ class puzzleboard {
     }
 
     public:
+    
     int board[BOARD_SIZE][BOARD_SIZE];
     int goal[BOARD_SIZE][BOARD_SIZE];
     int pathcost;
@@ -116,7 +118,20 @@ class puzzleboard {
             }
         }
     }
-
+    int getHashCode() const {
+        int power = 0;
+        int result=0;
+        for (int i = 0; i < BOARD_SIZE;i++) {
+            for (int j = 0; j < BOARD_SIZE;j++) {
+                result+=board[i][j]+pow(3.0, power);
+                power++;
+               
+            }
+        }
+        return result;
+    }
+    
+    
     int getPathCost() {
         return pathcost;
     }
@@ -212,29 +227,30 @@ class puzzleboard {
 
     // puzzle board must be of same size
     bool operator==(const puzzleboard &other) const {
-        for (int i = 0; i < BOARD_SIZE;i++) {
-            for (int j = 0; j < BOARD_SIZE;j++) {
-                if (this->board[i][j] != other.board[i][j]) {
-                    return false;
-                }
-            }
-        }
-        return true;
+//        for (int i = 0; i < BOARD_SIZE;i++) {
+//            for (int j = 0; j < BOARD_SIZE;j++) {
+//                if (this->board[i][j] != other.board[i][j]) {
+//                    return false;
+//                }
+//            }
+//        }
+        return this->getHashCode() == other.getHashCode();
     }
     
     
 
     bool operator<(const puzzleboard &other) const {
         
-        for (int i = 0; i < BOARD_SIZE;i++) {
-            for (int j = 0; j < BOARD_SIZE;j++) {
-                if (this->board[i][j] != other.board[i][j]) {
-                    return this->board[i][j] < other.board[i][j];
-                }
-            }
-        }
-
-        return true;
+//        for (int i = 0; i < BOARD_SIZE;i++) {
+//            for (int j = 0; j < BOARD_SIZE;j++) {
+//                if (this->board[i][j] != other.board[i][j]) {
+//                    return this->board[i][j] < other.board[i][j];
+//                }
+//            }
+//        }
+//
+//        return true;
+        return this->getHashCode() < other.getHashCode();
     }
 
     point findBlank() {
@@ -296,6 +312,8 @@ class puzzleboard {
         return true;
     }
 };
+
+
 
 void findandUpdate(list<puzzleboard>& frontier,
                    puzzleboard& v,
