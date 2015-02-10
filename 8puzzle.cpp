@@ -90,6 +90,12 @@ class puzzleboard {
         int temp = board[p1.y][p1.x];
         board[p1.y][p1.x] = board[p2.y][p2.x];
         board[p2.y][p2.x] = temp;
+        //update balnk if needed
+        if (isBlank(p1)) {
+            blank = p1;
+        } else if (isBlank(p2)) {
+            blank = p2;
+        }
     }
 
     public:
@@ -97,7 +103,7 @@ class puzzleboard {
     int board[BOARD_SIZE][BOARD_SIZE];
     int goal[BOARD_SIZE][BOARD_SIZE];
     int pathcost;
-    //point blank;
+    point blank;
     puzzleboard(int *a) {
         pathcost = 0;
         initGoalBoard();
@@ -107,13 +113,13 @@ class puzzleboard {
             row = i / BOARD_SIZE;
             col = i % BOARD_SIZE;
             board[row][col] = a[i];
-            //if(a[i] == 0) blank.setXY(col,row);
+            if(a[i] == 0) blank.setXY(col,row);
         }
     }
 
     puzzleboard(const puzzleboard& o) {
         pathcost = o.pathcost;
-        //blank = o.blank;
+        blank = o.blank;
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
                 this->board[i][j] = o.board[i][j];
@@ -268,8 +274,15 @@ class puzzleboard {
         return this->getHashCode() < other.getHashCode();
     }
 
+    bool isBlank(point p) {
+        if (p.x == -1 || p.y == -1) return false;
+        if (board[p.y][p.x] == 0) return true;
+        return false;
+    }
+
     point findBlank() {
-        point p;
+        return blank;
+        /*point p;
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
                 if (this->board[i][j] == 0) {
@@ -278,7 +291,7 @@ class puzzleboard {
                 }
             }
         }
-        return p;
+        return p;*/
     }
 
     bool isWithinBounds(point& p) {
@@ -289,8 +302,7 @@ class puzzleboard {
     vector<puzzleboard> generateNextMoves() {
         vector<puzzleboard> l;
         puzzleboard b(*this);
-        point blank;
-        blank = b.findBlank();
+        point blank = b.findBlank();
 
         point pp[4];
         pp[0].setXY(blank.x, blank.y - 1);
