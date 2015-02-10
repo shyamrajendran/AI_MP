@@ -1,7 +1,18 @@
+#include <algorithm>
 #include<iostream>
 #include<map>
 #include<vector>
+#include <cstdlib>
+#include <set>
+#include <random>
+#include <iostream>     // std::cout
+#include <algorithm>    // std::shuffle
+#include <array>        // std::array
+#include <random>       // std::default_random_engine
+#include <chrono>       // std::chrono::system_clock
 using namespace std;
+
+
 
 #define BOARD_SIZE 3
 typedef enum boardScoreType {
@@ -10,6 +21,9 @@ typedef enum boardScoreType {
     GASHNIG,
     UNKNOWN
 } boardType;
+
+
+
 
 class point {
 public:
@@ -69,6 +83,8 @@ public:
     bool isWithinBounds(point& p);
     vector<puzzleboard> generateNextMoves();
 */
+
+
 class puzzleboard {
     void swapPoints(point& p1, point& p2) {
         int temp = board[p1.y][p1.x];
@@ -196,6 +212,8 @@ class puzzleboard {
         }
         return true;
     }
+    
+    
 
     bool operator<(const puzzleboard &other) const {
         
@@ -250,6 +268,7 @@ class puzzleboard {
         return l;
     }
     
+    
     void printNextMoves() {
         vector<puzzleboard> l = generateNextMoves();
         cout<<"Next Moves for current board:"<<endl;
@@ -260,12 +279,86 @@ class puzzleboard {
 };
 
 
+bool findInVector(vector<vector<int>> v, vector<int> s){
+    vector<vector<int>>::iterator it;
+    
+    cout << "PRINTING VECTOR" << endl;
+    for (std::vector<vector<int>>::iterator it=v.begin(); it!=v.end(); ++it){
+        for (std::vector<int>::iterator itt=(*it).begin(); itt!=(*it).end(); ++itt){
+            cout << *itt;
+        }
+        cout << "++++++++++";
+    }
+    
+    it = find (v.begin(), v.end(), s);
+    if (it == v.end()){
+        return false;
+    }else{
+        return true;
+    }
+}
+void printVector(vector<int> v){
+//    cout << "PRNTING VECTOR";
+    for (std::vector<int>::iterator it=v.begin(); it!=v.end(); ++it){
+                cout << *it << " ";
+    }
+//        cout << "PRNTING VECTOR END";
+}
+vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=5){
+    vector<puzzleboard> result;
+    vector<vector<int>> alreadyGeneratedList;
+    vector<int> l;
+    int some_array[10];
+    int i=0 ;
+    while(l.size() != 9){
+        l.push_back(i++);
+        
+    }
+    for(int j = 1;j<=number;j++){
+        cout << "-------------------------------------------------------------------" << endl;
+        cout << "SIZE OF SET" << l.size();
+        cout <<  endl << "VECTOR BEFORE " << endl;
+        printVector(l);
+        
+        random_shuffle ( l.begin(), l.end() );
+        cout <<  endl << "VECTOR AFTER " << endl;
+        printVector(l);
+        
+        if(findInVector(alreadyGeneratedList, l)){
+            cout << "already";
+            j--;
+            continue;
+        }else{
+            // convert the generate set into list and pass arg to puzzle board constructor and append to result
+            i=0;
+            for (std::vector<int>::iterator it=l.begin(); it!=l.end(); ++it,i++){
+                some_array[i] = *it;
+            }
+            result.push_back(puzzleboard(some_array));
+            alreadyGeneratedList.push_back(l);
+          
+        }
+       
+    }
+    return result;
+}
+
 int main() {
+
     int a[] = {1,2,6,8,0,7,3,4,9};
     puzzleboard p(a);
+ 
+    
     p.printBoardStats();
     cout<<"dis from goal"<<p.getMisplacedDist()<<endl;
     //std::map<puzzleboard, puzzleboard> m;
     p.printNextMoves();
-     
+    
+    vector<puzzleboard> listOfBoards = generateRandomBoards(p);
+    cout << listOfBoards.size();
+    cout << "help";
+    for(std::vector<puzzleboard>::iterator it = listOfBoards.begin(); it != listOfBoards.end(); ++it) {
+        (*it).printBoard();
+    }
+    
 }
