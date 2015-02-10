@@ -123,7 +123,7 @@ class puzzleboard {
         int result=0;
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
-                result+=board[i][j]+pow(3.0, power);
+                result+=board[i][j]*pow(3.0, power);
                 power++;
                
             }
@@ -227,29 +227,12 @@ class puzzleboard {
 
     // puzzle board must be of same size
     bool operator==(const puzzleboard &other) const {
-//        for (int i = 0; i < BOARD_SIZE;i++) {
-//            for (int j = 0; j < BOARD_SIZE;j++) {
-//                if (this->board[i][j] != other.board[i][j]) {
-//                    return false;
-//                }
-//            }
-//        }
         return this->getHashCode() == other.getHashCode();
     }
     
     
 
     bool operator<(const puzzleboard &other) const {
-        
-//        for (int i = 0; i < BOARD_SIZE;i++) {
-//            for (int j = 0; j < BOARD_SIZE;j++) {
-//                if (this->board[i][j] != other.board[i][j]) {
-//                    return this->board[i][j] < other.board[i][j];
-//                }
-//            }
-//        }
-//
-//        return true;
         return this->getHashCode() < other.getHashCode();
     }
 
@@ -318,7 +301,7 @@ class puzzleboard {
 void findandUpdate(list<puzzleboard>& frontier,
                    puzzleboard& v,
                    puzzleboard& src,
-                   vector<pair<puzzleboard, puzzleboard> >& backtrack,
+                   map<puzzleboard, puzzleboard>& backtrack,
                    boardScoreType t) {
 
     list<puzzleboard>::iterator it = frontier.begin();
@@ -330,10 +313,12 @@ void findandUpdate(list<puzzleboard>& frontier,
             if (totalscoreNew < totalscoreOld) {
                 frontier.erase(it);
                 frontier.push_back(v);
-                /*std::map<puzzleboard, puzzleboard>::iterator it1 = backtrack.find(v);
-                find(backtrack.begin(), backtrack.end(),)
+                std::map<puzzleboard, puzzleboard>::iterator it1 = backtrack.find(v);
+                if (it1 == backtrack.end()) {
+                    cout<<"ERROR!!!!!!"<<endl;
+                }
                 backtrack.erase(it1);
-                backtrack.insert(std::pair<puzzleboard, puzzleboard>(v, src));*/
+                backtrack.insert(std::pair<puzzleboard, puzzleboard>(v, src));
             }
             return;
         }
@@ -341,7 +326,7 @@ void findandUpdate(list<puzzleboard>& frontier,
     }
     // i.e. node not in frontier
     frontier.push_back(v);
-    //backtrack.insert(std::pair<puzzleboard, puzzleboard>(v, src));
+    backtrack.insert(std::pair<puzzleboard, puzzleboard>(v, src));
 }
 
 void sortFrontier(list<puzzleboard>& frontier, boardScoreType t) {
@@ -370,7 +355,7 @@ void sortFrontier(list<puzzleboard>& frontier, boardScoreType t) {
 bool getPathAstar(puzzleboard s,
                 list<puzzleboard>& frontier,
                 vector<puzzleboard>& path,
-                vector<std::pair<puzzleboard, puzzleboard> >& backtrack,
+                map<puzzleboard, puzzleboard>& backtrack,
                 vector<puzzleboard>& visited,
                 boardScoreType t) {
     
@@ -387,14 +372,11 @@ bool getPathAstar(puzzleboard s,
         
         if (w.isTarget()) {
             path.push_back(w);
-            //std::map<puzzleboard, puzzleboard>::iterator it = backtrack.find(w);
-            /*vector<pair<puzzleboard, puzzleboard> >::iterator it = find(backtrack.begin(), backtrack.end(), w);
+            std::map<puzzleboard, puzzleboard>::iterator it = backtrack.find(w);
             while(it != backtrack.end()) {
-                //cout<<"found";
                 path.push_back(it->second);
-                //it = backtrack.find(it->second);
-                it = find(backtrack.begin(), backtrack.end(), it->second);
-            }*/
+                it = backtrack.find(it->second);
+            }
             return true;
         }
 
@@ -412,15 +394,17 @@ bool getPathAstar(puzzleboard s,
 
 void printPath(vector<puzzleboard> p) {
     cout<<"solution path is :"<<endl;
-    for (auto i : p) {
-        i.printBoard();
+    vector<puzzleboard>::reverse_iterator it = p.rbegin();
+    while(it != p.rend()) {
+        it->printBoard();
+        it++;
     }
 }
 
 void printPathAstar(puzzleboard start, boardScoreType t) {
     vector<puzzleboard> visited;
     vector<puzzleboard> path;
-    vector<pair<puzzleboard, puzzleboard> > backtrack;
+    map<puzzleboard, puzzleboard> backtrack;
     list<puzzleboard> frontier;
     if (getPathAstar(start,
                      frontier,
@@ -437,12 +421,6 @@ void printPathAstar(puzzleboard start, boardScoreType t) {
 
 bool findInVector(vector<vector<int>> v, vector<int> s){
     vector<vector<int>>::iterator it;
-//    for (std::vector<vector<int>>::iterator it=v.begin(); it!=v.end(); ++it){
-//        for (std::vector<int>::iterator itt=(*it).begin(); itt!=(*it).end(); ++itt){
-//            cout << *itt;
-//        }
-//
-//    }
     
     it = find (v.begin(), v.end(), s);
     if (it == v.end()){
@@ -486,21 +464,28 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=50
 }
 
 int main() {
-    int a[] = {1,2,3,4,0,5,6,7,8};
-    puzzleboard p(a);
+    int a[] = {1,2,0,3,4,5,6,7,8};
+    int b[] = {0,2,3,4,1,5,6,7,8};
+    puzzleboard p(a), p1(b);
+    
+    map<puzzleboard, puzzleboard> m;
+    m.insert(std::pair<puzzleboard, puzzleboard>(p,p1));
+    std::map<puzzleboard, puzzleboard>::iterator it;
+    it = m.find(p);
+    
     p.printBoardStats();
     cout<<"dis from goal"<<p.getMisplacedDist()<<endl;
     //std::map<puzzleboard, puzzleboard> m;
     //p.printNextMoves();
     printPathAstar(p, MISPLACED_TILES);
-    p.printNextMoves();
-    
+    //p.printNextMoves();
+    /*
     vector<puzzleboard> listOfBoards = generateRandomBoards(p);
     cout << listOfBoards.size();
     int i = 1;
     for(std::vector<puzzleboard>::iterator it = listOfBoards.begin(); it != listOfBoards.end(); ++it,i++) {
         cout << "RANDOM BOARD " << i << endl;
         (*it).printBoard();
-    }
+    }*/
     
 }
