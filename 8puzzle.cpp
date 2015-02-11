@@ -15,15 +15,14 @@ using namespace std;
 
 
 #define BOARD_SIZE 3
+int GOAL_BOARD[] = {0,1,2,3,4,5,6,7,8};
+
 typedef enum boardScoreType {
     MANHATTAN,
     MISPLACED_TILES,
     GASHNIG,
     UNKNOWN
 } boardType;
-
-
-
 
 class point {
 public:
@@ -70,6 +69,9 @@ public:
     }
 };
 
+
+std::map<int, point> goal_map;
+
 /*
     puzzleboard(int *a);
     puzzleboard(const puzzleboard& o);
@@ -90,10 +92,44 @@ public:
 
 
 class puzzleboard {
+    public:
+
+    
+    int board[BOARD_SIZE][BOARD_SIZE];
+    int pathcost;
+    point blank;
+    int hashCode;
+    
+    puzzleboard(int *a) {
+        pathcost = 0;
+        int row = 0, col = 0;
+        for (int i = 0; i < (BOARD_SIZE * BOARD_SIZE); i++) {
+            row = i / BOARD_SIZE;
+            col = i % BOARD_SIZE;
+            board[row][col] = a[i];
+            if(a[i] == 0) blank.setXY(col,row);
+        }
+        computeHashCode();
+    }
+
+    puzzleboard(const puzzleboard& o) {
+        pathcost = o.pathcost;
+        blank = o.blank;
+        hashCode = o.hashCode;
+        for (int i = 0; i < BOARD_SIZE;i++) {
+            for (int j = 0; j < BOARD_SIZE;j++) {
+                this->board[i][j] = o.board[i][j];
+            }
+        }
+    }
+
     void swapPoints(point& p1, point& p2) {
         int temp = board[p1.y][p1.x];
         board[p1.y][p1.x] = board[p2.y][p2.x];
         board[p2.y][p2.x] = temp;
+        //now since cell has changed, recompute hashcode
+        // update blank
+        computeHashCode();
         //update balnk if needed
         if (isBlank(p1)) {
             blank = p1;
@@ -102,50 +138,23 @@ class puzzleboard {
         }
     }
 
-    public:
-    
-    int board[BOARD_SIZE][BOARD_SIZE];
-    int goal[BOARD_SIZE][BOARD_SIZE];
-    int pathcost;
-    point blank;
-    puzzleboard(int *a) {
-        pathcost = 0;
-        initGoalBoard();
-        //default type is misplaced tiles
-        int row = 0, col = 0;
-        for (int i = 0; i < (BOARD_SIZE * BOARD_SIZE); i++) {
-            row = i / BOARD_SIZE;
-            col = i % BOARD_SIZE;
-            board[row][col] = a[i];
-            if(a[i] == 0) blank.setXY(col,row);
+    void computeHashCode() {
+        int power = 0;
+        int result = 0;
+        for (int i = 0; i < BOARD_SIZE;i++) {
+            for (int j = 0; j < BOARD_SIZE;j++) {
+                result += board[i][j]*pow(3.0, power);
+                power++;
+            }
         }
+        hashCode = result;
     }
 
-    puzzleboard(const puzzleboard& o) {
-        pathcost = o.pathcost;
-        blank = o.blank;
-        for (int i = 0; i < BOARD_SIZE;i++) {
-            for (int j = 0; j < BOARD_SIZE;j++) {
-                this->board[i][j] = o.board[i][j];
-                this->goal[i][j] = o.goal[i][j];
-            }
-        }
-    }
     int getHashCode() const {
-        int power = 0;
-        int result=0;
-        for (int i = 0; i < BOARD_SIZE;i++) {
-            for (int j = 0; j < BOARD_SIZE;j++) {
-                result+=board[i][j]*pow(3.0, power);
-                power++;
-               
-            }
-        }
-        return result;
+        return hashCode;
     }
     
-    
-    int getPathCost() {
+    int getPathCost() const {
         return pathcost;
     }
     
@@ -187,18 +196,6 @@ class puzzleboard {
         return (inv % 2 == 0) ? true : false;
     }
     
-    void initGoalBoard() {
-        int count = 1;
-        int size = BOARD_SIZE * BOARD_SIZE;
-        for (int i = 0; i < BOARD_SIZE;i++) {
-            for (int j = 0; j < BOARD_SIZE;j++) {
-                goal[i][j] = count % size;
-                count++;
-            }
-            cout<<endl;
-        }
-    }
-
     void printBoard() {
         cout<<"current board:"<<endl;
         for (int i = 0; i < BOARD_SIZE;i++) {
@@ -210,27 +207,16 @@ class puzzleboard {
         cout<<endl;
     }
 
-    void printGoal() {
-        cout<<"goal board:"<<endl;
-        for (int i = 0; i < BOARD_SIZE;i++) {
-            for (int j = 0; j < BOARD_SIZE;j++) {
-                cout<<"["<<goal[i][j]<<"]";
-            }
-            cout<<endl;
-        }
-        cout<<endl;
-    }
-
     void printBoardStats() {
         printBoard();
-        printGoal();
     }
 
     int getMisplacedDist() const{
         int dist = 0;
+        puzzleboard g(GOAL_BOARD);
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
-                if (board[i][j] != 0 && board[i][j] != goal[i][j]) {
+                if (board[i][j] != g.board[i][j]) {
                     dist++;
                 }
             }
@@ -244,37 +230,12 @@ class puzzleboard {
         int sum = 0;
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
-                switch(board[i][j]) {
-                    case 0:
-                        goal.setXY(2,2);
-                        break;
-                    case 1:
-                        goal.setXY(0,0);
-                        break;
-                    case 2:
-                        goal.setXY(1,0);
-                        break;
-                    case 3:
-                        goal.setXY(2,0);
-                        break;
-                    case 4:
-                        goal.setXY(0,1);
-                        break;
-                    case 5:
-                        goal.setXY(1,1);
-                        break;
-                    case 6:
-                        goal.setXY(2,1);
-                        break;
-                    case 7:
-                        goal.setXY(0,2);
-                        break;
-                    case 8:
-                        goal.setXY(1,2);
-                        break;
+                map<int, point>::iterator it = goal_map.find(board[i][j]);
+                if (it != goal_map.end()) {
+                    goal.setXY(it->second.x, it->second.y); 
+                    cur.setXY(j,i);
+                    sum += cur.getManhattan(goal);
                 }
-                cur.setXY(j,i);
-                sum +=cur.getManhattan(goal);
             }
         }
         return sum;
@@ -302,16 +263,9 @@ class puzzleboard {
 
     // puzzle board must be of same size
     bool operator==(const puzzleboard &other) const {
-//        cout << "THIS";
-//        this->printBoard();
-//        cout << "THIS";
-//        other.printBoard();
-        
         return this->getHashCode() == other.getHashCode();
     }
     
-    
-
     bool operator<(const puzzleboard &other) const {
         return this->getHashCode() < other.getHashCode();
     }
@@ -322,18 +276,8 @@ class puzzleboard {
         return false;
     }
 
-    point findBlank() {
+    point getBlank() {
         return blank;
-        /*point p;
-        for (int i = 0; i < BOARD_SIZE;i++) {
-            for (int j = 0; j < BOARD_SIZE;j++) {
-                if (this->board[i][j] == 0) {
-                    p.setXY(j, i);
-                    return p;
-                }
-            }
-        }
-        return p;*/
     }
 
     bool isWithinBounds(point& p) {
@@ -344,7 +288,7 @@ class puzzleboard {
     vector<puzzleboard> generateNextMoves() {
         vector<puzzleboard> l;
         puzzleboard b(*this);
-        point blank = b.findBlank();
+        point blank = b.getBlank();
 
         point pp[4];
         pp[0].setXY(blank.x, blank.y - 1);
@@ -371,9 +315,10 @@ class puzzleboard {
     }
     
     bool isTarget() {
+        puzzleboard g(GOAL_BOARD);
         for (int i = 0; i < BOARD_SIZE;i++) {
             for (int j = 0; j < BOARD_SIZE;j++) {
-                if (board[i][j] != goal[i][j]) {
+                if (board[i][j] != g.board[i][j]) {
                     return false;
                 }
             }
@@ -383,6 +328,21 @@ class puzzleboard {
 };
 
 
+void initGoalBoard() {
+    puzzleboard g(GOAL_BOARD);
+    for (int y = 0; y < BOARD_SIZE;y++) {
+        for(int x = 0; x < BOARD_SIZE;x++) {
+            point p(x,y);
+            goal_map.insert(std::pair<int, point>(g.board[y][x], p));
+        }
+    }
+}
+
+void printGoalMap() {
+    for (auto i : goal_map) {
+        cout<<i.first<<"->";i.second.print();cout<<endl;
+    }
+}
 
 void findandUpdate(list<puzzleboard>& frontier,
                    puzzleboard& v,
@@ -419,7 +379,7 @@ void findandUpdate(list<puzzleboard>& frontier,
 void sortFrontier(list<puzzleboard>& frontier, boardScoreType t) {
     switch (t) {
         case MISPLACED_TILES:
-            frontier.sort([](puzzleboard& b1, puzzleboard& b2) {
+            frontier.sort([](puzzleboard& b1,puzzleboard& b2) {
                 return b1.getMisplacedDist() + b1.getPathCost() < b2.getMisplacedDist() + b2.getPathCost();
             });
             break;
@@ -444,7 +404,9 @@ bool getPathAstar(puzzleboard s,
                 vector<puzzleboard>& path,
                 map<puzzleboard, puzzleboard>& backtrack,
                 map<puzzleboard,int>& visited,
-                boardScoreType t) {
+                boardScoreType t,
+                int& expanded,
+                int& pathlen) {
     
     int nodesExpanded = 0;
     frontier.push_back(s);
@@ -458,17 +420,18 @@ bool getPathAstar(puzzleboard s,
         //cout<<"POPPED FROM FRONTIER TO VISITED"<<endl;
         nodesExpanded++;
 
-        if(nodesExpanded == 50000){
-            cout<<"limit reached"<<endl;
+        if(nodesExpanded == 50000) {
+            cout<<"limit reached...aborting!"<<endl;
+            expanded = 0;
+            pathlen = 0;
             return false;
         }
-//        if (find(visited.begin(), visited.end(), w) == visited.end()) {
-//            visited.push_back(w);
-//        }
-        
+
         if (w.isTarget()) {
             cout<<"found:nodes expadned"<<nodesExpanded<<endl;
             path.push_back(w);
+            expanded = nodesExpanded;
+            pathlen = (int) path.size();
             std::map<puzzleboard, puzzleboard>::iterator it = backtrack.find(w);
             while(it != backtrack.end()) {
                 path.push_back(it->second);
@@ -504,8 +467,7 @@ void printPath(vector<puzzleboard> p) {
     }
 }
 
-pair<int,int>  printPathAstar(puzzleboard start, boardScoreType t) {
-    //vector<puzzleboard> visited;
+pair<int,int>  printPathAstar(puzzleboard& start, boardScoreType t) {
     map<puzzleboard, int> visited;
     vector<puzzleboard> path;
     map<puzzleboard, puzzleboard> backtrack;
@@ -513,17 +475,17 @@ pair<int,int>  printPathAstar(puzzleboard start, boardScoreType t) {
     res.first = 0;
     res.second = 0;
     list<puzzleboard> frontier;
+    int expanded = 0;
+    int pathlen = 0;
     if (getPathAstar(start,
                      frontier,
                      path,
                      backtrack,
-                     visited, t)) {
+                     visited, t, expanded, pathlen)) {
         cout<<"Astar path Found:length="<<path.size()<<endl;
-        printPath(path);
-        //overlayPathOnMap(p);
-        
-        res.first = path.size();
-        res.second = visited.size();
+        //printPath(path);
+        res.first = expanded;
+        res.second = pathlen;
         return res;
     } else {
         cout<<"no path"<<endl;
@@ -541,6 +503,7 @@ bool findInVector(vector<vector<int>> v, vector<int> s){
         return true;
     }
 }
+
 void printVector(vector<int> v){
     for (std::vector<int>::iterator it=v.begin(); it!=v.end(); ++it){
                 cout << *it << " ";
@@ -598,39 +561,48 @@ vector<pair<int,int>> plotHelper(puzzleboard p){
         +        return b1.getMisplacedDist() + b1.getPathCost() > b2.getMisplacedDist() + b2.getPat
         +    }
 +};*/
+
 int main() {
-    //int a[] = {8,1,3,4,0,2,7,6,5};//works 10000
-    //int a[] = {0,1,2,4,5,3,7,8,6};//works
-    //int a[] = {4,1,2,0,5,3,7,8,6};//works
-    //int a[] = {1,2,0,5,6,3,4,7,8};//works
-    //int a[] = {1,2,3,4,6,8,7,0,5};//works
-    //int a[] = {0,1,3,4,2,5,7,8,6};//works 10000
-    //int a[] = {2,3,5,1,0,4,7,8,6};//works
-    //int a[] = {1,0,2,7,5,4,8,6,3};//works
-    //int a[] = {5,1,8,2,7,3,0,4,6};//works
-    //int a[] = {3,1,2,4,7,5,6,0,8};//suhas
-    int a[] = {7,2,4,5,0,6,8,3,1};//suhas
-    //int a[] = {5,1,8,2,7,3,4,0,6};//works
-    //int a[] = {5,1,8,7,0,3,2,4,6};//works
-    //int a[] = {5,1,8,0,7,3,2,4,6};//works
-    //int a[] = {5,1,8,7,3,0,2,4,6};//works
-    //int a[] = {3,1,2,0,4,5,6,7,8};//
-    //int a[] = {5,6,2,1,8,4,7,3,0};//no path
-    //int a[] = {1,2,7,0,4,3,6,5,8};
-    //int a[] = {1,6,4,7,0,8,2,3,5};
-    int b[] = {0,2,3,4,1,5,6,7,8};
-    puzzleboard p(a), p1(b);
-   
-    if (p.isSolvable()) { 
-        printPathAstar(p, MISPLACED_TILES);
-    } else {
-        cout<<"no solution"<<endl;
-    }
     
-    /*map<puzzleboard, int> m;
-    m.insert(pair<puzzleboard,int>(p,1));
-    map<puzzleboard, int>::iterator it = m.find(p);*/
-    int i = 1;
+    int input[][9] = {
+        {8,1,3,4,0,2,7,6,5},
+        {0,1,2,4,5,3,7,8,6},
+        {4,1,2,0,5,3,7,8,6},
+        {1,2,0,5,6,3,4,7,8},
+        {1,2,3,4,6,8,7,0,5},
+        {0,1,3,4,2,5,7,8,6},
+        {2,3,5,1,0,4,7,8,6},
+        {1,0,2,7,5,4,8,6,3},
+        {5,1,8,2,7,3,0,4,6},
+        {7,2,4,5,0,6,8,3,1},
+        {5,1,8,2,7,3,4,0,6},
+        {5,1,8,7,0,3,2,4,6},
+        {5,1,8,0,7,3,2,4,6},
+        {5,1,8,7,3,0,2,4,6},
+        {3,1,2,0,4,5,6,7,8},
+        {5,6,2,1,8,4,7,3,0},
+        {1,2,7,0,4,3,6,5,8},
+        {1,6,4,7,0,8,2,3,5}
+    };
+    
+    initGoalBoard();
+    printGoalMap();
+    //puzzleboard p(input[8]);//, p1(b);
+   
+    for (auto i  = 0; i <= 15; i++) {
+        puzzleboard p(input[i]);
+        p.printBoard();
+        cout<<"num misplaced tiles:"<<p.getMisplacedDist()<<endl;
+    }
+        puzzleboard p(input[9]);
+        if (p.isSolvable()) {
+            //printPathAstar(p, MANHATTAN);
+            printPathAstar(p, MISPLACED_TILES);
+        } else {
+            cout<<"no solution"<<endl;
+        }
+    //}
+    //int i = 1;
     //vector<pair<int,int>> res = plotHelper(p);
     /*for(std::vector<pair<int,int>>::iterator it = res.begin(); it != res.end(); ++it,i++) {
         cout << "BOARD - "<<i << " : "<< (*it).first << "," << (*it).second << endl;
