@@ -64,6 +64,10 @@ public:
         if (this->x == other.x && this->y != other.y) return this->y < other.y;
         else return this->x < other.x;
     }
+    
+    int getManhattan(point p) {
+        return abs(this->x - p.x) + abs(this->y - p.y);
+    }
 };
 
 /*
@@ -235,7 +239,45 @@ class puzzleboard {
     }
 
     int getManhattanDist() const {
-        return 0;
+        // say we know the goal board
+        point goal,cur;
+        int sum = 0;
+        for (int i = 0; i < BOARD_SIZE;i++) {
+            for (int j = 0; j < BOARD_SIZE;j++) {
+                switch(board[i][j]) {
+                    case 0:
+                        goal.setXY(2,2);
+                        break;
+                    case 1:
+                        goal.setXY(0,0);
+                        break;
+                    case 2:
+                        goal.setXY(1,0);
+                        break;
+                    case 3:
+                        goal.setXY(2,0);
+                        break;
+                    case 4:
+                        goal.setXY(0,1);
+                        break;
+                    case 5:
+                        goal.setXY(1,1);
+                        break;
+                    case 6:
+                        goal.setXY(2,1);
+                        break;
+                    case 7:
+                        goal.setXY(0,2);
+                        break;
+                    case 8:
+                        goal.setXY(1,2);
+                        break;
+                }
+                cur.setXY(j,i);
+                sum +=cur.getManhattan(goal);
+            }
+        }
+        return sum;
     }
 
     int getGashnig() const {
@@ -416,7 +458,7 @@ bool getPathAstar(puzzleboard s,
         //cout<<"POPPED FROM FRONTIER TO VISITED"<<endl;
         nodesExpanded++;
 
-        if(nodesExpanded == 30000){
+        if(nodesExpanded == 50000){
             cout<<"limit reached"<<endl;
             return false;
         }
@@ -477,7 +519,7 @@ pair<int,int>  printPathAstar(puzzleboard start, boardScoreType t) {
                      backtrack,
                      visited, t)) {
         cout<<"Astar path Found:length="<<path.size()<<endl;
-        //printPath(path);
+        printPath(path);
         //overlayPathOnMap(p);
         
         res.first = path.size();
@@ -534,11 +576,14 @@ vector<puzzleboard> generateRandomBoards(puzzleboard base, short const number=10
 vector<pair<int,int>> plotHelper(puzzleboard p){
     vector<pair<int,int>>  res;
     pair<int, int> respair;
-    vector<puzzleboard> listOfBoards = generateRandomBoards(p,5);
+    vector<puzzleboard> listOfBoards = generateRandomBoards(p,20);
     int i = 0;
     for(std::vector<puzzleboard>::iterator it = listOfBoards.begin(); it != listOfBoards.end(); ++it,i++) {
+        cout<<"______BOARD"<<i<<"________"<<endl;
         if (it->isSolvable()) {
-            res.push_back(printPathAstar((*it), MISPLACED_TILES));
+            //cout<<"______BOARD"<<i<<"________"<<endl;
+            res.push_back(printPathAstar((*it), MANHATTAN));
+            cout<<"_______________________"<<endl;
         } else {
             cout<<"not solvable board:"<<i<<endl;
         }
@@ -546,6 +591,13 @@ vector<pair<int,int>> plotHelper(puzzleboard p){
     return res;
     
 }
+/*
++class AstarCompare {
+    +    public:
+    +    bool operator()(const puzzleboard& b1, const puzzleboard& b2) {
+        +        return b1.getMisplacedDist() + b1.getPathCost() > b2.getMisplacedDist() + b2.getPat
+        +    }
++};*/
 int main() {
     //int a[] = {8,1,3,4,0,2,7,6,5};//works 10000
     //int a[] = {0,1,2,4,5,3,7,8,6};//works
@@ -556,7 +608,8 @@ int main() {
     //int a[] = {2,3,5,1,0,4,7,8,6};//works
     //int a[] = {1,0,2,7,5,4,8,6,3};//works
     //int a[] = {5,1,8,2,7,3,0,4,6};//works
-    int a[] = {3,1,2,4,7,5,6,0,8};//suhas
+    //int a[] = {3,1,2,4,7,5,6,0,8};//suhas
+    int a[] = {7,2,4,5,0,6,8,3,1};//suhas
     //int a[] = {5,1,8,2,7,3,4,0,6};//works
     //int a[] = {5,1,8,7,0,3,2,4,6};//works
     //int a[] = {5,1,8,0,7,3,2,4,6};//works
