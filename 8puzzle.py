@@ -59,14 +59,6 @@ class Board():
 			return self.path_cost + self.get_gashnik(self) > other.path_cost + other.get_gashnik(other)
 		elif self.board_type == "MISPLACED":
 			return self.get_misplaced_tile_score() > other.get_misplaced_tile_score()
-	def __lt__(self, other):
-		if self.board_type == "MANHATTAN":
-			return self.path_cost + self.get_manhattan(self) < other.path_cost + other.get_manhattan(other)
-		elif self.board_type == "GASHNIK":
-			return self.path_cost + self.get_gashnik(self) < other.path_cost + other.get_gashnik(other)
-		elif self.board_type == "MISPLACED":
-			return self.get_misplaced_tile_score() < other.get_misplaced_tile_score()
-		
 	def get_path_a_star(self):
 		visited_map = {}
 		path = []
