@@ -87,7 +87,7 @@ class Board():
 				print("FOUND PATH", node_expanded)
 				path.append(w)
 				expanded = node_expanded
-
+				return True
 
 			vv = w.generate_swap_boards()
 			for v in vv:
@@ -120,7 +120,7 @@ class Board():
 
 	def generate_swap_boards(self):
 		neighbor_index = self.findNeighbours()
-		print "SAME",neighbor_index
+		print "SAME",neighbor_index,self.path_cost
 		boards = []
 		init_board = self.printb()
 		zero_index = init_board.index(0)
@@ -252,12 +252,13 @@ class Board():
 
 
 B = [1,2,3,5,8,7,4,0,6]
-A = [1,0,3,5,2,7,4,8,6]
+
 C = [1,2,3,5,7,0,4,8,6]
 D = [1,2,3,5,7,0,4,8,6]
 
 # D = [1,3,5,2,7,0,4,8,6]
-
+A = D
+# [1,2,0,3,4,5,6,7,8]
 board_type = "MANHATTAN"
 a = Board(A,board_type)	
 print a.get_path_a_star()
