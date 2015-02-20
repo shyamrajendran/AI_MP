@@ -1,11 +1,33 @@
+import operator,collections
 import sys
-import Queue
+import heapq
+# import queue
 import time
 import copy
 # import heaq
 class Board():
-	def __init__(self, x):
+	def __init__(self, x, board_type):
 		self.board_array = x
+		self.board_type = board_type
+		self.path_cost  = 0
+		# self.pc = pc
+		self.score = 0
+		self.cal_score(board_type)
+
+	def cal_score(self, board_type):
+		if board_type == "MANHATTAN":
+			self.score = self.get_manhattan(self)
+		elif board_type == "GASHNIK":
+			self.score = self.get_gashnik(self)
+		elif board_type == "MISPLACED":
+			self.score = self.get_misplaced_tile_score()
+
+	def update_path_cost(self, val):
+		self.path_cost+=val
+
+	def get_score(self):
+		return self.score
+
 	def __eq__(self, other):
 		return self.board_array == other.board_array
 	def __hash__(self):
@@ -15,6 +37,81 @@ class Board():
 			a+=n*(3**i)
 			i+=1
 		return hash(a)
+	def __eq__(self, other):
+		if self.board_type == "MANHATTAN":
+			return self.path_cost + self.get_manhattan(self) == other.path_cost + other.get_manhattan(other)
+		elif self.board_type == "GASHNIK":
+			return self.path_cost + self.get_gashnik(self) == other.path_cost + other.get_gashnik(other)
+		elif self.board_type == "MISPLACED":
+			return self.get_misplaced_tile_score() ==  other.get_misplaced_tile_score()
+	def __lt__(self, other):
+		if self.board_type == "MANHATTAN":
+			return self.path_cost + self.get_manhattan(self) < other.path_cost + other.get_manhattan(other)
+		elif self.board_type == "GASHNIK":
+			return self.path_cost + self.get_gashnik(self) < other.path_cost + other.get_gashnik(other)
+		elif self.board_type == "MISPLACED":
+			return self.get_misplaced_tile_score() < other.get_misplaced_tile_score()
+	def __gt__(self, other):
+		if self.board_type == "MANHATTAN":
+			return self.path_cost + self.get_manhattan(self) > other.path_cost + other.get_manhattan(other)
+		elif self.board_type == "GASHNIK":
+			return self.path_cost + self.get_gashnik(self) > other.path_cost + other.get_gashnik(other)
+		elif self.board_type == "MISPLACED":
+			return self.get_misplaced_tile_score() > other.get_misplaced_tile_score()
+	def __lt__(self, other):
+		if self.board_type == "MANHATTAN":
+			return self.path_cost + self.get_manhattan(self) < other.path_cost + other.get_manhattan(other)
+		elif self.board_type == "GASHNIK":
+			return self.path_cost + self.get_gashnik(self) < other.path_cost + other.get_gashnik(other)
+		elif self.board_type == "MISPLACED":
+			return self.get_misplaced_tile_score() < other.get_misplaced_tile_score()
+		
+	def get_path_a_star(self):
+		visited_map = {}
+		path = []
+		backtrack = {}
+		node_expanded = 0
+		frontier = []
+		frontier.append(self)
+		while frontier:
+			frontier.sort()
+			w = frontier[0]
+			visited_map[w] = True
+			del frontier[0]
+			node_expanded+=1
+			if node_expanded == 50000 :
+				print("EXIT REACHED 50000")
+				return false
+			if w.is_reached():
+				print("FOUND PATH", node_expanded)
+				path.append(w)
+				expanded = node_expanded
+
+
+			vv = self.generate_swap_boards()
+			for v in vv:
+				if v in visited_map:
+					continue
+				else:
+					v.path_cost = w.path_cost + 1
+					self.find_and_update(frontier, v, w, backtrack, self.board_type)
+		return False
+
+
+	def find_and_update(self, frontier, v, w, backtrack, t ):
+		try:
+
+			old_index = frontier.index(v)
+
+		except:
+			frontier.append(v)
+			backtrack[v] = w
+			return
+		total_score_new = v.path_cost + v.score
+		total_score_old = frontier[old_index].path_cost + frontier[old_index].get_score()
+		if total_score_old < total_score_new:
+			frontier[old_index].path_cost = v.path_cost
+			backtrack[v] = w
 
 	def generate_swap_boards(self):
 		neighbor_index = self.findNeighbours()
@@ -27,15 +124,17 @@ class Board():
 			t = temp[i]
 			temp[i] = 0
 			temp[zero_index] = t
-			boards.append(Board(temp))
+			boards.append(Board(temp,self.board_type))
 		return boards
 	
+
 	def get_greedy_manhattan(self, board_list):
 		min_path = sys.maxint
 		min_board = None
 		for i in board_list:
 			temp_board = copy.deepcopy(i)
 			min_temp = self.get_manhattan(i)
+			i.score = min_temp
 			if  min_temp < min_path:
 				min_board = temp_board
 				min_path = min_temp
@@ -46,7 +145,7 @@ class Board():
 		min_board = None
 		for i in board_list:
 			temp_board = copy.deepcopy(i)
-			min_temp = self.gashnik(i)
+			min_temp = self.get_gashnik(i)
 			if  min_temp < min_path:
 				min_board = temp_board
 				min_path = min_temp
@@ -76,9 +175,9 @@ class Board():
 	def print_matrix(self):
 		for i in range(3):
 			for j in range(3):
-				print self.board_array[i*3+j],
-			print ""
-		print "----"
+				print(self.board_array[i*3+j]),
+			print ("")
+		print("----")
 
 	def is_reached(self):
 		for index, i  in enumerate(self.board_array):
@@ -93,20 +192,18 @@ class Board():
 			if index != i:
 				res.append(i)
 		return res
-	def a_star(self, type):
-		if type == "MANHATTAN"
-			
 	def get_misplaced_tile_score(self):
-		return len(self.find_missed_value())
+		return len(self.find_missed_value(0))
 
-	def gashnik(self, board ):
+	def get_gashnik(self, board2 ):
+		board = copy.deepcopy(board2)
 		result = []
 		res = board.find_missed_value(1)
 		res.sort()
 		path_cost = 0
 		while not board.is_reached():
 			# time.sleep(1)
-			# print "RES", res0, 1, 2, 3, 4, 5, 6, 8, 7
+			# print "RES", res
 			# print "BOARD",board.printb()
 			path_cost+=1
 			zero_index = board.board_array.index(0)
@@ -133,6 +230,7 @@ class Board():
 				board.board_array[0] = checkVal
 				board.board_array[to_swap] = 0
 				# self.board_array[self.board_array.index(0)], self.board_array[to_swap] = to_swap, self.board_array[to_swap]
+			# print "--"
 		return path_cost
 
 	def get_manhattan(self, board):
@@ -148,10 +246,53 @@ class Board():
 
 
 
-A =[0, 1, 2, 3, 4, 5, 6, 8, 7]
-A = [6,3,5,2,1,0,4,8,7]
-a = Board(A)		
-print a.get_manhattan(a)
+B = [1,2,3,5,8,7,4,0,6]
+A = [1,0,3,5,2,7,4,8,6]
+C = [1,2,3,5,7,0,4,8,6]
+D = [1,2,3,0,5,7,4,8,6]
+
+# D = [1,3,5,2,7,0,4,8,6]
+
+board_type = "MANHATTAN"
+a = Board(A,board_type)	
+b = Board(B,board_type)
+c = Board(C,board_type)
+d = Board(D,board_type)
+
+print(a.get_manhattan(a))
+print(b.get_manhattan(b))
+print(c.get_manhattan(c))
+print(d.get_manhattan(d))
+
+# a_list =[]
+# a_list.append(a)
+# a_list.append(b)
+# a_list.append(c)
+# a_list.append(d)
+
+
+
+
+# for i in a_list:
+# 	print("LIST", i.pc)
+
+# print("---")
+
+
+# a_list.sort()
+# print("---")
+# for i in a_list:
+# 	print("AFTER", i.pc)
+
+
+# print a_list.index(d)
+
+# a_heap = heapq.heapify(a_list)
+# print "--"
+# a = len(a_list)
+# for i in range(a):
+# 	i = heapq.heappop(a_list)
+# 	print i.printb()
 # a.print_matrix()
 # # a.gashnik(a)
 # board_list = a.generate_swap_boards()
