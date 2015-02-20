@@ -63,7 +63,6 @@ public:
 class Board {
 public:
     int board_array[9];
-    //int index_lookup[9];//TBD
     board_type type;
     int heuristic_score;
     int pathcost;
@@ -105,7 +104,6 @@ public:
     Board(int a[]) {
         for (int i = 0; i < 9;i++) {
             board_array[i] = a[i];
-            //index_lookup[a[i]] = i;
         }
         computeHashCode();
         type = UNKNOWN;
@@ -116,7 +114,6 @@ public:
     Board(int a[], board_type t) {
         for (int i = 0; i < 9;i++) {
             board_array[i] = a[i];
-            //index_lookup[a[i]] = i;
         }
         computeHashCode();
         type = t;
@@ -194,7 +191,7 @@ public:
             if (index_of_zero > 0) {
                 int swap_index = board.indexOf(index_of_zero);
                 int temp = board.board_array[swap_index];
-                board.board_array[swap_index] = 0;//board.board_array[index_of_zero];
+                board.board_array[swap_index] = 0;
                 board.board_array[index_of_zero] = temp;
                 res.remove(index_of_zero);
             } else {
@@ -434,7 +431,8 @@ pair<int,int>  printPathAstar(Board& start, board_type t) {
 
 int main() {
     string line;
-    ifstream myfile("/Users/saikat/workspace_ubuntu/practise/cs440mp1/mp1_new/8puzzle/input.txt");
+    //ifstream myfile("/Users/saikat/workspace_ubuntu/practise/cs440mp1/mp1_new/8puzzle/input.txt");
+    ifstream myfile("input.txt");
     int input_board[50][9];
     int input_num = 0;
     if (myfile.is_open())
