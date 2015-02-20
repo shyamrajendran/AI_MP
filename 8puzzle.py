@@ -20,7 +20,7 @@ class Board():
 		elif board_type == "GASHNIK":
 			self.score = self.get_gashnik(self)
 		elif board_type == "MISPLACED":
-			self.score = self.get_misplaced_tile_score()
+			self.score = self.get_misplaced_tile_score(self)
 
 	def update_path_cost(self, val):
 		self.path_cost+=val
@@ -44,21 +44,23 @@ class Board():
 		elif self.board_type == "GASHNIK":
 			return self.path_cost + self.get_gashnik(self) == other.path_cost + other.get_gashnik(other)
 		elif self.board_type == "MISPLACED":
-			return self.get_misplaced_tile_score() ==  other.get_misplaced_tile_score()
+			return self.path_cost + self.get_misplaced_tile_score(self) ==  other.path_cost + other.get_misplaced_tile_score(other)
 	def __lt__(self, other):
 		if self.board_type == "MANHATTAN":
 			return self.path_cost + self.get_manhattan(self) < other.path_cost + other.get_manhattan(other)
 		elif self.board_type == "GASHNIK":
 			return self.path_cost + self.get_gashnik(self) < other.path_cost + other.get_gashnik(other)
 		elif self.board_type == "MISPLACED":
-			return self.get_misplaced_tile_score() < other.get_misplaced_tile_score()
+			# print "SELF",self.path_cost self.get_misplaced_tile_score(self) 
+			# print "oTHER",
+			return self.path_cost + self.get_misplaced_tile_score(self) < other.path_cost + other.get_misplaced_tile_score(other)
 	def __gt__(self, other):
 		if self.board_type == "MANHATTAN":
 			return self.path_cost + self.get_manhattan(self) > other.path_cost + other.get_manhattan(other)
 		elif self.board_type == "GASHNIK":
 			return self.path_cost + self.get_gashnik(self) > other.path_cost + other.get_gashnik(other)
 		elif self.board_type == "MISPLACED":
-			return self.get_misplaced_tile_score() > other.get_misplaced_tile_score()
+			return self.path_cost + self.get_misplaced_tile_score(self) > other.path_cost  +  other.get_misplaced_tile_score(other)
 	def get_path_a_star(self):
 
 		visited_map = {}
@@ -70,7 +72,14 @@ class Board():
 		while frontier:
 			print "****ENTER FRONTIER ****"
 			frontier.sort()
+			print "LEN" , len(frontier)
+			for i in frontier:
+				print i.print_matrix(),"|",i.path_cost,",",i.get_score(),"| =>",i.path_cost+i.get_score()
+			print "**** DONE *****"
 			w = frontier[0]
+			print "MIN ->"
+			print w.print_matrix(), "|", w.path_cost, "|", w.get_score(),"| =>",w.path_cost+w.get_score()
+			print "^^^^ MIN ^^^^ "
 			visited_map[w] = True
 			del frontier[0]
 			node_expanded+=1
@@ -83,24 +92,26 @@ class Board():
 					a = raw_input("done")
 			except:
 				pass
+
 			if w.is_reached():
-				print("FOUND PATH", node_expanded)
 				path.append(w)
+				print("FOUND PATH", node_expanded,len(path))
 				expanded = node_expanded
 				return True
 
+			#different for gashnik
 			vv = w.generate_swap_boards()
-			print len(visited_map)
+			print "length of vv " , len(visited_map)
 			for v in vv:
-				for i in visited_map:
-					if i.board_array == v.board_array:
-						continue
+				if v in visited_map:
+					continue
 				else:
 					print "---------"
 					print "NODES expanded " , node_expanded
-					print v.print_matrix()
+					print v.print_matrix(),  "|", v.path_cost, "|", v.get_score()
 					print "---------"
 					v.path_cost = w.path_cost + 1
+					visited_map[v] = True
 					self.find_and_update(frontier, v, w, backtrack, self.board_type)
 		return False
 
@@ -118,7 +129,7 @@ class Board():
 			frontier.append(v)
 			backtrack[v] = w
 			return
-		total_score_new = v.path_cost + v.score
+		total_score_new = v.path_cost + v.get_score()
 		total_score_old = frontier[old_index].path_cost + frontier[old_index].get_score()
 		if total_score_new < total_score_old:
 			frontier[old_index].path_cost = v.path_cost
@@ -203,8 +214,8 @@ class Board():
 			if index != i:
 				res.append(i)
 		return res
-	def get_misplaced_tile_score(self):
-		return len(self.find_missed_value(0))
+	def get_misplaced_tile_score(self, board):
+		return len(board.find_missed_value(0))
 
 	def get_gashnik(self, board2 ):
 		board = copy.deepcopy(board2)
@@ -263,48 +274,32 @@ class Board():
 585         {5,6,2,1,8,4,7,3,0},//15 mi{9432,25} {702,25}
 """
 
-# B = [1,2,3,5,8,7,4,0,6]
 
-# C = [1,2,3,5,7,0,4,8,6]
-# D = [1,2,3,5,7,0,4,8,6]
+board_type = "MISPLACED"
+# A1 = [1,2,3,5,8,7,4,0,6]
+# A2 = [1,2,3,5,7,6,0,4,8]
+A3 = [0,1,2,5,7,3,4,8,6]
 
-# D = [1,3,5,2,7,0,4,8,6]
-A = [7,2,4,5,0,6,8,3,1]
-# [1,2,0,3,4,5,6,7,8]
-board_type = "GASHNIK"
-a = Board(A,board_type)	
-a.print_matrix()
-# sys.exit()
+a = Board(A3, board_type)
 print a.get_path_a_star()
-
-# # print a.get_path_a_star()
-# b = Board(B,board_type)
-# c = Board(C,board_type)
-# d = Board(D,board_type)
-
-# # print(a.get_manhattan(a))
-# # print(b.get_manhattan(b))
-# # print(c.get_manhattan(c))
-# # print(d.get_manhattan(d))
+# a1 = Board(A1,board_type)
+# a2 = Board(A2,board_type)
+# a3 = Board(A3,board_type)
 
 # a_list =[]
-# a_list.append(a)
-# a_list.append(b)
-# a_list.append(c)
-# # a_list.append(d)
-
-# print a_list.index(d)
-
-
+# a_list.append(a1)
+# a_list.append(a2)
+# a_list.append(a3)
 
 
 # for i in a_list:
-# 	print("LIST", i.pc)
-
-# print("---")
-
-
+# 	print i.print_matrix(), i.get_score(), i.path_cost, i.get_score()+i.path_cost
 # a_list.sort()
+# print "AFTER"
+# for i in a_list:
+# 	print i.print_matrix(), i.get_score(), i.path_cost, i.get_score()+i.path_cost
+
+# sys.exit()
 # print("---")
 # for i in a_list:
 # 	print("AFTER", i.pc)
