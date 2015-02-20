@@ -60,6 +60,7 @@ class Board():
 		elif self.board_type == "MISPLACED":
 			return self.get_misplaced_tile_score() > other.get_misplaced_tile_score()
 	def get_path_a_star(self):
+
 		visited_map = {}
 		path = []
 		backtrack = {}
@@ -67,6 +68,7 @@ class Board():
 		frontier = []
 		frontier.append(self)
 		while frontier:
+			print "****ENTER FRONTIER ****"
 			frontier.sort()
 			w = frontier[0]
 			visited_map[w] = True
@@ -75,6 +77,12 @@ class Board():
 			if node_expanded == 50000 :
 				print("EXIT REACHED 50000")
 				return false
+			print w.print_matrix()
+			try:
+				if sys.argv[1]: 
+					a = raw_input("done")
+			except:
+				pass
 			if w.is_reached():
 				print("FOUND PATH", node_expanded)
 				path.append(w)
@@ -82,10 +90,16 @@ class Board():
 				return True
 
 			vv = w.generate_swap_boards()
+			print len(visited_map)
 			for v in vv:
-				if v in visited_map:
-					continue
+				for i in visited_map:
+					if i.board_array == v.board_array:
+						continue
 				else:
+					print "---------"
+					print "NODES expanded " , node_expanded
+					print v.print_matrix()
+					print "---------"
 					v.path_cost = w.path_cost + 1
 					self.find_and_update(frontier, v, w, backtrack, self.board_type)
 		return False
@@ -112,7 +126,7 @@ class Board():
 
 	def generate_swap_boards(self):
 		neighbor_index = self.findNeighbours()
-		print "SAME",neighbor_index,self.path_cost
+		# print "SAME",neighbor_index,self.path_cost
 		boards = []
 		init_board = self.printb()
 		zero_index = init_board.index(0)
@@ -240,19 +254,27 @@ class Board():
 			man_score+=abs(cur_row - des_row) + abs(cur_col - des_col)
 		return man_score
 
+"""
+5,1,8,2,7,3,0,4,6},//mi{8002,25} {1094,25}
+581         {5,1,8,2,7,3,4,0,6},//10 mi{6603,24} {923,24}
+582         {5,1,8,7,0,3,2,4,6},//11 mi{13279,27}{2536,27}
+583         {5,1,8,0,7,3,2,4,6},//12 mi{10754,26} {1661,26}
+584         {5,1,8,7,3,0,2,4,6},//mi{11124,26} {1709,26}
+585         {5,6,2,1,8,4,7,3,0},//15 mi{9432,25} {702,25}
+"""
 
+# B = [1,2,3,5,8,7,4,0,6]
 
-
-B = [1,2,3,5,8,7,4,0,6]
-
-C = [1,2,3,5,7,0,4,8,6]
-D = [1,2,3,5,7,0,4,8,6]
+# C = [1,2,3,5,7,0,4,8,6]
+# D = [1,2,3,5,7,0,4,8,6]
 
 # D = [1,3,5,2,7,0,4,8,6]
-A = D
+A = [7,2,4,5,0,6,8,3,1]
 # [1,2,0,3,4,5,6,7,8]
-board_type = "MANHATTAN"
+board_type = "GASHNIK"
 a = Board(A,board_type)	
+a.print_matrix()
+# sys.exit()
 print a.get_path_a_star()
 
 # # print a.get_path_a_star()

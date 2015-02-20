@@ -2,6 +2,7 @@
 #include<iostream>
 #include<map>
 #include <math.h>
+#include <conio.h>
 #include<vector>
 #include<list>
 #include<set>
@@ -412,9 +413,12 @@ bool getPathAstar(puzzleboard s,
     frontier.push_back(s);
     while(!frontier.empty()) {
         //cout << "FRONTIER SIZE :" << frontier.size() << "VISITED SIZE" << visited.size() <<   endl;
+			
         sortFrontier(frontier, t);
         puzzleboard w = frontier.front();
-        //w.printBoard();
+		cout << "PRINTING BOARD";	
+        w.printBoard();
+		getch();
         visited.insert(std::pair<puzzleboard, int>(w,1));
         frontier.pop_front();
         //cout<<"POPPED FROM FRONTIER TO VISITED"<<endl;
