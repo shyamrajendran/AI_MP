@@ -37,6 +37,7 @@ class Board():
 			a+=n*(3**i)
 			i+=1
 		return hash(a)
+
 	def __eq__(self, other):
 		if self.board_type == "MANHATTAN":
 			return self.path_cost + self.get_manhattan(self) == other.path_cost + other.get_manhattan(other)
@@ -88,7 +89,7 @@ class Board():
 				expanded = node_expanded
 
 
-			vv = self.generate_swap_boards()
+			vv = w.generate_swap_boards()
 			for v in vv:
 				if v in visited_map:
 					continue
@@ -99,23 +100,27 @@ class Board():
 
 
 	def find_and_update(self, frontier, v, w, backtrack, t ):
-		try:
-
-			old_index = frontier.index(v)
-
-		except:
+		# print("CHECKING",v.printb())
+		# for i in frontier:
+			# print i.printb(),"|",
+		old_index = -1
+		for index, iv in enumerate(frontier):
+			if iv.board_array == v.board_array:
+				old_index = index
+				break
+		if old_index == -1:
 			frontier.append(v)
 			backtrack[v] = w
 			return
 		total_score_new = v.path_cost + v.score
 		total_score_old = frontier[old_index].path_cost + frontier[old_index].get_score()
-		if total_score_old < total_score_new:
+		if total_score_new < total_score_old:
 			frontier[old_index].path_cost = v.path_cost
 			backtrack[v] = w
 
 	def generate_swap_boards(self):
 		neighbor_index = self.findNeighbours()
-		print neighbor_index
+		print "SAME",neighbor_index
 		boards = []
 		init_board = self.printb()
 		zero_index = init_board.index(0)
@@ -249,26 +254,31 @@ class Board():
 B = [1,2,3,5,8,7,4,0,6]
 A = [1,0,3,5,2,7,4,8,6]
 C = [1,2,3,5,7,0,4,8,6]
-D = [1,2,3,0,5,7,4,8,6]
+D = [1,2,3,5,7,0,4,8,6]
 
 # D = [1,3,5,2,7,0,4,8,6]
 
 board_type = "MANHATTAN"
 a = Board(A,board_type)	
-b = Board(B,board_type)
-c = Board(C,board_type)
-d = Board(D,board_type)
+print a.get_path_a_star()
 
-print(a.get_manhattan(a))
-print(b.get_manhattan(b))
-print(c.get_manhattan(c))
-print(d.get_manhattan(d))
+# # print a.get_path_a_star()
+# b = Board(B,board_type)
+# c = Board(C,board_type)
+# d = Board(D,board_type)
+
+# # print(a.get_manhattan(a))
+# # print(b.get_manhattan(b))
+# # print(c.get_manhattan(c))
+# # print(d.get_manhattan(d))
 
 # a_list =[]
 # a_list.append(a)
 # a_list.append(b)
 # a_list.append(c)
-# a_list.append(d)
+# # a_list.append(d)
+
+# print a_list.index(d)
 
 
 
