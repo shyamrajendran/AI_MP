@@ -1,8 +1,10 @@
 #include<iostream>
 #include<vector>
 #include<list>
-#include<map>>
+#include<map>
 #include<math.h>
+#include <fstream>
+#include<sstream>
 using namespace std;
 
 #define MAX_EXPANSION 60000
@@ -185,7 +187,6 @@ public:
         list<int> res = board.find_missed_value(true);
         res.sort();
         int path_cost = 0;
-        int local_array[9];
         
         while(!board.isTarget()) {
             path_cost++;
@@ -369,14 +370,14 @@ bool getPathAstar(Board s,
         nodesExpanded++;
         
         if(nodesExpanded == MAX_EXPANSION) {
-            cout<<"limit reached...aborting!"<<endl;
+            //cout<<"limit reached...aborting!"<<endl;
             expanded = 0;
             pathlen = 0;
             return false;
         }
         
         if (w.isTarget()) {
-            cout<<"found:nodes expadned"<<nodesExpanded<<endl;
+            //cout<<"found:nodes expadned"<<nodesExpanded<<endl;
             path.push_back(w);
             expanded = nodesExpanded;
             pathlen = (int) path.size();
@@ -403,8 +404,6 @@ bool getPathAstar(Board s,
 }
 
 
-
-
 pair<int,int>  printPathAstar(Board& start, board_type t) {
     map<Board, int> visited;
     vector<Board> path;
@@ -420,32 +419,59 @@ pair<int,int>  printPathAstar(Board& start, board_type t) {
                      path,
                      backtrack,
                      visited, t, expanded, pathlen)) {
-        cout<<"Astar path Found:length="<<path.size()<<endl;
+        //cout<<"Astar path Found:length="<<path.size()<<endl;
         //printPath(path);
         res.first = expanded;
-        res.second = pathlen;
+        res.second = path.size();
         return res;
     } else {
-        cout<<"no path"<<endl;
+        //cout<<"no path"<<endl;
+        res.first = -1;
+        res.second = -1;
         return res;
     }
 }
 
 int main() {
-    //int a[9] = {7,6,2,8,3,4,0,1,5};//works MA,MI,GA,3
-    //int a[9] = {7,6,2,3,0,4,8,1,5};//works MA,MI,GA,17
-    //int a[9] = {7,6,2,3,4,0,8,1,5};//works MA,MI,GA,18
-    //int a[9] = {0,7,2,3,6,4,8,1,5};//works MA,MI,GA,19
-
-    //int a[9] = {3,1,2,6,4,5,0,7,8};
-    //Board b(a, MANHATTAN);
-    //Board b(a, MISPLACED);
-    Board b(a, GASHNIG);
-    b.printboard();
-    //printPathAstar(b, MANHATTAN);
-    //printPathAstar(b, MISPLACED);
-    printPathAstar(b, GASHNIG);
-    //cout<<"manhattan="<<b.computeManhattan();
-    //cout<<"gashnik"<<b.computeGashhNig(b);
-    //b.get
+    string line;
+    ifstream myfile("/Users/saikat/workspace_ubuntu/practise/cs440mp1/mp1_new/8puzzle/input.txt");
+    int input_board[50][9];
+    int input_num = 0;
+    if (myfile.is_open())
+    {
+        
+        while(getline(myfile, line)) {
+            istringstream s(line);
+            string st;
+            int i = 0;
+            if (input_num >= 50) {
+                goto exit;
+            }
+            while(getline(s, st, ',')) {
+                input_board[input_num][i++] = atoi(st.c_str());
+            }
+            input_num++;
+        }
+    } else {
+        cout<<"unable to open path"<<endl;
+    }
+exit:
+    myfile.close();
+    
+    for (int i = 0; i< 50;i++) {
+        for (int j = 0;j< 9;j++) {
+            cout<<input_board[i][j]<< " ";
+        }
+        cout<<"|";
+        Board b1(input_board[i], MISPLACED);
+        Board b2(input_board[i], MANHATTAN);
+        Board b3(input_board[i], GASHNIG);
+        pair<int, int> op1 = printPathAstar(b1, MISPLACED);
+        pair<int, int> op2 = printPathAstar(b2, MANHATTAN);
+        pair<int, int> op3 = printPathAstar(b3, GASHNIG);
+        cout<<op1.first<<" "<<op1.second<<"|";
+        cout<<op2.first<<" "<<op2.second<<"|";
+        cout<<op3.first<<" "<<op3.second<<"|";
+        cout<<endl;
+    }
 }
