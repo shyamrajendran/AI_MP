@@ -160,16 +160,16 @@ public class BoardState {
 	        	  col = t.getCol();
 	        	  multi[row][col] = "G ";
           }
-         stringBuffer.append("Player = ").append(player).append("\n");
-      	stringBuffer.append("Player 1 Score = ").append(player_scores[0]).append("\n");
-		stringBuffer.append("Player 2 Score = ").append(player_scores[1]).append("\n");
-          for(int i=0; i<6; i++){
-        	  	for(int j = 0;j<6 ; j++){
-        	  		stringBuffer.append(multi[i][j]);	
+//         stringBuffer.append("Player = ").append(player).append("\n");
+//      	stringBuffer.append("Player 1 Score = ").append(player_scores[0]).append("\n");
+//		stringBuffer.append("Player 2 Score = ").append(player_scores[1]).append("\n");
+          for(int i=0; i<WarGame.getBoard_height(); i++){
+        	  	for(int j = 0;j<WarGame.getBoard_width() ; j++){
+        	  		stringBuffer.append(multi[i][j]);
         	  	}
         	  	stringBuffer.append("\n");
           }
-          stringBuffer.append("\n=================================\n");
+//          stringBuffer.append("\n=================================\n");
         	return stringBuffer.toString();
 
         }
