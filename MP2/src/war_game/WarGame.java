@@ -587,12 +587,16 @@ public class WarGame {
             WarGame warGame = new WarGame(game_board, DEPTH);
             System.out.println(" MATCH TYPE : Minimax Vs Minimax **  ");
             warGame.playGame(Player.BLUE, false, false); // true = alphaBeta set
+
             System.out.println(" MATCH TYPE : AlphaBeta Vs AlphaBeta **  ");
             warGame.playGame(Player.BLUE, true, true); // true = alphaBeta set
-            System.out.println(" MATCH TYPE : Minimax Vs Minimax **  ");
-            warGame.playGame(Player.BLUE,false, false); // true = alphaBeta set
+
             System.out.println(" MATCH TYPE : Minimax Vs AlphaBeta **  ");
-            warGame.playGame(Player.BLUE,false, true); // true = alphaBeta set
+            warGame.playGame(Player.BLUE, false, true); // true = alphaBeta set
+
+            System.out.println(" MATCH TYPE : AlphaBeta Vs Minimax **  ");
+            warGame.playGame(Player.BLUE, true, false); // true = alphaBeta set
+
             System.out.println("************************  DONE  *********************************");
             System.out.println("");
         }
