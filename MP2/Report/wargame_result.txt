@@ -1,15 +1,20 @@
->>>>>>>>>>>>>>>>>>>>>>>>game_boards/Keren.txt<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/bin/java -Didea.launcher.port=7542 "-Didea.launcher.bin.path=/Applications/IntelliJ IDEA 14 CE.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath "/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/lib/ant-javafx.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/lib/dt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/lib/javafx-doclet.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/lib/javafx-mx.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/lib/jconsole.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/lib/sa-jdi.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/lib/tools.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/deploy.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/htmlconverter.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/javaws.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/jfxrt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/management-agent.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/plugin.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/ext/dnsns.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/ext/localedata.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/ext/sunec.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/ext/sunjce_provider.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/ext/sunpkcs11.jar:/Library/Java/JavaVirtualMachines/jdk1.7.0_67.jdk/Contents/Home/jre/lib/ext/zipfs.jar:/Users/sam/Documents/workspace/AP_mp2/out/production/AP_mp2:/Applications/IntelliJ IDEA 14 CE.app/Contents/lib/idea_rt.jar" com.intellij.rt.execution.application.AppMain war_game.WarGame
+BOARD : game_boards/Keren.txt
 1 1 1 1 1 1 
 1 1 1 1 1 1 
 1 1 1 1 1 1 
 1 1 1 1 1 1 
 1 1 1 1 1 1 
 1 1 1 1 1 1 
- *************************************************** Minimax Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 15
-Player 2 Score = 21
+ MATCH TYPE :  Minimax Vs Minimax **  
+*****  Winner is **** GREEN
+P1 SCORE : 15
+P2 SCORE : 21
+P1 Average Nodes Expanded per Move : 217740
+P2 Average Nodes Expanded per Move : 194736
+P1 Average Move Time : 150.0
+P2 Average Move Time : 37.0
+FINAL GAME BOARD STATE : 
 B G B G B G 
 G B G B G B 
 B G G G G G 
@@ -17,23 +22,15 @@ G G B G G G
 G B G G G B 
 B G B B B B 
 
-=================================
-
-P1 SCORE : 15
-P2 SCORE : 21
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
-P2 Average Nodes Expanded per Move : 194736
-P1 Average Move Time : 106.0
-P2 Average Move Time : 97.0
-Winner is GREEN
-Game Over
- ************************************************** AlphaBeta Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 10
-Player 2 Score = 26
+ MATCH TYPE : AlphaBeta Vs AlphaBeta **  
+*****  Winner is **** GREEN
+P1 SCORE : 10
+P2 SCORE : 26
+P1 Average Nodes Expanded per Move : 9892
+P2 Average Nodes Expanded per Move : 9144
+P1 Average Move Time : 3.0
+P2 Average Move Time : 20.0
+FINAL GAME BOARD STATE : 
 B G B G B G 
 G B G B G B 
 B G G G G G 
@@ -41,23 +38,15 @@ G G B G G G
 G B G G G G 
 B G G G G G 
 
-=================================
-
-P1 SCORE : 10
-P2 SCORE : 26
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 9892
+ MATCH TYPE:  Minimax Vs AlphaBeta **  
+*****  Winner is **** GREEN
+P1 SCORE : 14
+P2 SCORE : 22
+P1 Average Nodes Expanded per Move : 217740
 P2 Average Nodes Expanded per Move : 9144
-P1 Average Move Time : 3.0
-P2 Average Move Time : 3.0
-Winner is GREEN
-Game Over
- ************************************************** Minimax Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 14
-Player 2 Score = 22
+P1 Average Move Time : 58.0
+P2 Average Move Time : 1.0
+FINAL GAME BOARD STATE : 
 B G B G B G 
 G B G B G B 
 B G G G G G 
@@ -65,23 +54,15 @@ G G B G G G
 G B B B G G 
 B B B G G G 
 
-=================================
-
-P1 SCORE : 14
-P2 SCORE : 22
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
+ MATCH TYPE:  AlphaBeta Vs Minimax **  
+*****  Winner is **** GREEN
+P1 SCORE : 10
+P2 SCORE : 26
+P1 Average Nodes Expanded per Move : 9892
 P2 Average Nodes Expanded per Move : 9144
-P1 Average Move Time : 53.0
+P1 Average Move Time : 1.0
 P2 Average Move Time : 1.0
-Winner is GREEN
-Game Over
- ************************************************** AlphaBeta Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 10
-Player 2 Score = 26
+FINAL GAME BOARD STATE : 
 B G B G B G 
 G B G B G B 
 B G G G G G 
@@ -89,32 +70,23 @@ G G B G G G
 G B G G G G 
 B G G G G G 
 
-=================================
-
-P1 SCORE : 10
-P2 SCORE : 26
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 9892
-P2 Average Nodes Expanded per Move : 9144
-P1 Average Move Time : 22.0
-P2 Average Move Time : 1.0
-Winner is GREEN
-Game Over
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  DONE  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
->>>>>>>>>>>>>>>>>>>>>>>>game_boards/Narvik.txt<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+BOARD GAME FOR game_boards/Keren.txt COMPLETED! 
+BOARD : game_boards/Narvik.txt
 99 1 99 1 99 1 
 1 99 1 99 1 99 
 99 1 99 1 99 1 
 1 99 1 99 1 99 
 99 1 99 1 99 1 
 1 99 1 99 1 99 
- *************************************************** Minimax Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 704
-Player 2 Score = 1096
+ MATCH TYPE :  Minimax Vs Minimax **  
+*****  Winner is **** GREEN
+P1 SCORE : 704
+P2 SCORE : 1096
+P1 Average Nodes Expanded per Move : 217740
+P2 Average Nodes Expanded per Move : 194736
+P1 Average Move Time : 89.0
+P2 Average Move Time : 60.0
+FINAL GAME BOARD STATE : 
 B B B G G B 
 B B B G G G 
 B B G G G B 
@@ -122,23 +94,15 @@ B B G G G G
 B B G G G B 
 G B B G B G 
 
-=================================
-
-P1 SCORE : 704
-P2 SCORE : 1096
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
-P2 Average Nodes Expanded per Move : 194736
-P1 Average Move Time : 11.0
-P2 Average Move Time : 59.0
-Winner is GREEN
-Game Over
- ************************************************** AlphaBeta Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 998
-Player 2 Score = 802
+ MATCH TYPE : AlphaBeta Vs AlphaBeta **  
+*****  Winner is **** BLUE
+P1 SCORE : 998
+P2 SCORE : 802
+P1 Average Nodes Expanded per Move : 20085
+P2 Average Nodes Expanded per Move : 19450
+P1 Average Move Time : 2.0
+P2 Average Move Time : 25.0
+FINAL GAME BOARD STATE : 
 B B B B G G 
 G B B G G G 
 B B B G G B 
@@ -146,23 +110,15 @@ G B B B G G
 B B B G G G 
 G G B B G G 
 
-=================================
-
-P1 SCORE : 998
-P2 SCORE : 802
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 20085
-P2 Average Nodes Expanded per Move : 19450
-P1 Average Move Time : 3.0
-P2 Average Move Time : 124.0
-Winner is BLUE
-Game Over
- ************************************************** Minimax Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 1689
-Player 2 Score = 111
+ MATCH TYPE:  Minimax Vs AlphaBeta **  
+*****  Winner is **** BLUE
+P1 SCORE : 1689
+P2 SCORE : 111
+P1 Average Nodes Expanded per Move : 217740
+P2 Average Nodes Expanded per Move : 19700
+P1 Average Move Time : 130.0
+P2 Average Move Time : 2.0
+FINAL GAME BOARD STATE : 
 B G B B B G 
 G B B B G G 
 B B B B B G 
@@ -170,23 +126,15 @@ G B G B B B
 B G B G B G 
 B B G B G B 
 
-=================================
-
-P1 SCORE : 1689
-P2 SCORE : 111
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
-P2 Average Nodes Expanded per Move : 19700
-P1 Average Move Time : 151.0
-P2 Average Move Time : 3.0
-Winner is BLUE
-Game Over
- ************************************************** AlphaBeta Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 998
-Player 2 Score = 802
+ MATCH TYPE:  AlphaBeta Vs Minimax **  
+*****  Winner is **** BLUE
+P1 SCORE : 998
+P2 SCORE : 802
+P1 Average Nodes Expanded per Move : 20085
+P2 Average Nodes Expanded per Move : 19450
+P1 Average Move Time : 3.0
+P2 Average Move Time : 2.0
+FINAL GAME BOARD STATE : 
 B B B B G G 
 G B B G G G 
 B B B G G B 
@@ -194,56 +142,23 @@ G B B B G G
 B B B G G G 
 G G B B G G 
 
-=================================
-
-P1 SCORE : 998
-P2 SCORE : 802
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 20085
-P2 Average Nodes Expanded per Move : 19450
-P1 Average Move Time : 23.0
-P2 Average Move Time : 2.0
-Winner is BLUE
-Game Over
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  DONE  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
->>>>>>>>>>>>>>>>>>>>>>>>game_boards/Sevastopol.txt<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+BOARD GAME FOR game_boards/Narvik.txt COMPLETED! 
+BOARD : game_boards/Sevastopol.txt
 1 1 1 1 1 1 
 2 2 2 2 2 2 
 4 4 4 4 4 4 
 8 8 8 8 8 8 
 16 16 16 16 16 16 
 32 32 32 32 32 32 
- *************************************************** Minimax Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 226
-Player 2 Score = 152
-B B B B B B 
-B B B B B B 
-B B B B B B 
-G B B B B B 
-G G B B G B 
-G B B G B G 
-
-=================================
-
+ MATCH TYPE :  Minimax Vs Minimax **  
+*****  Winner is **** BLUE
 P1 SCORE : 226
 P2 SCORE : 152
-P1 Move Count : 18
-P2 Move Count : 18
 P1 Average Nodes Expanded per Move : 217740
 P2 Average Nodes Expanded per Move : 194736
-P1 Average Move Time : 31.0
-P2 Average Move Time : 54.0
-Winner is BLUE
-Game Over
- ************************************************** AlphaBeta Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 226
-Player 2 Score = 152
+P1 Average Move Time : 191.0
+P2 Average Move Time : 11.0
+FINAL GAME BOARD STATE : 
 B B B B B B 
 B B B B B B 
 B B B B B B 
@@ -251,80 +166,71 @@ G B B B B B
 G G B B G B 
 G B B G B G 
 
-=================================
-
+ MATCH TYPE : AlphaBeta Vs AlphaBeta **  
+*****  Winner is **** BLUE
 P1 SCORE : 226
 P2 SCORE : 152
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 189158
-P2 Average Nodes Expanded per Move : 164083
-P1 Average Move Time : 29.0
-P2 Average Move Time : 167.0
-Winner is BLUE
-Game Over
- ************************************************** Minimax Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 226
-Player 2 Score = 152
-B B B B B B 
-B B B B B B 
-B B B B B B 
-G B B B B B 
-G G B B G B 
-G B B G B G 
-
-=================================
-
-P1 SCORE : 226
-P2 SCORE : 152
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
-P2 Average Nodes Expanded per Move : 164083
-P1 Average Move Time : 35.0
-P2 Average Move Time : 49.0
-Winner is BLUE
-Game Over
- ************************************************** AlphaBeta Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 226
-Player 2 Score = 152
-B B B B B B 
-B B B B B B 
-B B B B B B 
-G B B B B B 
-G G B B G B 
-G B B G B G 
-
-=================================
-
-P1 SCORE : 226
-P2 SCORE : 152
-P1 Move Count : 18
-P2 Move Count : 18
 P1 Average Nodes Expanded per Move : 189158
 P2 Average Nodes Expanded per Move : 164083
 P1 Average Move Time : 51.0
-P2 Average Move Time : 35.0
-Winner is BLUE
-Game Over
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  DONE  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+P2 Average Move Time : 31.0
+FINAL GAME BOARD STATE : 
+B B B B B B 
+B B B B B B 
+B B B B B B 
+G B B B B B 
+G G B B G B 
+G B B G B G 
 
->>>>>>>>>>>>>>>>>>>>>>>>game_boards/Smolensk.txt<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+ MATCH TYPE:  Minimax Vs AlphaBeta **  
+*****  Winner is **** BLUE
+P1 SCORE : 226
+P2 SCORE : 152
+P1 Average Nodes Expanded per Move : 217740
+P2 Average Nodes Expanded per Move : 164083
+P1 Average Move Time : 167.0
+P2 Average Move Time : 30.0
+FINAL GAME BOARD STATE : 
+B B B B B B 
+B B B B B B 
+B B B B B B 
+G B B B B B 
+G G B B G B 
+G B B G B G 
+
+ MATCH TYPE:  AlphaBeta Vs Minimax **  
+*****  Winner is **** BLUE
+P1 SCORE : 226
+P2 SCORE : 152
+P1 Average Nodes Expanded per Move : 189158
+P2 Average Nodes Expanded per Move : 164083
+P1 Average Move Time : 32.0
+P2 Average Move Time : 34.0
+FINAL GAME BOARD STATE : 
+B B B B B B 
+B B B B B B 
+B B B B B B 
+G B B B B B 
+G G B B G B 
+G B B G B G 
+
+BOARD GAME FOR game_boards/Sevastopol.txt COMPLETED! 
+BOARD : game_boards/Smolensk.txt
 66 76 28 66 11 9 
 31 39 50 8 33 14 
 80 76 39 59 2 48 
 50 73 43 3 13 3 
 99 45 72 87 49 4 
 80 63 92 28 61 53 
- *************************************************** Minimax Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 535
-Player 2 Score = 1118
+ MATCH TYPE :  Minimax Vs Minimax **  
+*****  Winner is **** GREEN
+P1 SCORE : 535
+P2 SCORE : 1118
+P1 Average Nodes Expanded per Move : 217740
+P2 Average Nodes Expanded per Move : 194736
+P1 Average Move Time : 35.0
+P2 Average Move Time : 197.0
+FINAL GAME BOARD STATE : 
 B G G G G G 
 G G B G G G 
 G G B B G G 
@@ -332,23 +238,15 @@ G G B G B G
 G G G G G B 
 B G B B B G 
 
-=================================
-
-P1 SCORE : 535
-P2 SCORE : 1118
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
-P2 Average Nodes Expanded per Move : 194736
-P1 Average Move Time : 34.0
-P2 Average Move Time : 248.0
-Winner is GREEN
-Game Over
- ************************************************** AlphaBeta Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 776
-Player 2 Score = 877
+ MATCH TYPE : AlphaBeta Vs AlphaBeta **  
+*****  Winner is **** GREEN
+P1 SCORE : 776
+P2 SCORE : 877
+P1 Average Nodes Expanded per Move : 61560
+P2 Average Nodes Expanded per Move : 68478
+P1 Average Move Time : 29.0
+P2 Average Move Time : 29.0
+FINAL GAME BOARD STATE : 
 G G G B B G 
 G G B B B B 
 B G B B B B 
@@ -356,23 +254,15 @@ G B G G B B
 G G B B G B 
 G G G G B B 
 
-=================================
-
-P1 SCORE : 776
-P2 SCORE : 877
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 61560
-P2 Average Nodes Expanded per Move : 68478
-P1 Average Move Time : 28.0
-P2 Average Move Time : 6.0
-Winner is GREEN
-Game Over
- ************************************************** Minimax Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 1107
-Player 2 Score = 546
+ MATCH TYPE:  Minimax Vs AlphaBeta **  
+*****  Winner is **** BLUE
+P1 SCORE : 1107
+P2 SCORE : 546
+P1 Average Nodes Expanded per Move : 217740
+P2 Average Nodes Expanded per Move : 94317
+P1 Average Move Time : 60.0
+P2 Average Move Time : 7.0
+FINAL GAME BOARD STATE : 
 G B B G B G 
 G G B B B B 
 G B B G B G 
@@ -380,23 +270,15 @@ B B B G G B
 B G B G B B 
 B B B B B B 
 
-=================================
-
-P1 SCORE : 1107
-P2 SCORE : 546
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
-P2 Average Nodes Expanded per Move : 94317
-P1 Average Move Time : 57.0
-P2 Average Move Time : 26.0
-Winner is BLUE
-Game Over
- ************************************************** AlphaBeta Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 776
-Player 2 Score = 877
+ MATCH TYPE:  AlphaBeta Vs Minimax **  
+*****  Winner is **** GREEN
+P1 SCORE : 776
+P2 SCORE : 877
+P1 Average Nodes Expanded per Move : 61560
+P2 Average Nodes Expanded per Move : 68478
+P1 Average Move Time : 53.0
+P2 Average Move Time : 7.0
+FINAL GAME BOARD STATE : 
 G G G B B G 
 G G B B B B 
 B G B B B B 
@@ -404,32 +286,23 @@ G B G G B B
 G G B B G B 
 G G G G B B 
 
-=================================
-
-P1 SCORE : 776
-P2 SCORE : 877
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 61560
-P2 Average Nodes Expanded per Move : 68478
-P1 Average Move Time : 28.0
-P2 Average Move Time : 6.0
-Winner is GREEN
-Game Over
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  DONE  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
->>>>>>>>>>>>>>>>>>>>>>>>game_boards/Westerplatte.txt<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+BOARD GAME FOR game_boards/Smolensk.txt COMPLETED! 
+BOARD : game_boards/Westerplatte.txt
 1 1 1 1 1 1 
 1 3 4 4 3 1 
 1 4 2 2 4 1 
 1 4 2 2 4 1 
 1 3 4 4 3 1 
 1 1 1 1 1 1 
- *************************************************** Minimax Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 31
-Player 2 Score = 41
+ MATCH TYPE :  Minimax Vs Minimax **  
+*****  Winner is **** GREEN
+P1 SCORE : 31
+P2 SCORE : 41
+P1 Average Nodes Expanded per Move : 217740
+P2 Average Nodes Expanded per Move : 194736
+P1 Average Move Time : 12.0
+P2 Average Move Time : 263.0
+FINAL GAME BOARD STATE : 
 B B B G G B 
 B B B G G G 
 G B B B G B 
@@ -437,23 +310,15 @@ G G B B G B
 G G B G G G 
 G G G B G G 
 
-=================================
-
-P1 SCORE : 31
-P2 SCORE : 41
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
-P2 Average Nodes Expanded per Move : 194736
-P1 Average Move Time : 269.0
-P2 Average Move Time : 11.0
-Winner is GREEN
-Game Over
- ************************************************** AlphaBeta Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 33
-Player 2 Score = 39
+ MATCH TYPE : AlphaBeta Vs AlphaBeta **  
+*****  Winner is **** GREEN
+P1 SCORE : 33
+P2 SCORE : 39
+P1 Average Nodes Expanded per Move : 39703
+P2 Average Nodes Expanded per Move : 39228
+P1 Average Move Time : 4.0
+P2 Average Move Time : 29.0
+FINAL GAME BOARD STATE : 
 B B B B G G 
 B B B G G G 
 B B G G G G 
@@ -461,23 +326,15 @@ B G B G B G
 G B G B G G 
 B G B G G G 
 
-=================================
-
-P1 SCORE : 33
-P2 SCORE : 39
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 39703
-P2 Average Nodes Expanded per Move : 39228
-P1 Average Move Time : 29.0
-P2 Average Move Time : 6.0
-Winner is GREEN
-Game Over
- ************************************************** Minimax Vs AlphaBeta **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 44
-Player 2 Score = 28
+ MATCH TYPE:  Minimax Vs AlphaBeta **  
+*****  Winner is **** BLUE
+P1 SCORE : 44
+P2 SCORE : 28
+P1 Average Nodes Expanded per Move : 217740
+P2 Average Nodes Expanded per Move : 41949
+P1 Average Move Time : 37.0
+P2 Average Move Time : 29.0
+FINAL GAME BOARD STATE : 
 B B G B G G 
 B B B G G G 
 B B B B B G 
@@ -485,23 +342,15 @@ B B B B G B
 G B B G G G 
 B B B G G G 
 
-=================================
-
-P1 SCORE : 44
-P2 SCORE : 28
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 217740
-P2 Average Nodes Expanded per Move : 41949
-P1 Average Move Time : 34.0
-P2 Average Move Time : 29.0
-Winner is BLUE
-Game Over
- ************************************************** AlphaBeta Vs Minimax **  
-Player = BLUE's turn
-Player = BLUE
-Player 1 Score = 33
-Player 2 Score = 39
+ MATCH TYPE:  AlphaBeta Vs Minimax **  
+*****  Winner is **** GREEN
+P1 SCORE : 33
+P2 SCORE : 39
+P1 Average Nodes Expanded per Move : 39703
+P2 Average Nodes Expanded per Move : 39228
+P1 Average Move Time : 4.0
+P2 Average Move Time : 27.0
+FINAL GAME BOARD STATE : 
 B B B B G G 
 B B B G G G 
 B B G G G G 
@@ -509,16 +358,4 @@ B G B G B G
 G B G B G G 
 B G B G G G 
 
-=================================
-
-P1 SCORE : 33
-P2 SCORE : 39
-P1 Move Count : 18
-P2 Move Count : 18
-P1 Average Nodes Expanded per Move : 39703
-P2 Average Nodes Expanded per Move : 39228
-P1 Average Move Time : 30.0
-P2 Average Move Time : 5.0
-Winner is GREEN
-Game Over
->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  DONE  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+BOARD GAME FOR game_boards/Westerplatte.txt COMPLETED! 
