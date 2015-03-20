@@ -253,72 +253,130 @@ public class WarGame {
     }
 
 
-//    private BoardState alphaBetaAgent(BoardState state){
-//
-//    	 int alpha = Integer.MIN_VALUE;
-//    	 int beta = Integer.MAX_VALUE;
-//    	 if ((state.getPlayer() == Player.BLUE)){
-//    		 return max_value(state, alpha, beta,0 );
-//    	 }else{
-//    		 return min_value(state, alpha, beta,0 );
-//    	 }
-//    }
-//
-//    private BoardState max_value(BoardState state, int alpha, int beta, int depth){
-//
+    private BoardState alphaBetaAgent(BoardState state){
+
+    	 int alpha = Integer.MIN_VALUE;
+    	 int beta = Integer.MAX_VALUE;
+    	 if ((state.getPlayer() == Player.BLUE)){
+    		 return max_value(state, alpha, beta,0 );
+    	 }else{
+    		 return min_value(state, alpha, beta,0 );
+    	 }
+    }
+
+    private BoardState max_value(BoardState state, int alpha, int beta, int depth){
+
+        if (gameOver(state) || depth == MAX_DEPTH) {
+            state.calculateUtility();
+            return state;
+        }
+        int max_utility = Integer.MIN_VALUE;
+        BoardState desiredNextState = null;
+        ArrayList<BoardState> next_moves = getNextMoves(state);
+        for (BoardState next_state : next_moves) {
+        		nodesExpanded++;
+	        	BoardState curr_state = min_value(state, alpha, beta, depth+1);
+	        	int utility = curr_state.getUtility();
+
+
+            if (utility > max_utility ) {
+	        		max_utility = utility;
+	        		desiredNextState = curr_state;
+	        		if (depth == 0) desiredNextState = next_state;
+	        }
+
+            if (max_utility >= beta) return desiredNextState;
+            alpha = Math.max(alpha, max_utility);
+        }
+        return desiredNextState;
+    }
+    private BoardState min_value(BoardState state, int alpha, int beta, int depth){
+
+    	  if (gameOver(state) || depth == MAX_DEPTH) {
+              state.calculateUtility();
+              return state;
+          }
+          int min_utility = Integer.MAX_VALUE;
+          BoardState desiredNextState = null;
+          ArrayList<BoardState> next_moves = getNextMoves(state);
+          for (BoardState next_state : next_moves) {
+        	  	nodesExpanded++;
+  	        	BoardState curr_state = min_value(state, alpha, beta, depth+1);
+  	        	int utility = curr_state.getUtility();
+
+                  if (utility < min_utility ) {
+                      min_utility = utility;
+                      desiredNextState = curr_state;
+                      if (depth == 0) desiredNextState = next_state;
+                  }
+
+              if (min_utility <= alpha) return desiredNextState;
+              beta = Math.min(beta, min_utility);
+          }
+          return desiredNextState;
+
+    }
+//    private BoardState minimaxAgent(BoardState state, int alpha, int beta, int depth, boolean alphaBeta) {
 //        if (gameOver(state) || depth == MAX_DEPTH) {
 //            state.calculateUtility();
+//            depth4Counter++;
 //            return state;
 //        }
-//        int max_utility = Integer.MIN_VALUE;
-//        BoardState desiredNextState = null;
+//
 //        ArrayList<BoardState> next_moves = getNextMoves(state);
-//        for (BoardState next_state : next_moves) {
-//        		nodesExpanded++;
-//	        	BoardState curr_state = min_value(state, alpha, beta, depth+1);
-//	        	int utility = curr_state.getUtility();
 //
-////                System.out.print(max_utilitycurr_state.getUtility()+",");
+//        BoardState desiredNextState = null;
+//        if (state.getPlayer() == Player.BLUE) {
+//            int max_utility = Integer.MIN_VALUE;
+//            for (BoardState next_state : next_moves) {
+//                nodesExpanded++;
+//                BoardState curr_state = minimaxAgent(next_state, alpha, beta, depth + 1, alphaBeta);
+//                //curr_state.calculateUtility();
 //
-//            if (utility > max_utility ) {
-//	        		max_utility = utility;
-//	        		desiredNextState = curr_state;
-//	        		if (depth == 0) desiredNextState = next_state;
-//	        	}
+//                if (curr_state.getUtility() > max_utility) {
+/////                    System.out.println(max_utility +":" +curr_state.getUtility());
+//                    desiredNextState = curr_state;
+//                    if (depth == 0) desiredNextState = next_state;
+//                    desiredNextState.calculateUtility();
+//                    max_utility = desiredNextState.getUtility();
+//                }
 //
+//                if (alphaBeta ){
+//                    if (max_utility >= beta) {
+//                        return desiredNextState;
+//                    }
+//                    //int desiredStateUtil = desiredNextState.getUtility();
+//                    alpha = Math.max(alpha, max_utility);
+//                }
+//            }
 //        }
+//        else if (state.getPlayer() == Player.GREEN) {
+//            int min_utility = Integer.MAX_VALUE;
+//            for (BoardState next_state : next_moves) {
+//                nodesExpanded++;
+//                BoardState curr_state = minimaxAgent(next_state, alpha, beta, depth + 1,alphaBeta);
+//
+//                if (curr_state.getUtility() < min_utility) {
+//                    desiredNextState = curr_state;
+//                    if (depth == 0) desiredNextState = next_state;
+//                    desiredNextState.calculateUtility();
+//                    min_utility = desiredNextState.getUtility();
+//                }
+//                if (alphaBeta){
+//                    if (min_utility <= alpha) {
+//                        return desiredNextState;
+//                    }
+//                    //int desiredStateUtil = desiredNextState.getUtility();
+//                    beta = Math.min(beta, min_utility);
+//                }
+//
+//            }
+//        }
+//
 //        return desiredNextState;
-//
-//
-//
 //    }
-//    private BoardState min_value(BoardState state, int alpha, int beta, int depth){
-//
-//    	  if (gameOver(state) || depth == MAX_DEPTH) {
-//              state.calculateUtility();
-//              return state;
-//          }
-//          int min_utility = Integer.MAX_VALUE;
-//          BoardState desiredNextState = null;
-//          ArrayList<BoardState> next_moves = getNextMoves(state);
-//          for (BoardState next_state : next_moves) {
-//        	  	nodesExpanded++;
-//  	        	BoardState curr_state = min_value(state, alpha, beta, depth+1);
-//  	        	int utility = curr_state.getUtility();
-//  	        	if (utility < min_utility ) {
-//  	        		min_utility = utility;
-//  	        		desiredNextState = curr_state;
-//  	        		if (depth == 0) desiredNextState = next_state;
-//  	        	}
-//  	        if (utility <= alpha) {
-//  	        		return desiredNextState;
-//  	        }
-//  	        int desiredStateUtil = desiredNextState.getUtility();
-//  	        beta = Math.min(alpha, desiredStateUtil);
-//          }
-//          return desiredNextState;
-//
-//    }
+
+    /*new implementation*/
     private BoardState minimaxAgent(BoardState state, int alpha, int beta, int depth, boolean alphaBeta) {
         if (gameOver(state) || depth == MAX_DEPTH) {
             state.calculateUtility();
@@ -334,24 +392,25 @@ public class WarGame {
             for (BoardState next_state : next_moves) {
                 nodesExpanded++;
                 BoardState curr_state = minimaxAgent(next_state, alpha, beta, depth + 1, alphaBeta);
+                //curr_state.calculateUtility();
+
                 if (curr_state.getUtility() > max_utility) {
-//                    System.out.println(max_utility +":" +curr_state.getUtility());
+///                    System.out.println(max_utility +":" +curr_state.getUtility());
+                    // this masterpiece line change helps us!!!!
                     max_utility = curr_state.getUtility();
                     desiredNextState = curr_state;
                     if (depth == 0) desiredNextState = next_state;
+                    //desiredNextState.calculateUtility();
+                    //max_utility = desiredNextState.getUtility();
                 }
-
-
 
                 if (alphaBeta ){
-                    if (curr_state.getUtility() >= beta) {
+                    if (max_utility >= beta) {
                         return desiredNextState;
                     }
-                    int desiredStateUtil = desiredNextState.getUtility();
-                    alpha = Math.max(alpha, desiredStateUtil);
+                    //int desiredStateUtil = desiredNextState.getUtility();
+                    alpha = Math.max(alpha, max_utility);
                 }
-
-
             }
         }
         else if (state.getPlayer() == Player.GREEN) {
@@ -359,17 +418,20 @@ public class WarGame {
             for (BoardState next_state : next_moves) {
                 nodesExpanded++;
                 BoardState curr_state = minimaxAgent(next_state, alpha, beta, depth + 1,alphaBeta);
+
                 if (curr_state.getUtility() < min_utility) {
                     min_utility = curr_state.getUtility();
                     desiredNextState = curr_state;
                     if (depth == 0) desiredNextState = next_state;
+                    desiredNextState.calculateUtility();
+                    //min_utility = desiredNextState.getUtility();
                 }
                 if (alphaBeta){
-                    if (curr_state.getUtility() <= alpha) {
+                    if (min_utility <= alpha) {
                         return desiredNextState;
                     }
-                    int desiredStateUtil = desiredNextState.getUtility();
-                    beta = Math.min(beta, desiredStateUtil);
+                    //int desiredStateUtil = desiredNextState.getUtility();
+                    beta = Math.min(beta, min_utility);
                 }
 
             }
@@ -388,38 +450,38 @@ public class WarGame {
 
     private BoardState minimaxAgent(BoardState state, boolean alphaBeta) { return minimaxAgent(state, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, alphaBeta );}
 
-//    public void playGame_Alpha(Player start_player){
-//        BoardState current_game_state = new BoardState(start_player);
-//        System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
-//        while (!gameOver(current_game_state)) {
-//            current_game_state = alphaBetaAgent(current_game_state);
-//            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
-//            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
-//            if (gameOver(current_game_state)) break;
-//
-//            System.out.println(current_game_state);
-//            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
-//
-//            current_game_state = alphaBetaAgent(current_game_state);
-//            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
-//            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
-//            System.out.println(current_game_state);
-//            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
-//
-//        }
-//
-//        System.out.println(current_game_state);
-//
-//        Player winner = current_game_state.currentWinner();
-//
-//        if (winner == null)
-//            System.out.println("Game Tied");
-//        else
-//            System.out.println("Winner is " + winner);
-//
-//        System.out.println("Game Over");
-//        System.out.println("NODES EXPANDED"+ nodesExpanded );
-//    }
+    public void playGame_Alpha(Player start_player){
+        BoardState current_game_state = new BoardState(start_player);
+        System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+        while (!gameOver(current_game_state)) {
+            current_game_state = alphaBetaAgent(current_game_state);
+            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
+            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
+            if (gameOver(current_game_state)) break;
+
+            System.out.println(current_game_state);
+            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+
+            current_game_state = alphaBetaAgent(current_game_state);
+            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
+            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
+            System.out.println(current_game_state);
+            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+
+        }
+
+        System.out.println(current_game_state);
+
+        Player winner = current_game_state.currentWinner();
+
+        if (winner == null)
+            System.out.println("Game Tied");
+        else
+            System.out.println("Winner is " + winner);
+
+        System.out.println("Game Over");
+        System.out.println("NODES EXPANDED"+ nodesExpanded );
+    }
 
 
 
@@ -427,7 +489,7 @@ public class WarGame {
 
     public void playGame(Player start_player, boolean alphaBetaP1, boolean alphaBetaP2) {
         chanceBlitz = false;
-        boolean debug = false;
+        boolean debug = true;//false;
         boolean alphaBeta;
         int player1NodeCount = 0;
         int player2NodeCount = 0;
@@ -441,11 +503,8 @@ public class WarGame {
         while (!gameOver(current_game_state)) {
             nodesExpanded = 0;
             long startTime = System.currentTimeMillis();
-            if (alphaBetaP1) {
-                current_game_state = minimaxAgent(current_game_state, true);
-            } else {
-                current_game_state = minimaxAgent(current_game_state, false);
-            }
+            current_game_state = minimaxAgent(current_game_state, alphaBetaP1);
+
             p1Count++;
             long endTime = System.currentTimeMillis();
             timeElapsedPlayer1+=(endTime - startTime);
@@ -463,11 +522,8 @@ public class WarGame {
 
             nodesExpanded = 0;
             startTime = System.currentTimeMillis();
-            if (alphaBetaP2) {
-                current_game_state = minimaxAgent(current_game_state, true);
-            }else{
-                current_game_state = minimaxAgent(current_game_state, false);
-            }
+            current_game_state = minimaxAgent(current_game_state, alphaBetaP2);
+
             p2Count++;
             endTime = System.currentTimeMillis();
             timeElapsedPlayer2+= (endTime - startTime);
@@ -513,26 +569,30 @@ public class WarGame {
     public static void main(String[] args) throws IOException {
 
 //        String file_name = "game_boards/bigest.txt";
-        int DEPTH = 3;
+        int DEPTH = 4;
         ArrayList<String> gameBoards = new ArrayList<String>();
-        gameBoards.add("game_boards/Keren.txt");
-        gameBoards.add("game_boards/Narvik.txt");
-        gameBoards.add("game_boards/Sevastopol.txt");
-        gameBoards.add("game_boards/Smolensk.txt");
-        gameBoards.add("game_boards/Westerplatte.txt");
 
-        for ( String game_board : gameBoards){
+        gameBoards.add("/Users/saikat/IdeaProjects/MP2/src/war_game/game_boards/Keren.txt");
+        String file_name = gameBoards.get(0);
+        //gameBoards.add("game_boards/Keren.txt");
+//        gameBoards.add("game_boards/Narvik.txt");
+//        gameBoards.add("game_boards/Sevastopol.txt");
+//        gameBoards.add("game_boards/Smolensk.txt");
+//        gameBoards.add("game_boards/Westerplatte.txt");
 
-            String file_name = game_board;
-            System.out.println("************************ " + file_name + " *********************************");
+//        for ( String game_board : gameBoards){
+//
+//            String file_name = game_board;
+//            System.out.println("************************ " + file_name + " *********************************");
             WarGame warGame = new WarGame(file_name, DEPTH);
-            warGame.playGame(Player.BLUE,false, false); // true = alphaBeta set
+            //warGame.playGame(Player.BLUE, false, false); // true = alphaBeta set
             warGame.playGame(Player.BLUE,true, true); // true = alphaBeta set
-            warGame.playGame(Player.BLUE,true, false); // true = alphaBeta set
-            warGame.playGame(Player.BLUE,false, true); // true = alphaBeta set
-            System.out.println("************************  DONE  *********************************");
-            System.out.println("");
-        }
+            //warGame.playGame_Alpha(Player.BLUE);
+//            warGame.playGame(Player.BLUE,true, false); // true = alphaBeta set
+//            warGame.playGame(Player.BLUE,false, true); // true = alphaBeta set
+//            System.out.println("************************  DONE  *********************************");
+//            System.out.println("");
+//        }
 
     }
 }
