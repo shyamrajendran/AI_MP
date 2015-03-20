@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.Random;
 
 import javax.xml.soap.Node;
 
@@ -14,8 +15,18 @@ import org.omg.CORBA.INTERNAL;
  * Created by manshu on 3/14/15.
  */
 public class WarGame {
+    public boolean chanceBlitz = true;
 	public int nodesExpanded = 0;
     public int depth4Counter = 0;
+    public long timeElapsedPlayer1 = 0;
+    public long timeElapsedPlayer2 = 0;
+
+
+    public int player1NodeCount = 0;
+
+    public int player2NodeCount = 0;
+
+
     private int[][] board;
     private int board_width, board_height;
     private Player current_player;
@@ -76,9 +87,22 @@ public class WarGame {
         return adjacent_locations;
     }
 
-    private ArrayList<BoardState> getNextMoves(BoardState state) {
-    	if ( true ) {
 
+    private boolean flipCoin() {
+        int max = 2;
+        int min = 0;
+        Random rand = new Random();
+        int randomNum = rand.nextInt((max - min)) + min;
+
+        if (randomNum == 1 ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private ArrayList<BoardState> getNextMoves(BoardState state) {
+        if ( true ) {
 
       Set<Tuple> player1_pieces = state.getPlayerInfo(state.getPlayer());
       Set<Tuple> player2_pieces = state.getPlayerInfo(state.getOtherPlayer());
@@ -121,12 +145,20 @@ public class WarGame {
     	  
     	  for (Tuple blitz_tuple : next_next_tuples) {
     		  if(  player2_pieces.contains(blitz_tuple)){
-    			  to_be_blitzed.add(blitz_tuple);
+
+                  if ( !chanceBlitz  ) {
+                      to_be_blitzed.add(blitz_tuple);
+                  }else {
+                      if (flipCoin()) {
+                          to_be_blitzed.add(blitz_tuple);
+                      }
+                  }
     		  }else if(player1_pieces.contains(blitz_tuple)){
     			  my_adjacent_pieces.add(blitz_tuple);
     		  }
 
     	  }
+
 
     	  if(!my_adjacent_pieces.isEmpty() && !to_be_blitzed.isEmpty() ) {
     		  for(Tuple opposite_tuple : to_be_blitzed){
@@ -304,7 +336,7 @@ public class WarGame {
         if (state.getPlayer() == Player.BLUE) {
             int max_utility = Integer.MIN_VALUE;
             for (BoardState next_state : next_moves) {
-            	nodesExpanded++;
+                nodesExpanded++;
                 BoardState curr_state = minimaxAgent(next_state, alpha, beta, depth + 1, alphaBeta);
                 if (curr_state.getUtility() > max_utility) {
 //                    System.out.println(max_utility +":" +curr_state.getUtility());
@@ -329,7 +361,7 @@ public class WarGame {
         else if (state.getPlayer() == Player.GREEN) {
             int min_utility = Integer.MAX_VALUE;
             for (BoardState next_state : next_moves) {
-            	nodesExpanded++;
+                nodesExpanded++;
                 BoardState curr_state = minimaxAgent(next_state, alpha, beta, depth + 1,alphaBeta);
                 if (curr_state.getUtility() < min_utility) {
                     min_utility = curr_state.getUtility();
@@ -388,21 +420,41 @@ public class WarGame {
     
     
     public void playGame(Player start_player, boolean alphaBeta) {
+        int p1Count = 0;
+        int p2Count = 0;
         BoardState current_game_state = new BoardState(start_player);
         System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
         while (!gameOver(current_game_state)) {
+            nodesExpanded = 0;
+            long startTime = System.currentTimeMillis();
             current_game_state = minimaxAgent(current_game_state, alphaBeta);
+            p1Count++;
+            long endTime = System.currentTimeMillis();
+            timeElapsedPlayer1+=(endTime - startTime);
+            player1NodeCount += nodesExpanded;
+            System.out.println("TIME ELAPSED" + timeElapsedPlayer1);
+
             System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
             System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
             if (gameOver(current_game_state)) break;
 
             System.out.println(current_game_state);
+            System.out.println("NODES EXPANDED" + player1NodeCount + "|"  + timeElapsedPlayer1);
             System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
 
+            nodesExpanded = 0;
+            startTime = System.currentTimeMillis();
             current_game_state = minimaxAgent(current_game_state, alphaBeta);
+            p2Count++;
+            endTime = System.currentTimeMillis();
+            timeElapsedPlayer2+= (endTime - startTime);
+
+            player2NodeCount += nodesExpanded;
+
             System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
             System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
             System.out.println(current_game_state);
+            System.out.println("NODES EXPANDED" + player2NodeCount + "| TIMETAKEN" + timeElapsedPlayer2);
             System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
 
         }
@@ -410,11 +462,18 @@ public class WarGame {
         System.out.println(current_game_state);
 
         Player winner = current_game_state.currentWinner();
+        float avgP1MoveTime = timeElapsedPlayer1 / p1Count ;
+        float avgP2MoveTime = timeElapsedPlayer2 / p2Count ;
+        System.out.println("P1 move count" + p1Count + " p2 move count" + p2Count);
+        System.out.println("p1 move time avg " + avgP1MoveTime + "|" + "p2 move time avg" + avgP2MoveTime);
 
         if (winner == null)
             System.out.println("Game Tied");
         else
             System.out.println("Winner is " + winner);
+
+
+            System.out.println();
       
         System.out.println("Game Over");
         System.out.println("NODES EXPANDED"+ nodesExpanded );
@@ -423,7 +482,8 @@ public class WarGame {
     public static void main(String[] args) throws IOException {
     	 	
         String file_name = "game_boards/keren.txt";
-        WarGame warGame = new WarGame(file_name, 6);
+        WarGame warGame = new WarGame(file_name, 3);
+
         warGame.playGame(Player.BLUE,true); // true = alphaBeta set
 //        warGame.playGame_Alpha(Player.BLUE);
         ;
