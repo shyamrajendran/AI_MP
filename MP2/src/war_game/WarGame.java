@@ -557,8 +557,6 @@ public class WarGame {
 
         System.out.println("P1 SCORE : "+ current_game_state.getPlayerScore(start_player));
         System.out.println("P2 SCORE : "+ current_game_state.getPlayerScore(current_game_state.getOtherPlayer()));
-        System.out.println("P1 Move Count : " + p1Count );
-        System.out.println("P2 Move Count : " + p2Count);
         System.out.println("P1 Average Nodes Expanded per Move : " + player1NodeCount );
         System.out.println("P2 Average Nodes Expanded per Move : " + player2NodeCount );
         System.out.println("P1 Average Move Time : " + avgP1MoveTime);
