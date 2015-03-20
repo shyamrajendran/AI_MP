@@ -25,6 +25,7 @@ public class BoardState {
         state_utility = 0;
     }
 
+
     public BoardState(BoardState state) {
         player_info = new ArrayList<Set<Tuple>>(2);
         player_info.add(new LinkedHashSet<Tuple>());
@@ -101,7 +102,14 @@ public class BoardState {
         else
             return null;
     }
-
+    public Player currentLoser(){
+        if (player_scores[0] < player_scores[1])
+            return Player.values()[0];
+        else if (player_scores[0] > player_scores[1])
+            return Player.values()[1];
+        else
+            return null;
+    }
     @Override
     protected void finalize() throws Throwable {
         Iterator<Tuple> iterator = player_info.get(0).iterator();
@@ -140,11 +148,11 @@ public class BoardState {
 
     			return stringBuffer.toString();
         } else{
-	     
+
         	StringBuffer stringBuffer = new StringBuffer();
-          String[][] multi = new String[7][7];
-          for(int i=0; i<6; i++){
-      	  	for(int j = 0;j<6 ; j++){
+          String[][] multi = new String[WarGame.getBoard_height()][WarGame.getBoard_width()];
+          for(int i=0; i<WarGame.getBoard_height(); i++){
+      	  	for(int j = 0;j<WarGame.getBoard_width() ; j++){
       	  		multi[i][j] = "  ";
       	  	}
           }
@@ -159,13 +167,12 @@ public class BoardState {
 	        	  row = t.getRow();
 	        	  col = t.getCol();
 	        	  multi[row][col] = "G ";
-          }
-         stringBuffer.append("Player = ").append(player).append("\n");
+          }stringBuffer.append("Player = ").append(player).append("\n");
       	stringBuffer.append("Player 1 Score = ").append(player_scores[0]).append("\n");
 		stringBuffer.append("Player 2 Score = ").append(player_scores[1]).append("\n");
-          for(int i=0; i<6; i++){
-        	  	for(int j = 0;j<6 ; j++){
-        	  		stringBuffer.append(multi[i][j]);	
+          for(int i=0; i< WarGame.getBoard_height(); i++){
+        	  	for(int j = 0;j<WarGame.getBoard_width() ; j++){
+        	  		stringBuffer.append(multi[i][j]);
         	  	}
         	  	stringBuffer.append("\n");
           }

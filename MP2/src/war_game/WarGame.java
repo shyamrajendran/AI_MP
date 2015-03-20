@@ -15,23 +15,18 @@ import org.omg.CORBA.INTERNAL;
  * Created by manshu on 3/14/15.
  */
 public class WarGame {
-    public boolean chanceBlitz = true;
-	public int nodesExpanded = 0;
+    public boolean chanceBlitz = false;
+    public int nodesExpanded = 0;
     public int depth4Counter = 0;
-    public long timeElapsedPlayer1 = 0;
-    public long timeElapsedPlayer2 = 0;
-
-
-    public int player1NodeCount = 0;
-
-    public int player2NodeCount = 0;
 
 
     private int[][] board;
-    private int board_width, board_height;
+    public static int board_width, board_height;
+
     private Player current_player;
     private int MAX_DEPTH;
     private static final int DEFAULT_MAX_DEPTH = 3;
+
 
     private void readBoard(String file_name) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new FileReader(file_name));
@@ -61,6 +56,7 @@ public class WarGame {
         board_height = board.length;
         board_width = board[0].length;
     }
+
 
     public WarGame(String file_name) throws IOException {
         readBoard(file_name);
@@ -106,45 +102,45 @@ public class WarGame {
 
       Set<Tuple> player1_pieces = state.getPlayerInfo(state.getPlayer());
       Set<Tuple> player2_pieces = state.getPlayerInfo(state.getOtherPlayer());
-      
-      
+
+
       ArrayList<Tuple> possible_moves = new ArrayList<Tuple>();
-      
+
 //      System.out.println("PLAYER 1 size"+player1_pieces.size());
 //      System.out.println("PLAYER 2 size"+player2_pieces.size());
       for (int i = 0; i < board_height; i++) {
-    	  for (int j = 0; j < board_width; j++) {
-    		  Tuple to_move = new Tuple(i, j);
-    		  if (player1_pieces.contains(to_move) || player2_pieces.contains(to_move)) continue;
-    		  possible_moves.add(to_move);
-    	  }
+          for (int j = 0; j < board_width; j++) {
+              Tuple to_move = new Tuple(i, j);
+              if (player1_pieces.contains(to_move) || player2_pieces.contains(to_move)) continue;
+              possible_moves.add(to_move);
+          }
       }
 //     System.out.println("possible moves length" + possible_moves.size());
 //      System.out.println(possible_moves);
        ArrayList<BoardState> nextBoardStates = new ArrayList<BoardState>(possible_moves.size());
 
       for (Tuple move : possible_moves) {
-    	  //    	  	System.out.println("CHECKING TO MOVE POSSIBILITY"+move);
-    	  BoardState temp = new BoardState(state);
+          //    	  	System.out.println("CHECKING TO MOVE POSSIBILITY"+move);
+          BoardState temp = new BoardState(state);
 
 //    	  Set<Tuple> temp_player1_pieces = temp.getPlayerInfo(state.getPlayer());
 //    	  Set<Tuple> temp_player2_pieces = temp.getPlayerInfo(state.getOtherPlayer());
 
-    	  temp.addLocation(temp.getPlayer(), move);
-    	  
-    	  
-    	  ArrayList<Tuple> next_next_tuples = getAdjacentLocations(move);
-    	  ArrayList<Tuple> to_be_blitzed = new ArrayList<Tuple>();
-    	  ArrayList<Tuple> my_adjacent_pieces = new ArrayList<Tuple>();
+          temp.addLocation(temp.getPlayer(), move);
+
+
+          ArrayList<Tuple> next_next_tuples = getAdjacentLocations(move);
+          ArrayList<Tuple> to_be_blitzed = new ArrayList<Tuple>();
+          ArrayList<Tuple> my_adjacent_pieces = new ArrayList<Tuple>();
 //    	  if (move.getRow() == 1 && move.getCol() == 1){
 ////    		  System.out.println("hi");
 ////    		  System.out.println(temp.getPlayerInfo(temp.getPlayer()));
 ////    		  System.out.println(temp.getPlayerInfo(temp.getOtherPlayer()));
-//    		  
+//
 //    	  }
-    	  
-    	  for (Tuple blitz_tuple : next_next_tuples) {
-    		  if(  player2_pieces.contains(blitz_tuple)){
+
+          for (Tuple blitz_tuple : next_next_tuples) {
+              if(  player2_pieces.contains(blitz_tuple)){
 
                   if ( !chanceBlitz  ) {
                       to_be_blitzed.add(blitz_tuple);
@@ -153,102 +149,102 @@ public class WarGame {
                           to_be_blitzed.add(blitz_tuple);
                       }
                   }
-    		  }else if(player1_pieces.contains(blitz_tuple)){
-    			  my_adjacent_pieces.add(blitz_tuple);
-    		  }
+              }else if(player1_pieces.contains(blitz_tuple)){
+                  my_adjacent_pieces.add(blitz_tuple);
+              }
 
-    	  }
+          }
 
 
-    	  if(!my_adjacent_pieces.isEmpty() && !to_be_blitzed.isEmpty() ) {
-    		  for(Tuple opposite_tuple : to_be_blitzed){
-    			  temp.removeLocation(temp.getOtherPlayer(), opposite_tuple);
-    			  temp.addLocation(temp.getPlayer(), opposite_tuple);
-    			  temp.setPlayerScore(temp.getOtherPlayer(), temp.getPlayerScore(temp.getOtherPlayer()) -
-    					  board[opposite_tuple.getRow()][opposite_tuple.getCol()]);
-    			  temp.setPlayerScore(temp.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
-    					  board[opposite_tuple.getRow()][opposite_tuple.getCol()]);
-    			  
-    			  
-    		  }
-    		  temp.setPlayerScore(temp.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
-    				  board[move.getRow()][move.getCol()]);
+          if(!my_adjacent_pieces.isEmpty() && !to_be_blitzed.isEmpty() ) {
+              for(Tuple opposite_tuple : to_be_blitzed){
+                  temp.removeLocation(temp.getOtherPlayer(), opposite_tuple);
+                  temp.addLocation(temp.getPlayer(), opposite_tuple);
+                  temp.setPlayerScore(temp.getOtherPlayer(), temp.getPlayerScore(temp.getOtherPlayer()) -
+                          board[opposite_tuple.getRow()][opposite_tuple.getCol()]);
+                  temp.setPlayerScore(temp.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
+                          board[opposite_tuple.getRow()][opposite_tuple.getCol()]);
 
-    	  } else{
-    		  temp.setPlayerScore(temp.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
-    				  board[move.getRow()][move.getCol()]);
-    	  }
-	    	  temp.calculateUtility();
-	    	  temp.setPlayer(temp.getOtherPlayer());
-	    	  nextBoardStates.add(temp);
+
+              }
+              temp.setPlayerScore(temp.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
+                      board[move.getRow()][move.getCol()]);
+
+          } else{
+              temp.setPlayerScore(temp.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
+                      board[move.getRow()][move.getCol()]);
+          }
+              temp.calculateUtility();
+              temp.setPlayer(temp.getOtherPlayer());
+              nextBoardStates.add(temp);
       }
 
       return nextBoardStates;
-    	}  else {
+        }  else {
 
-    		Set<Tuple> player1_pieces = state.getPlayerInfo(state.getPlayer());
-    		Set<Tuple> player2_pieces = state.getPlayerInfo(state.getOtherPlayer());
+            Set<Tuple> player1_pieces = state.getPlayerInfo(state.getPlayer());
+            Set<Tuple> player2_pieces = state.getPlayerInfo(state.getOtherPlayer());
 
-    		boolean conquer_possible = false;
-    		ArrayList<Tuple> possible_moves = new ArrayList<Tuple>();
+            boolean conquer_possible = false;
+            ArrayList<Tuple> possible_moves = new ArrayList<Tuple>();
 
-    		for (Tuple tuple : player1_pieces) {
-    			ArrayList<Tuple> next_tuples = getAdjacentLocations(tuple);
-    			for (Tuple t : next_tuples) {
-    				if (player1_pieces.contains(t) || player2_pieces.contains(t)) // location possible ?
-    					continue;
-    				ArrayList<Tuple> next_next_tuples = getAdjacentLocations(t);
-    				for (Tuple t1 : next_next_tuples) {
-    					if (player2_pieces.contains(t1)) {
-    						conquer_possible = true;
-    						possible_moves.add(t);
-    					}
-    				}
-    			}
-    		}
+            for (Tuple tuple : player1_pieces) {
+                ArrayList<Tuple> next_tuples = getAdjacentLocations(tuple);
+                for (Tuple t : next_tuples) {
+                    if (player1_pieces.contains(t) || player2_pieces.contains(t)) // location possible ?
+                        continue;
+                    ArrayList<Tuple> next_next_tuples = getAdjacentLocations(t);
+                    for (Tuple t1 : next_next_tuples) {
+                        if (player2_pieces.contains(t1)) {
+                            conquer_possible = true;
+                            possible_moves.add(t);
+                        }
+                    }
+                }
+            }
 
-    		if (!conquer_possible) {
-    			for (int i = 0; i < board_height; i++) {
-    				for (int j = 0; j < board_width; j++) {
-    					Tuple temp = new Tuple(i, j);
-    					if (player1_pieces.contains(temp) || player2_pieces.contains(temp)) continue;
-    					possible_moves.add(temp);
-    				}
-    			}
-    		}
+            if (!conquer_possible) {
+                for (int i = 0; i < board_height; i++) {
+                    for (int j = 0; j < board_width; j++) {
+                        Tuple temp = new Tuple(i, j);
+                        if (player1_pieces.contains(temp) || player2_pieces.contains(temp)) continue;
+                        possible_moves.add(temp);
+                    }
+                }
+            }
 
-    		ArrayList<BoardState> nextBoardStates = new ArrayList<BoardState>(possible_moves.size());
+            ArrayList<BoardState> nextBoardStates = new ArrayList<BoardState>(possible_moves.size());
 
-    		for (Tuple move : possible_moves) {
-    			BoardState temp = new BoardState(state);
-    			temp.addLocation(state.getPlayer(), move);
+            for (Tuple move : possible_moves) {
+                BoardState temp = new BoardState(state);
+                temp.addLocation(state.getPlayer(), move);
 
-    			temp.setPlayerScore(state.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
-    					board[move.getRow()][move.getCol()]);
+                temp.setPlayerScore(state.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
+                        board[move.getRow()][move.getCol()]);
 
-    			if (conquer_possible) {
-    				ArrayList<Tuple> next_next_tuples = getAdjacentLocations(move);
-    				for (Tuple t1 : next_next_tuples) {
-    					if (player2_pieces.contains(t1)) {
-    						temp.removeLocation(temp.getOtherPlayer(), t1);
-    						temp.addLocation(temp.getPlayer(), t1);
-    						temp.setPlayerScore(temp.getOtherPlayer(), temp.getPlayerScore(temp.getOtherPlayer()) -
-    								board[t1.getRow()][t1.getCol()]);
-    						temp.setPlayerScore(temp.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
-    								board[t1.getRow()][t1.getCol()]);
-    						temp.calculateUtility();
-    					}
-    				}
-    				temp.setPlayer(temp.getOtherPlayer());
-    				nextBoardStates.add(temp);
-    			} else {
-    				temp.setPlayer(temp.getOtherPlayer());
-    				nextBoardStates.add(temp);
-    			}
-    		}
+                if (conquer_possible) {
+                    ArrayList<Tuple> next_next_tuples = getAdjacentLocations(move);
+                    for (Tuple t1 : next_next_tuples) {
+                        if (player2_pieces.contains(t1)) {
+                            temp.removeLocation(temp.getOtherPlayer(), t1);
+                            temp.addLocation(temp.getPlayer(), t1);
+                            temp.setPlayerScore(temp.getOtherPlayer(), temp.getPlayerScore(temp.getOtherPlayer()) -
+                                    board[t1.getRow()][t1.getCol()]);
+                            temp.setPlayerScore(temp.getPlayer(), temp.getPlayerScore(temp.getPlayer()) +
+                                    board[t1.getRow()][t1.getCol()]);
+                            temp.calculateUtility();
+                        }
+                    }
+                    temp.setPlayer(temp.getOtherPlayer());
+                    nextBoardStates.add(temp);
+                } else {
+                    temp.setPlayer(temp.getOtherPlayer());
+                    nextBoardStates.add(temp);
+                }
+            }
 
-    		return nextBoardStates;
-    	}
+            return nextBoardStates;
+        }
     }
 
     private int stateUtility(BoardState state) {
@@ -256,7 +252,7 @@ public class WarGame {
         return state.getScoreDifference();
     }
 
-    
+
 //    private BoardState alphaBetaAgent(BoardState state){
 //
 //    	 int alpha = Integer.MIN_VALUE;
@@ -355,7 +351,7 @@ public class WarGame {
                     alpha = Math.max(alpha, desiredStateUtil);
                 }
 
-                
+
             }
         }
         else if (state.getPlayer() == Player.GREEN) {
@@ -380,6 +376,14 @@ public class WarGame {
         }
 
         return desiredNextState;
+    }
+
+    public static int getBoard_height() {
+        return board_height;
+    }
+
+    public static int getBoard_width() {
+        return board_width;
     }
 
     private BoardState minimaxAgent(BoardState state, boolean alphaBeta) { return minimaxAgent(state, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, alphaBeta );}
@@ -416,88 +420,119 @@ public class WarGame {
 //        System.out.println("Game Over");
 //        System.out.println("NODES EXPANDED"+ nodesExpanded );
 //    }
-    
-    
-    
-    public void playGame(Player start_player, boolean alphaBeta) {
+
+
+
+
+
+    public void playGame(Player start_player, boolean alphaBetaP1, boolean alphaBetaP2) {
+        chanceBlitz = false;
+        boolean debug = false;
+        boolean alphaBeta;
+        int player1NodeCount = 0;
+        int player2NodeCount = 0;
+
         int p1Count = 0;
         int p2Count = 0;
+        long timeElapsedPlayer1 = 0;
+        long timeElapsedPlayer2 = 0;
         BoardState current_game_state = new BoardState(start_player);
         System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
         while (!gameOver(current_game_state)) {
             nodesExpanded = 0;
             long startTime = System.currentTimeMillis();
-            current_game_state = minimaxAgent(current_game_state, alphaBeta);
+            if (alphaBetaP1) {
+                current_game_state = minimaxAgent(current_game_state, true);
+            } else {
+                current_game_state = minimaxAgent(current_game_state, false);
+            }
             p1Count++;
             long endTime = System.currentTimeMillis();
             timeElapsedPlayer1+=(endTime - startTime);
             player1NodeCount += nodesExpanded;
-            System.out.println("TIME ELAPSED" + timeElapsedPlayer1);
-
-            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
-            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
+            if (debug) {
+                System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
+                System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
+            }
             if (gameOver(current_game_state)) break;
-
-            System.out.println(current_game_state);
-            System.out.println("NODES EXPANDED" + player1NodeCount + "|"  + timeElapsedPlayer1);
-            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+            if (debug) {
+                System.out.println(current_game_state);
+                System.out.println("PLAYER 1 : NODES EXPANDED: " + player1NodeCount + "| TIMETAKEN :" + timeElapsedPlayer1);
+                System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+            }
 
             nodesExpanded = 0;
             startTime = System.currentTimeMillis();
-            current_game_state = minimaxAgent(current_game_state, alphaBeta);
+            if (alphaBetaP2) {
+                current_game_state = minimaxAgent(current_game_state, true);
+            }else{
+                current_game_state = minimaxAgent(current_game_state, false);
+            }
             p2Count++;
             endTime = System.currentTimeMillis();
             timeElapsedPlayer2+= (endTime - startTime);
 
             player2NodeCount += nodesExpanded;
-
-            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
-            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
-            System.out.println(current_game_state);
-            System.out.println("NODES EXPANDED" + player2NodeCount + "| TIMETAKEN" + timeElapsedPlayer2);
-            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+            if (debug) {
+                System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
+                System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
+                System.out.println(current_game_state);
+                System.out.println("PLAYER 2 : NODES EXPANDED :" + player2NodeCount + "| TIMETAKEN : " + timeElapsedPlayer2);
+                System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+            }
 
         }
 
         System.out.println(current_game_state);
 
         Player winner = current_game_state.currentWinner();
+        Player loser = current_game_state.currentLoser();
         float avgP1MoveTime = timeElapsedPlayer1 / p1Count ;
         float avgP2MoveTime = timeElapsedPlayer2 / p2Count ;
-        System.out.println("P1 move count" + p1Count + " p2 move count" + p2Count);
-        System.out.println("p1 move time avg " + avgP1MoveTime + "|" + "p2 move time avg" + avgP2MoveTime);
+
+
+
+        System.out.println("P1 SCORE : "+ current_game_state.getPlayerScore(start_player));
+        System.out.println("P2 SCORE : "+ current_game_state.getPlayerScore(current_game_state.getOtherPlayer()));
+        System.out.println("P1 Move Count : " + p1Count );
+        System.out.println("P2 Move Count : " + p2Count);
+        System.out.println("P1 Average Nodes Expanded per Move : " + player1NodeCount );
+        System.out.println("P2 Average Nodes Expanded per Move : " + player2NodeCount );
+        System.out.println("P1 Average Move Time : " + avgP1MoveTime);
+        System.out.println("P2 Average Move Time : " + avgP2MoveTime);
 
         if (winner == null)
             System.out.println("Game Tied");
         else
             System.out.println("Winner is " + winner);
 
-
-            System.out.println();
-      
         System.out.println("Game Over");
-        System.out.println("NODES EXPANDED"+ nodesExpanded );
     }
 
-    public static void main(String[] args) throws IOException {
-    	 	
-        String file_name = "game_boards/keren.txt";
-        WarGame warGame = new WarGame(file_name, 3);
 
-        warGame.playGame(Player.BLUE,true); // true = alphaBeta set
-//        warGame.playGame_Alpha(Player.BLUE);
-        ;
-//        BoardState state = new BoardState(Player.BLUE);
-//
-//        state.addLocation(Player.BLUE, new Tuple(0, 0));
-//        state.addLocation(Player.BLUE, new Tuple(0, 2));
-//        state.addLocation(Player.GREEN, new Tuple(0, 1));
-//        state.addLocation(Player.GREEN, new Tuple(2, 2));
-//
-//        state.setPlayer(state.getOtherPlayer());
-//
-//        ArrayList<BoardState> bs = warGame.getNextMoves(state);
-//        System.out.println(bs);
-//        System.out.println(bs.size());
+    public static void main(String[] args) throws IOException {
+
+//        String file_name = "game_boards/bigest.txt";
+        int DEPTH = 3;
+        ArrayList<String> gameBoards = new ArrayList<String>();
+        gameBoards.add("game_boards/Keren.txt");
+        gameBoards.add("game_boards/Narvik.txt");
+        gameBoards.add("game_boards/Sevastopol.txt");
+        gameBoards.add("game_boards/Smolensk.txt");
+        gameBoards.add("game_boards/Westerplatte.txt");
+
+        for ( String game_board : gameBoards){
+
+            String file_name = game_board;
+            System.out.println("************************ " + file_name + " *********************************");
+            WarGame warGame = new WarGame(file_name, DEPTH);
+            warGame.playGame(Player.BLUE,false, false); // true = alphaBeta set
+            warGame.playGame(Player.BLUE,true, true); // true = alphaBeta set
+            warGame.playGame(Player.BLUE,true, false); // true = alphaBeta set
+            warGame.playGame(Player.BLUE,false, true); // true = alphaBeta set
+            System.out.println("************************  DONE  *********************************");
+            System.out.println("");
+        }
+
     }
 }
