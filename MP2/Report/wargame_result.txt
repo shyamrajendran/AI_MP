@@ -383,3 +383,86 @@ G G G B G G
 
 Game Over
 ************************  DONE  *********************************
+
+
+DEPTH 4
+
+
+ ********************** PLAYING WITH DEPTH 4 ********************
+BOARD : C:\Users\srajend2\workspace\mp2\game_boards\Keren.txt ***
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+1 1 1 1 1 1
+ MATCH TYPE : Minimax Vs Minimax **
+Game Tied
+P1 SCORE : 18
+P2 SCORE : 18
+P1 Average Nodes Expanded per Move : 5822436
+P2 Average Nodes Expanded per Move : 5051568
+P1 Average Move Time : 2219.0
+P2 Average Move Time : 2421.0
+END GAME BOARD STATE :
+B G B G B G
+G B G B G B
+B G B G B G
+G B G B G B
+B G B G B G
+G B G B G B
+
+Game Over
+ MATCH TYPE : AlphaBeta Vs AlphaBeta **
+Game Tied
+P1 SCORE : 18
+P2 SCORE : 18
+P1 Average Nodes Expanded per Move : 32959
+P2 Average Nodes Expanded per Move : 27930
+P1 Average Move Time : 169.0
+P2 Average Move Time : 9.0
+END GAME BOARD STATE :
+B G B G B G
+G B G B G B
+B G B G B G
+G B G B G B
+B G B G B G
+G B G B G B
+
+ MATCH TYPE : Minimax Vs AlphaBeta **
+Game Tied
+P1 SCORE : 18
+P2 SCORE : 18
+P1 Average Nodes Expanded per Move : 5822436
+P2 Average Nodes Expanded per Move : 27930
+P1 Average Move Time : 1958.0
+P2 Average Move Time : 33.0
+END GAME BOARD STATE :
+B G B G B G
+G B G B G B
+B G B G B G
+G B G B G B
+B G B G B G
+G B G B G B	
+
+ MATCH TYPE : AlphaBeta Vs Minimax **
+Game Tied
+P1 SCORE : 18
+P2 SCORE : 18
+P1 Average Nodes Expanded per Move : 32959
+P2 Average Nodes Expanded per Move : 5051568
+P1 Average Move Time : 78.0
+P2 Average Move Time : 1453.0
+END GAME BOARD STATE :
+B G B G B G
+G B G B G B
+B G B G B G
+G B G B G B
+B G B G B G
+G B G B G B
+
+Game Over
+
+
+
+
