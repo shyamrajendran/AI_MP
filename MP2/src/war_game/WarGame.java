@@ -450,38 +450,38 @@ public class WarGame {
 
     private BoardState minimaxAgent(BoardState state, boolean alphaBeta) { return minimaxAgent(state, Integer.MIN_VALUE, Integer.MAX_VALUE, 0, alphaBeta );}
 
-    public void playGame_Alpha(Player start_player){
-        BoardState current_game_state = new BoardState(start_player);
-        System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
-        while (!gameOver(current_game_state)) {
-            current_game_state = alphaBetaAgent(current_game_state);
-            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
-            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
-            if (gameOver(current_game_state)) break;
-
-            System.out.println(current_game_state);
-            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
-
-            current_game_state = alphaBetaAgent(current_game_state);
-            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
-            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
-            System.out.println(current_game_state);
-            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
-
-        }
-
-        System.out.println(current_game_state);
-
-        Player winner = current_game_state.currentWinner();
-
-        if (winner == null)
-            System.out.println("Game Tied");
-        else
-            System.out.println("Winner is " + winner);
-
-        System.out.println("Game Over");
-        System.out.println("NODES EXPANDED"+ nodesExpanded );
-    }
+//    public void playGame_Alpha(Player start_player){
+//        BoardState current_game_state = new BoardState(start_player);
+////        System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+//        while (!gameOver(current_game_state)) {
+//            current_game_state = alphaBetaAgent(current_game_state);
+//            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
+//            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
+//            if (gameOver(current_game_state)) break;
+//
+//            System.out.println(current_game_state);
+//            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+//
+//            current_game_state = alphaBetaAgent(current_game_state);
+//            System.out.println(current_game_state.getPlayerInfo(current_game_state.getPlayer()));
+//            System.out.println(current_game_state.getPlayerInfo(current_game_state.getOtherPlayer()));
+//            System.out.println(current_game_state);
+//            System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+//
+//        }
+//
+//        System.out.println(current_game_state);
+//
+//        Player winner = current_game_state.currentWinner();
+//
+//        if (winner == null)
+//            System.out.println("Game Tied");
+//        else
+//            System.out.println("Winner is " + winner);
+//
+//        System.out.println("Game Over");
+//        System.out.println("NODES EXPANDED"+ nodesExpanded );
+//    }
 
 
 
@@ -489,7 +489,7 @@ public class WarGame {
 
     public void playGame(Player start_player, boolean alphaBetaP1, boolean alphaBetaP2) {
         chanceBlitz = false;
-        boolean debug = true;//false;
+        boolean debug = false;//false;
         boolean alphaBeta;
         int player1NodeCount = 0;
         int player2NodeCount = 0;
@@ -499,7 +499,7 @@ public class WarGame {
         long timeElapsedPlayer1 = 0;
         long timeElapsedPlayer2 = 0;
         BoardState current_game_state = new BoardState(start_player);
-        System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
+//        System.out.println("Player = " + current_game_state.getPlayer() + "'s turn");
         while (!gameOver(current_game_state)) {
             nodesExpanded = 0;
             long startTime = System.currentTimeMillis();
@@ -539,12 +539,19 @@ public class WarGame {
 
         }
 
-        System.out.println(current_game_state);
+
 
         Player winner = current_game_state.currentWinner();
-        Player loser = current_game_state.currentLoser();
+//        Player loser = current_game_state.currentLoser();
         float avgP1MoveTime = timeElapsedPlayer1 / p1Count ;
         float avgP2MoveTime = timeElapsedPlayer2 / p2Count ;
+
+
+
+        if (winner == null)
+            System.out.println("Game Tied");
+        else
+            System.out.println("Winner is " + winner);
 
 
 
@@ -556,11 +563,9 @@ public class WarGame {
         System.out.println("P2 Average Nodes Expanded per Move : " + player2NodeCount );
         System.out.println("P1 Average Move Time : " + avgP1MoveTime);
         System.out.println("P2 Average Move Time : " + avgP2MoveTime);
+        System.out.println("END GAME BOARD STATE : ");
+        System.out.println(current_game_state);
 
-        if (winner == null)
-            System.out.println("Game Tied");
-        else
-            System.out.println("Winner is " + winner);
 
         System.out.println("Game Over");
     }
@@ -568,31 +573,29 @@ public class WarGame {
 
     public static void main(String[] args) throws IOException {
 
-//        String file_name = "game_boards/bigest.txt";
-        int DEPTH = 4;
+        int DEPTH = 3;
         ArrayList<String> gameBoards = new ArrayList<String>();
 
-        gameBoards.add("/Users/saikat/IdeaProjects/MP2/src/war_game/game_boards/Keren.txt");
-        String file_name = gameBoards.get(0);
-        //gameBoards.add("game_boards/Keren.txt");
-//        gameBoards.add("game_boards/Narvik.txt");
-//        gameBoards.add("game_boards/Sevastopol.txt");
-//        gameBoards.add("game_boards/Smolensk.txt");
-//        gameBoards.add("game_boards/Westerplatte.txt");
+        gameBoards.add("game_boards/Keren.txt");
+        gameBoards.add("game_boards/Narvik.txt");
+        gameBoards.add("game_boards/Sevastopol.txt");
+        gameBoards.add("game_boards/Smolensk.txt");
+        gameBoards.add("game_boards/Westerplatte.txt");
 
-//        for ( String game_board : gameBoards){
-//
-//            String file_name = game_board;
-//            System.out.println("************************ " + file_name + " *********************************");
-            WarGame warGame = new WarGame(file_name, DEPTH);
-            //warGame.playGame(Player.BLUE, false, false); // true = alphaBeta set
-            warGame.playGame(Player.BLUE,true, true); // true = alphaBeta set
-            //warGame.playGame_Alpha(Player.BLUE);
-//            warGame.playGame(Player.BLUE,true, false); // true = alphaBeta set
-//            warGame.playGame(Player.BLUE,false, true); // true = alphaBeta set
-//            System.out.println("************************  DONE  *********************************");
-//            System.out.println("");
-//        }
+        for ( String game_board : gameBoards){
+            System.out.println("BOARD : " + game_board + " *********************************");
+            WarGame warGame = new WarGame(game_board, DEPTH);
+            System.out.println(" MATCH TYPE : Minimax Vs Minimax **  ");
+            warGame.playGame(Player.BLUE, false, false); // true = alphaBeta set
+            System.out.println(" MATCH TYPE : AlphaBeta Vs AlphaBeta **  ");
+            warGame.playGame(Player.BLUE, true, true); // true = alphaBeta set
+            System.out.println(" MATCH TYPE : Minimax Vs Minimax **  ");
+            warGame.playGame(Player.BLUE,false, false); // true = alphaBeta set
+            System.out.println(" MATCH TYPE : Minimax Vs AlphaBeta **  ");
+            warGame.playGame(Player.BLUE,false, true); // true = alphaBeta set
+            System.out.println("************************  DONE  *********************************");
+            System.out.println("");
+        }
 
     }
 }
