@@ -539,10 +539,7 @@ public class WarGame {
 
         }
 
-
-
         Player winner = current_game_state.currentWinner();
-//        Player loser = current_game_state.currentLoser();
         float avgP1MoveTime = timeElapsedPlayer1 / p1Count ;
         float avgP2MoveTime = timeElapsedPlayer2 / p2Count ;
 
@@ -573,13 +570,11 @@ public class WarGame {
 
         int DEPTH = 3;
         ArrayList<String> gameBoards = new ArrayList<String>();
-
-        gameBoards.add("/Users/saikat/IdeaProjects/MP2/src/war_game/game_boards/Keren.txt");
-        gameBoards.add("/Users/saikat/IdeaProjects/MP2/src/war_game/game_boards/Narvik.txt");
-        gameBoards.add("/Users/saikat/IdeaProjects/MP2/src/war_game/game_boards/Sevastopol.txt");
-        gameBoards.add("/Users/saikat/IdeaProjects/MP2/src/war_game/game_boards/Smolensk.txt");
-        //gameBoards.add("/Users/saikat/IdeaProjects/MP2/src/war_game/game_boards/Westerplatte.txt");
-
+        gameBoards.add("game_boards/Keren.txt");
+        gameBoards.add("game_boards/Narvik.txt");
+        gameBoards.add("game_boards/Sevastopol.txt");
+        gameBoards.add("game_boards/Smolensk.txt");
+        gameBoards.add("game_boards/Westerplatte.txt");
         for ( String game_board : gameBoards){
             System.out.println("BOARD : " + game_board + " *********************************");
             WarGame warGame = new WarGame(game_board, DEPTH);
@@ -588,10 +583,10 @@ public class WarGame {
 
             System.out.println(" MATCH TYPE : AlphaBeta Vs AlphaBeta **  ");
             warGame.playGame(Player.BLUE, true,DEPTH, true,DEPTH); // true = alphaBeta set
-//
+
             System.out.println(" MATCH TYPE : Minimax Vs AlphaBeta **  ");
             warGame.playGame(Player.BLUE, false,DEPTH, true, DEPTH); // true = alphaBeta set
-////
+
             System.out.println(" MATCH TYPE : AlphaBeta Vs Minimax **  ");
             warGame.playGame(Player.BLUE, true, DEPTH, false, DEPTH); // true = alphaBeta set
 
