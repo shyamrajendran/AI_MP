@@ -108,6 +108,10 @@ public class SpamFilter {
     private void printConfusionMatrix(){
 //        System.out.println("SPAM :");
         System.out.println("CONFUSION MATRIX");
+        System.out.println("************* PREDICTION ********* ");
+        System.out.println("        SPAM    NONSPAM");
+        System.out.println("SPAM    x   x");
+        System.out.println("NONSPAM x   x");
         for (Double d : confusionMatrix.get("spam")){
             System.out.print(d + " ");
         }
