@@ -1,1 +1,4 @@
 1 Chinese:3 Tokyo:1 Japan:1
+0 Beijing:3 Japan:1
+0 Beijing:3 Japan:1
+1 Japan:20 Chinese:1

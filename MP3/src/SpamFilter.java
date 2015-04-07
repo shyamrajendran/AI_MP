@@ -4,6 +4,7 @@ import com.sun.org.apache.xpath.internal.operations.Bool;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -19,6 +20,8 @@ public class SpamFilter {
     private HashMap<String, Double> spamCondProb = new HashMap<String, Double>();
     private HashMap<String, Double> nonSpamCondProb = new HashMap<String, Double>();
     private Set<String> totalUniqueWords = new HashSet<String>();
+    private HashMap<String , ArrayList<Double>> confusionMatrix = new HashMap<String , ArrayList<Double>>(2);
+
     private int uniqSpamWords;
     private int uniqNonSpamWords;
     private int totalSpamWords;
@@ -28,12 +31,12 @@ public class SpamFilter {
 
     public SpamFilter(String fileName) throws IOException {
         readFile(fileName);
-        printMaps(spam_hash);
+//        printMaps(spam_hash);
         spamProb = calcSpamProb(spam_messages, non_spam_message);
         spamCondProb = calcCondProb(spam_hash);
         nonSpamCondProb = calcCondProb(non_spam_hash);
-        System.out.println("SPAMCONDITIONAL PROB");
-        printMapsD(spamCondProb);
+//        System.out.println("SPAMCONDITIONAL PROB");
+//        printMapsD(spamCondProb);
     }
 
 
@@ -51,7 +54,7 @@ public class SpamFilter {
         // get total number of unique words to add here.
         totalWords+=totalUniqueWords.size();
         for(Map.Entry<String, Integer> entry : ha.entrySet()) {
-            System.out.println("ENTRY CALU FOR" + entry.getKey() + "VALUE IS "+ entry.getValue() + "| TOTAL is "+totalWords);
+//            System.out.println("ENTRY CALU FOR" + entry.getKey() + "VALUE IS "+ entry.getValue() + "| TOTAL is "+totalWords);
             tempWordProb = (double ) (entry.getValue()+1)  / totalWords;
             res.put(entry.getKey(), tempWordProb);
         }
@@ -102,25 +105,109 @@ public class SpamFilter {
         return totalProduct;
     }
 
+    private void printConfusionMatrix(){
+//        System.out.println("SPAM :");
+        System.out.println("CONFUSION MATRIX");
+        for (Double d : confusionMatrix.get("spam")){
+            System.out.print(d + " ");
+        }
+//        System.out.println("\nNON SPAM :");
+        System.out.println();
+
+        for (Double d : confusionMatrix.get("nonSpam")){
+            System.out.print(d + " ");
+        }
+    }
     private void predictClassification(String fileName) throws IOException {
         BufferedReader  bufferedReader = new BufferedReader(new FileReader(fileName));
         String in_line;
         String[] temp ;
         double messageSpam ;
+        String test;
+        String prediction;
         double messageNonSpam;
         double res;
+
         while((in_line = bufferedReader.readLine()) != null){
+            ArrayList<Double> matrixDetails = new ArrayList<Double>(2);
             if (in_line.equals("")) continue;
             temp = in_line.split(" ");
-            messageSpam = calcMessProb(Arrays.copyOfRange(temp, 1, temp.length), Boolean.TRUE);
-            messageNonSpam = calcMessProb(Arrays.copyOfRange(temp, 1, temp.length), Boolean.FALSE);
-            if (messageSpam > messageNonSpam ) {
-                System.out.println("GIVEN : "+temp[0]+" | PREDICTION :SPAM\n" + messageNonSpam +" "+messageSpam);
+
+            if ( temp[0].equals("1") ) {
+                test = "spam";
             } else {
-                System.out.println("GIVEN : "+temp[0]+" | PREDICTION :NONSPAM\n" + messageNonSpam+" "+messageSpam);
+                test = "nonSpam";
             }
 
+
+            messageSpam = calcMessProb(Arrays.copyOfRange(temp, 1, temp.length), Boolean.TRUE);
+            messageNonSpam = calcMessProb(Arrays.copyOfRange(temp, 1, temp.length), Boolean.FALSE);
+
+            if (messageSpam > messageNonSpam) {
+                prediction = "spam";
+            } else {
+                prediction = "nonSpam";
+            }
+
+            double t0;
+            double t1;
+            if (test.equals(prediction)){
+                if (test.equals("spam")){
+                    // spam spam
+                    if (! confusionMatrix.containsKey("spam")) {
+                        matrixDetails.add(1.0);
+                        matrixDetails.add(0.0);
+                        confusionMatrix.put("spam",matrixDetails);
+                    } else {
+                        matrixDetails = confusionMatrix.get("spam");
+                        t0 = matrixDetails.get(0);
+                        matrixDetails.set(0, t0 + 1);
+                        confusionMatrix.put("spam",matrixDetails);
+                    }
+                } else{
+                    //not spam not spam
+                    if (! confusionMatrix.containsKey("nonSpam")) {
+                        matrixDetails.add(0.0);
+                        matrixDetails.add(1.0);
+                        confusionMatrix.put("nonSpam",matrixDetails);
+                    } else {
+                        matrixDetails = confusionMatrix.get("nonSpam");
+                        t1 = matrixDetails.get(1);
+                        matrixDetails.set(1,t1+1);
+                        confusionMatrix.put("nonSpam",matrixDetails);
+                    }
+
+                }
+            } else {
+                if (test.equals("spam")){
+                    // spam spam
+                    if (! confusionMatrix.containsKey("spam")) {
+                        matrixDetails.add(0.0);
+                        matrixDetails.add(1.0);
+                        confusionMatrix.put("spam",matrixDetails);
+                    } else {
+                        matrixDetails = confusionMatrix.get("spam");
+                        t1 = matrixDetails.get(1);
+                        matrixDetails.set(1, t1 + 1);
+                        confusionMatrix.put("spam",matrixDetails);
+                    }
+                } else{
+                    //not spam not spam
+                    if (! confusionMatrix.containsKey("nonSpam")) {
+                        matrixDetails.add(1.0);
+                        matrixDetails.add(0.0);
+                        confusionMatrix.put("nonSpam",matrixDetails);
+                    } else {
+                        matrixDetails = confusionMatrix.get("nonSpam");
+                        t0 = matrixDetails.get(0);
+                        matrixDetails.set(0,t0+1);
+                        confusionMatrix.put("nonSpam",matrixDetails);
+                    }
+
+                }
+            }
         }
+        printConfusionMatrix();
 
     }
     private double calcSpamProb(int spam_m, int non_spam_m){
@@ -172,12 +259,11 @@ public class SpamFilter {
     private void readFile(String fileName) throws IOException {
         BufferedReader  bufferedReader = new BufferedReader(new FileReader(fileName));
         String in_line;
-//        ArrayList<String[]> line_words = new ArrayList<String[]>();
         String[] temp ;
         while((in_line = bufferedReader.readLine()) != null){
             if (in_line.equals("")) continue;
             temp = in_line.split(" ");
-            System.out.println("LINE IS "+in_line);
+//            System.out.println("LINE IS "+in_line);
             if ( temp[0].equals("0") ) {
                 non_spam_message++;
                 populateCounts(temp, Boolean.FALSE);
@@ -185,15 +271,14 @@ public class SpamFilter {
                 spam_messages++;
                 populateCounts(temp, Boolean.TRUE);
             }
-//            line_words.add(temp);
         }
 
     }
 
     public static  void main(String[] args) throws IOException {
 //        SpamFilter sf = new SpamFilter("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt");
-        SpamFilter sf = new SpamFilter("/Users/Sam/AI_MP/MP3/spam_detection/sample.txt");
-        String testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email_sample.txt";
+        SpamFilter sf = new SpamFilter("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt");
+        String testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
         sf.predictClassification(testFile);
 
     }
