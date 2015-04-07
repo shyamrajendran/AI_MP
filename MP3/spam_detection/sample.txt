@@ -1,0 +1,4 @@
+1 Chinese:2 Beijing:1
+1 Chinese:2 Shanghai:1
+1 Chinese:1 Macao:1
+0 Tokyo:1 Japan:1 Chinese:1
