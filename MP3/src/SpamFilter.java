@@ -12,6 +12,7 @@ import java.util.*;
  * Created by sam on 4/7/15.
  */
 public class SpamFilter {
+    final private double LAPLACE = 1.0;
     private int spam_messages = 0;
     private int non_spam_message = 0;
     private ArrayList<String[]> spam_words;
@@ -55,7 +56,7 @@ public class SpamFilter {
         totalWords+=totalUniqueWords.size();
         for(Map.Entry<String, Integer> entry : ha.entrySet()) {
 //            System.out.println("ENTRY CALU FOR" + entry.getKey() + "VALUE IS "+ entry.getValue() + "| TOTAL is "+totalWords);
-            tempWordProb = (double ) (entry.getValue()+1)  / totalWords;
+            tempWordProb = (double ) (entry.getValue()+ LAPLACE)  / totalWords;
             res.put(entry.getKey(), tempWordProb);
         }
         return res;
@@ -72,10 +73,10 @@ public class SpamFilter {
         String key;
         if ( type ) {
             totalWords = calcTotalWords(spam_hash);
-            totalProduct = spamProb;
+            totalProduct = Math.log(spamProb);
         } else {
             totalWords = calcTotalWords(non_spam_hash);
-            totalProduct = 1 - spamProb;
+            totalProduct = Math.log(1 - spamProb);
         }
 
 
@@ -83,24 +84,33 @@ public class SpamFilter {
             keyValuePair= st.split(":");
             key = keyValuePair[0];
             val = Integer.parseInt(keyValuePair[1]);
+            if (! totalUniqueWords.contains(key)) continue;
+            // this is as per post https://piazza.com/class/i56vzaj3akl4wf?cid=398
+            // “create dictionaries consisting of all unique words occurring in the training documents”
+            // Apply Laplace smoothing to the words in the dictionary (some words may not appear in certain classes).
+            // For words in the test documents, which doesn't appear in the dictionary, ignore them.
+
             if (type){
                 // indicates spam message has been read. Now check what your classification predicts
                 if (!spamCondProb.containsKey(key)){
-                    wordProb = 1.0 / ( totalWords + totalUniqueWords.size());
+                    wordProb = LAPLACE / ( totalWords + totalUniqueWords.size());
                 } else {
                     wordProb = spamCondProb.get(key);
                 }
 
             } else {
                 if (!nonSpamCondProb.containsKey(key)){
-                    wordProb = 1.0 / ( totalWords + totalUniqueWords.size());
+                    wordProb = LAPLACE / ( totalWords + totalUniqueWords.size());
                 } else {
                     wordProb = nonSpamCondProb.get(key);
                 }
             }
-            wordProb = Math.pow(wordProb,(double) val);
-            totalProduct*=(wordProb);
-            ;
+//            wordProb = Math.pow(wordProb,(double) val);
+//            totalProduct*=(wordProb);
+//            System.out.println("BEFORE"+ totalProduct);
+            totalProduct += Math.log(wordProb) * val;
+            // could have log here ?
+
         }
         return totalProduct;
     }
@@ -204,7 +214,7 @@ public class SpamFilter {
                     } else {
                         matrixDetails = confusionMatrix.get("nonSpam");
                         t0 = matrixDetails.get(0);
-                        matrixDetails.set(0,t0+1);
+                        matrixDetails.set(0,t0 + 1);
                         confusionMatrix.put("nonSpam",matrixDetails);
                     }
 
@@ -280,9 +290,10 @@ public class SpamFilter {
     }
 
     public static  void main(String[] args) throws IOException {
-//        SpamFilter sf = new SpamFilter("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt");
         SpamFilter sf = new SpamFilter("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt");
+//        SpamFilter sf = new SpamFilter("/Users/Sam/AI_MP/MP3/spam_detection/sample.txt");
         String testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
+//        String testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email_sample.txt";
         sf.predictClassification(testFile);
 
     }
