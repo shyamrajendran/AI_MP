@@ -32,12 +32,9 @@ public class SpamFilter {
 
     public SpamFilter(String fileName) throws IOException {
         readFile(fileName);
-//        printMaps(spam_hash);
         spamProb = calcSpamProb(spam_messages, non_spam_message);
         spamCondProb = calcCondProb(spam_hash);
         nonSpamCondProb = calcCondProb(non_spam_hash);
-//        System.out.println("SPAMCONDITIONAL PROB");
-//        printMapsD(spamCondProb);
     }
 
 
@@ -55,7 +52,6 @@ public class SpamFilter {
         // get total number of unique words to add here.
         totalWords+=totalUniqueWords.size();
         for(Map.Entry<String, Integer> entry : ha.entrySet()) {
-//            System.out.println("ENTRY CALU FOR" + entry.getKey() + "VALUE IS "+ entry.getValue() + "| TOTAL is "+totalWords);
             tempWordProb = (double ) (entry.getValue()+ LAPLACE)  / totalWords;
             res.put(entry.getKey(), tempWordProb);
         }
@@ -105,29 +101,23 @@ public class SpamFilter {
                     wordProb = nonSpamCondProb.get(key);
                 }
             }
-//            wordProb = Math.pow(wordProb,(double) val);
-//            totalProduct*=(wordProb);
-//            System.out.println("BEFORE"+ totalProduct);
             totalProduct += Math.log(wordProb) * val;
-            // could have log here ?
 
         }
         return totalProduct;
     }
 
     private void printConfusionMatrix(){
-//        System.out.println("SPAM :");
         System.out.println("CONFUSION MATRIX");
         System.out.println("************* PREDICTION ********* ");
-        System.out.println("        SPAM    NONSPAM");
-        System.out.println("SPAM    x   x");
-        System.out.println("NONSPAM x   x");
+        System.out.println("    SPAM    NONSPAM");
+        System.out.print("SPAM  ");
+
         for (Double d : confusionMatrix.get("spam")){
             System.out.print(d + " ");
         }
-//        System.out.println("\nNON SPAM :");
         System.out.println();
-
+        System.out.print("NONSPAM ");
         for (Double d : confusionMatrix.get("nonSpam")){
             System.out.print(d + " ");
         }
@@ -146,7 +136,6 @@ public class SpamFilter {
             ArrayList<Double> matrixDetails = new ArrayList<Double>(2);
             if (in_line.equals("")) continue;
             temp = in_line.split(" ");
-
             if ( temp[0].equals("1") ) {
                 test = "spam";
             } else {
