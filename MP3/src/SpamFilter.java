@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.text.DecimalFormat;
 import java.util.*;
 
 
@@ -27,6 +28,8 @@ public class SpamFilter {
     private int uniqNonSpamWords;
     private int totalSpamWords;
     private int totalNonSpamWords;
+    private int testDocumentSpamCount = 0 ;
+    private int testDocumentNonSpamCount = 0;
     private double spamProb ;
 
 
@@ -108,18 +111,22 @@ public class SpamFilter {
     }
 
     private void printConfusionMatrix(){
+        DecimalFormat df = new DecimalFormat("#.00");
+
+        System.out.println("TEST SPAM DOCUMENTS READ     :" +testDocumentSpamCount);
+        System.out.println("TEST NON SPAM DOCUMENTS READ :" +testDocumentNonSpamCount);
         System.out.println("CONFUSION MATRIX");
-        System.out.println("************* PREDICTION ********* ");
+        System.out.println("***** PREDICTION SCORES ********* ");
         System.out.println("    SPAM    NONSPAM");
         System.out.print("SPAM  ");
 
         for (Double d : confusionMatrix.get("spam")){
-            System.out.print(d + " ");
+            System.out.print(df.format(d/testDocumentSpamCount*100)+"%" + " ");
         }
         System.out.println();
         System.out.print("NONSPAM ");
         for (Double d : confusionMatrix.get("nonSpam")){
-            System.out.print(d + " ");
+            System.out.print(df.format(d/testDocumentNonSpamCount*100)+"%" + " ");
         }
     }
     private void predictClassification(String fileName) throws IOException {
@@ -138,8 +145,10 @@ public class SpamFilter {
             temp = in_line.split(" ");
             if ( temp[0].equals("1") ) {
                 test = "spam";
+                testDocumentSpamCount++;
             } else {
                 test = "nonSpam";
+                testDocumentNonSpamCount++;
             }
 
 
