@@ -67,7 +67,6 @@ public class SpamFilter {
         String[] keyValuePair = new String[2];
         int val;
         double totalProduct ;
-        int numerator = 0;
         double wordProb = 0.0;
         String key;
         if ( type ) {
