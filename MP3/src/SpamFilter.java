@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class SpamFilter {
     //
-    // DO NOT USE THIS CLASS. NEWSCLASSIFICATION ITSELF WILL DO THE JOB NOW
+    // DO NOT USE THIS CLASS. 
     //
     final private double LAPLACE = 1.0;
     private int spam_messages = 0;
