@@ -169,17 +169,18 @@ public class TextDocClassification {
     }
 
     private  void printConfusionMatrix(){
-        DecimalFormat df = new DecimalFormat("#.00");
         Double accuracy = 0.0;
         Double t ;
-        System.out.println("TOTAL TRAINING DOCUMENTS READ" + totalTestDoc);
-        for(int i=0; i<LABEL_COUNT; i++){
-            System.out.println("TOTAL TEST DOCUMENTS OF TYPE "+i+" READ : "+labelTestOccuranceCount.get(i));
-        }
+        System.out.println("TOTAL TEST DOCUMENTS READ   " + totalTestDoc);
+//        for(int i=0; i<LABEL_COUNT; i++){
+//            System.out.println("TOTAL TEST DOCUMENTS OF TYPE "+i+" READ : "+labelTestOccuranceCount.get(i));
+//        }
+        System.out.println("\n\n*** CONFUSION MATRIX ***\n");
         for (int i = 0 ;i < LABEL_COUNT; i++){
             for (int j = 0 ; j < LABEL_COUNT ; j++){
                 t = confusionMatrix[i][j]/labelTestOccuranceCount.get(i)*100;
-                System.out.print(df.format(t)+"% ");
+                System.out.format("%10.3f", t);
+                System.out.print("%");
                 if ( i == j) {
                     accuracy+=t;
                 }
@@ -187,13 +188,20 @@ public class TextDocClassification {
             System.out.println();
 
         }
-        System.out.println("--------------------------------------------------------");
-        System.out.println("OVERALL ACCURACY :"+df.format(accuracy/LABEL_COUNT)+"%");
-        System.out.println("--------------------------------------------------------");
+        double a = accuracy/LABEL_COUNT;
+        System.out.println("--------------------------");
+        System.out.print("OVERALL ACCURACY :");
+        System.out.format("%5.3f", a);
+        System.out.println("%");
+        System.out.println("---------------------------");
     }
 
     public static  void main(String[] args) throws IOException {
-        System.out.println(" ************** SPAM EMAIL CLASSIFICATION ********** ");
+        System.out.println();
+        System.out.println();
+        System.out.println("**********************************************");
+        System.out.println("        EMAIL CLASSIFICATION                  ");
+        System.out.println("**********************************************");
         TextDocClassification nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt",2);
         String testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
         nf.calcLabelProb();
@@ -202,7 +210,9 @@ public class TextDocClassification {
 
         System.out.println();
         System.out.println();
-        System.out.println(" ************** NEWS CLASSIFICATION ********** ");
+        System.out.println("**********************************************");
+        System.out.println("        NEWS CLASSIFICATION                   ");
+        System.out.println("**********************************************");
         nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/8category/8category.training.txt",8);
         testFile = "/Users/Sam/AI_MP/MP3/8category/8category.testing.txt";
         nf.calcLabelProb();

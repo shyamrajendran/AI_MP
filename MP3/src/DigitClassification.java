@@ -11,9 +11,9 @@ import java.util.*;
  */
 public class DigitClassification {
     private final int ROW = 28;
-    private final double LAPLACE = 1.0;
+    private final double LAPLACE = 4.0;
     private final int COLUMN = 28;
-    private final int TRAINIMAGES = 7;
+    private final int TRAINIMAGES = 5000;
     private final int CLASSLABELS = 10;
     private double[][] confusionMatrix ;
     private int totalTests;
@@ -60,7 +60,7 @@ public class DigitClassification {
         calcClassProb();
         calcPixelCounts();
         calcPixelProb();
-        printPixelProb(testImagePixelProb);
+//        printPixelProb(testImagePixelProb);
     }
 
     private void calcPixelCounts(){
@@ -250,21 +250,24 @@ public class DigitClassification {
 
             char pixel;
             int flag;
+            int raw_index ;
             for(int i=0; i<ROW;i++){
-                String image_line = bufferedReader2.readLine();
-                for(int j=0; i<COLUMN; j++){
+                String image_line = bufferedReader1.readLine();
+                for(int j=0; j<COLUMN; j++){
+                    raw_index = ROW*i+j;
                     pixel = image_line.charAt(j);
                     if (pixel == ' '){
-                        flag = 1;
-                    } else {
                         flag = 0;
+                    } else {
+                        flag = 1;
                     }
-                    testPixels[ROW*i+j] = flag;
+                    testPixels[raw_index] = flag;
                 }
             }
             // finished reading all pixels for the image
             double[] decisionProbs = new double[CLASSLABELS];
             for(int i = 0; i<CLASSLABELS; i++){
+                if (!testImagePixels.containsKey(i)) continue;
                 decisionProbs[i]=calcDecisionProb(testPixels,i);
             }
             // find max and return the index
@@ -301,18 +304,17 @@ public class DigitClassification {
     }
 
     private void printConfusionMatrix(){
-        DecimalFormat df = new DecimalFormat("#.00");
         Double accuracy;
         Double t ;
         accuracy=0.0;
-        System.out.println("TOTAL TRAINING DOCUMENTS READ" + totalTests);
-        for(int i=0; i<CLASSLABELS; i++){
-            System.out.println("TOTAL TEST DOCUMENTS OF TYPE "+i+" READ : "+perClassTotal.get(i));
-        }
+
+        System.out.println("TOTAL TEST DOCUMENTS READ   :" + totalTests);
+        System.out.println("\n\n*** CONFUSION MATRIX ***\n");
         for (int i = 0 ;i < CLASSLABELS; i++){
             for (int j = 0 ; j < CLASSLABELS ; j++){
                 t = confusionMatrix[i][j]/perClassTotal.get(i)*100;
-                System.out.print(df.format(t)+"% ");
+                System.out.format("%10.3f", t);
+                System.out.print("%");
                 if ( i == j) {
                     accuracy+=t;
                 }
@@ -320,9 +322,12 @@ public class DigitClassification {
             System.out.println();
 
         }
-        System.out.println("--------------------------------------------------------");
-        System.out.println("OVERALL ACCURACY :"+df.format(accuracy/CLASSLABELS)+"%");
-        System.out.println("--------------------------------------------------------");
+        double a = accuracy/CLASSLABELS;
+        System.out.println("--------------------------");
+        System.out.print("OVERALL ACCURACY :");
+        System.out.format("%5.3f", a);
+        System.out.println("%");
+        System.out.println("---------------------------");
     }
 
     public static void main(String[] args) throws IOException {
@@ -333,6 +338,11 @@ public class DigitClassification {
 
         DigitClassification dc = new DigitClassification(trainImages, trainLabels);
         dc.predictDigit(testImages, testLabels);
+        System.out.println();
+        System.out.println();
+        System.out.println("**********************************************");
+        System.out.println("        NEWS CLASSIFICATION                   ");
+        System.out.println("**********************************************");
         dc.printConfusionMatrix();
     }
 
