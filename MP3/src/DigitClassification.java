@@ -10,7 +10,7 @@ public class DigitClassification {
     private final int ROW = 28;
     private final double LAPLACE = 1.0;
     private final int COLUMN = 28;
-    private final int TRAINIMAGES = 3;
+    private final int TRAINIMAGES = 7;
     private final int CLASSLABELS = 10;
 
 
@@ -84,12 +84,12 @@ public class DigitClassification {
         HashMap<Integer, int[]> t ;
         int[] tt ;
         int[] tt2 ;
-        HashMap<Integer, Double[]> p = new HashMap<Integer, Double[]>() ;
+//        HashMap<Integer, Double[]> p = new HashMap<Integer, Double[]>() ;
         double foreProb;
         double backProb;
         double foreCount;
         double backCount;
-        Double[] pixelProbs = new Double[2];
+
 
         double[] probData;
         for(int i=0; i<CLASSLABELS; i++){
@@ -98,15 +98,20 @@ public class DigitClassification {
             tt = classPixelCounts.get(i);
             backCount = tt[0];
             foreCount = tt[1];
-
+            HashMap<Integer, Double[]> p = new HashMap<Integer, Double[]>();
             for(Map.Entry<Integer, int[]> entry : t.entrySet()) {
                 //get total count of times foreground or background has come
-                tt2 = entry.getValue();
-                backProb = (double) (tt2[0] + LAPLACE) / (CLASSLABELS + backCount);
-                foreProb = (double) (tt2[1] + LAPLACE) / (CLASSLABELS + foreCount);
+                int index = entry.getKey();
+//                p = new HashMap<Integer, Double[]>() ;
+                tt2 = entry.getValue().clone();
+//                backProb = (double) (tt2[0] + LAPLACE) / (CLASSLABELS + backCount);
+                backProb = (double) (tt2[0] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * 2 );
+                foreProb = (double) (tt2[1] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * 2);
+                Double[] pixelProbs = new Double[2];
                 pixelProbs[0]=backProb;
                 pixelProbs[1]=foreProb;
-                p.put(entry.getKey(),pixelProbs);
+                p.put(index, pixelProbs);
+
             }
             testImagePixelProb.put(i,p);
         }
@@ -136,8 +141,8 @@ public class DigitClassification {
         }
     }
     public static void main(String[] args) throws IOException {
-        String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainimages_sample";
-        String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/trainlabels_sample";
+        String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
+        String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/traininglabels";
         DigitClassification dc = new DigitClassification(trainImages, trainLabels);
     }
 
