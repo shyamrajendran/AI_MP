@@ -1,6 +1,9 @@
+import org.omg.PortableInterceptor.INACTIVE;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -12,6 +15,14 @@ public class DigitClassification {
     private final int COLUMN = 28;
     private final int TRAINIMAGES = 7;
     private final int CLASSLABELS = 10;
+    private double[][] confusionMatrix ;
+    private int totalTests;
+    private HashMap<Integer, Integer> perClassTotal = new HashMap<Integer, Integer>();
+
+
+
+
+
 
 
     // per class count of Fij values Fij  = 28*row+col
@@ -37,7 +48,13 @@ public class DigitClassification {
     private HashMap<Integer, Double> classProb = new HashMap<Integer, Double>();
 
 
+
+
+
+
+
     public DigitClassification(String trainImages, String trainLabels) throws IOException {
+        confusionMatrix = new double[ROW][COLUMN];
         readTrainingFile(trainImages, trainLabels);
         //printMap(testImagePixels);
         calcClassProb();
@@ -117,6 +134,8 @@ public class DigitClassification {
         }
 
     }
+
+
     private void printMap(HashMap<Integer, HashMap<Integer, int[]>> ha){
         HashMap<Integer, int[]> t = new HashMap<Integer, int[]>();
         for(Map.Entry<Integer, HashMap<Integer, int[]>> entry : ha.entrySet()) {
@@ -139,11 +158,6 @@ public class DigitClassification {
                 System.out.println("CLASS: " + entry.getKey() + " PIXELPROB:(" + entry2.getKey() + ") :" + temp[0] +":"+temp[1]);
             }
         }
-    }
-    public static void main(String[] args) throws IOException {
-        String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
-        String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/traininglabels";
-        DigitClassification dc = new DigitClassification(trainImages, trainLabels);
     }
 
     private void readTrainingFile(String images, String labels) throws IOException {
@@ -181,7 +195,6 @@ public class DigitClassification {
             for ( j = 0; j < ROW; j++) {
                 if ((  line = bufferedReader1.readLine()) != null ){
                     int index = 0;
-
                     for (; index < line.length(); index++) {
                         pixelArrayIndex = ROW * j + index;
 //                    pixelCount++;
@@ -216,5 +229,112 @@ public class DigitClassification {
         }
 
     }
+
+    private void predictDigit(String testImages, String testLables) throws IOException{
+        BufferedReader bufferedReader1 = new BufferedReader(new FileReader(testImages));
+        BufferedReader bufferedReader2 = new BufferedReader(new FileReader(testLables));
+        String in_line;
+        while((in_line = bufferedReader2.readLine()) != null){
+
+            if (in_line.equals("")) continue;
+            int[] testPixels = new int[ROW*COLUMN];
+            totalTests++;
+            // for every test label read; read 28 rows of test images ( 28 x28)
+            int testLabel = Integer.parseInt(in_line);
+            if (!perClassTotal.containsKey(testLabel)){
+                perClassTotal.put(testLabel,1);
+            } else {
+                int t = perClassTotal.get(testLabel);
+                perClassTotal.put(testLabel,t+1);
+            }
+
+            char pixel;
+            int flag;
+            for(int i=0; i<ROW;i++){
+                String image_line = bufferedReader2.readLine();
+                for(int j=0; i<COLUMN; j++){
+                    pixel = image_line.charAt(j);
+                    if (pixel == ' '){
+                        flag = 1;
+                    } else {
+                        flag = 0;
+                    }
+                    testPixels[ROW*i+j] = flag;
+                }
+            }
+            // finished reading all pixels for the image
+            double[] decisionProbs = new double[CLASSLABELS];
+            for(int i = 0; i<CLASSLABELS; i++){
+                decisionProbs[i]=calcDecisionProb(testPixels,i);
+            }
+            // find max and return the index
+            int predictedLabel = max(decisionProbs);
+            confusionMatrix[testLabel][predictedLabel]++;
+
+        }
+    }
+
+    private int max(double[] probs){
+        int maxIndex = 0;
+        double maxValue = probs[0];
+        for(int i=0; i<probs.length; i++){
+            if (probs[i]>maxValue){
+                maxIndex = i;
+                maxValue = probs[i];
+            }
+        }
+        return maxIndex;
+    }
+
+    private double calcDecisionProb(int[] pixelValues, int classLabel){
+        double resultProb=0.0 ;
+        resultProb = Math.log(classProbInTest.get(classLabel));
+        HashMap<Integer, Double[]> pixelProb = new HashMap<Integer, Double[]>();
+        pixelProb =  testImagePixelProb.get(classLabel);
+        int index =0;
+        for(int pixel: pixelValues){
+            Double[] d = pixelProb.get(index);
+            resultProb += Math.log(d[pixel]);
+            index++;
+        }
+        return resultProb;
+    }
+
+    private void printConfusionMatrix(){
+        DecimalFormat df = new DecimalFormat("#.00");
+        Double accuracy;
+        Double t ;
+        accuracy=0.0;
+        System.out.println("TOTAL TRAINING DOCUMENTS READ" + totalTests);
+        for(int i=0; i<CLASSLABELS; i++){
+            System.out.println("TOTAL TEST DOCUMENTS OF TYPE "+i+" READ : "+perClassTotal.get(i));
+        }
+        for (int i = 0 ;i < CLASSLABELS; i++){
+            for (int j = 0 ; j < CLASSLABELS ; j++){
+                t = confusionMatrix[i][j]/perClassTotal.get(i)*100;
+                System.out.print(df.format(t)+"% ");
+                if ( i == j) {
+                    accuracy+=t;
+                }
+            }
+            System.out.println();
+
+        }
+        System.out.println("--------------------------------------------------------");
+        System.out.println("OVERALL ACCURACY :"+df.format(accuracy/CLASSLABELS)+"%");
+        System.out.println("--------------------------------------------------------");
+    }
+
+    public static void main(String[] args) throws IOException {
+        String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
+        String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/traininglabels";
+        String testImages = "/Users/Sam/AI_MP/MP3/digitdata/testimages";
+        String testLabels = "/Users/Sam/AI_MP/MP3/digitdata/testlabels";
+
+        DigitClassification dc = new DigitClassification(trainImages, trainLabels);
+        dc.predictDigit(testImages, testLabels);
+        dc.printConfusionMatrix();
+    }
+
 
 }
