@@ -14,8 +14,31 @@ import java.util.*;
  */
 public class SpamFilter {
     //
-    // DO NOT USE THIS CLASS. 
+    // DO NOT USE THIS CLASS.
     //
+    //
+    // DO NOT USE THIS CLASS.
+    //
+    //
+    // DO NOT USE THIS CLASS.
+    //
+    //
+    // DO NOT USE THIS CLASS.
+    //
+
+    //
+    // DO NOT USE THIS CLASS.
+    //
+    //
+    // DO NOT USE THIS CLASS.
+    //
+    //
+    // DO NOT USE THIS CLASS.
+    //
+    //
+    // DO NOT USE THIS CLASS.
+    //
+
     final private double LAPLACE = 1.0;
     private int spam_messages = 0;
     private int non_spam_message = 0;

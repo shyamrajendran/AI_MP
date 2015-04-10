@@ -8,14 +8,29 @@ import java.util.*;
  */
 public class DigitClassification {
     private final int ROW = 28;
+    private final double LAPLACE = 1.0;
     private final int COLUMN = 28;
-    private final int TRAINIMAGES = 1;
+    private final int TRAINIMAGES = 3;
+    private final int CLASSLABELS = 10;
 
 
     // per class count of Fij values Fij  = 28*row+col
 //    private HashMap<Integer, HashMap<Integer, Integer>> testImagePixels = new HashMap<Integer, HashMap<Integer, Integer>>();
     private HashMap<Integer, HashMap<Integer, int[]>> testImagePixels = new HashMap<Integer, HashMap<Integer, int[]>>();
     // CLASS,HASH<index,[foregroundCount,backgroundCount]>
+
+    private HashMap<Integer, Integer> classCountsInTest  = new HashMap<Integer, Integer>();
+    // stores per class number of times its seen in test data
+
+    private HashMap<Integer, Double> classProbInTest  = new HashMap<Integer, Double>();
+    // stores prob of each class in testdata
+
+    private HashMap<Integer, int[]> classPixelCounts = new HashMap<Integer, int[]>();
+    // per class  count of each type of pixels
+
+
+    private HashMap<Integer, HashMap<Integer, Double[]>> testImagePixelProb = new HashMap<Integer, HashMap<Integer, Double[]>>();
+    // stores per class, per pixel prob it being foreground or background
 
 
     // to store per class probabilty
@@ -24,9 +39,79 @@ public class DigitClassification {
 
     public DigitClassification(String trainImages, String trainLabels) throws IOException {
         readTrainingFile(trainImages, trainLabels);
-        printMap(testImagePixels);
+        //printMap(testImagePixels);
+        calcClassProb();
+        calcPixelCounts();
+        calcPixelProb();
+        printPixelProb(testImagePixelProb);
     }
 
+    private void calcPixelCounts(){
+        int t0=0;
+        int t1=0;
+        int[] tt;
+
+        HashMap<Integer, int[]> t;
+        for (int i = 0 ;i < CLASSLABELS ; i++ ){
+            if(!testImagePixels.containsKey(i)) continue;
+            t = testImagePixels.get(i);
+            for(Map.Entry<Integer, int[]> entry : t.entrySet()) {
+                // for each : should run till 784
+                tt = entry.getValue().clone();
+                t0+=tt[0];
+                t1+=tt[1];
+            }
+            int[] ttp = new int[2];
+            ttp[0]=t0;
+            ttp[1]=t1;
+            t0=0;
+            t1=0;
+            classPixelCounts.put(i,ttp);
+        }
+    }
+
+    private void calcClassProb(){
+
+        for (int i = 0 ;i < CLASSLABELS ; i++ ){
+            if(!testImagePixels.containsKey(i)) continue;
+            int t = classCountsInTest.get(i);
+            double d = (double) t / TRAINIMAGES;
+            classProbInTest.put(i,d);
+        }
+    }
+
+    private void calcPixelProb(){
+        HashMap<Integer, int[]> t ;
+        int[] tt ;
+        int[] tt2 ;
+        HashMap<Integer, Double[]> p = new HashMap<Integer, Double[]>() ;
+        double foreProb;
+        double backProb;
+        double foreCount;
+        double backCount;
+        Double[] pixelProbs = new Double[2];
+
+        double[] probData;
+        for(int i=0; i<CLASSLABELS; i++){
+            if (!testImagePixels.containsKey(i)) continue;
+            t = testImagePixels.get(i);
+            tt = classPixelCounts.get(i);
+            backCount = tt[0];
+            foreCount = tt[1];
+
+            for(Map.Entry<Integer, int[]> entry : t.entrySet()) {
+                //get total count of times foreground or background has come
+                tt2 = entry.getValue();
+                backProb = (double) (tt2[0] + LAPLACE) / (CLASSLABELS + backCount);
+                foreProb = (double) (tt2[1] + LAPLACE) / (CLASSLABELS + foreCount);
+                pixelProbs[0]=backProb;
+                pixelProbs[1]=foreProb;
+                p.put(entry.getKey(),pixelProbs);
+            }
+            testImagePixelProb.put(i,p);
+        }
+
+    }
     private void printMap(HashMap<Integer, HashMap<Integer, int[]>> ha){
         HashMap<Integer, int[]> t = new HashMap<Integer, int[]>();
         for(Map.Entry<Integer, HashMap<Integer, int[]>> entry : ha.entrySet()) {
@@ -35,6 +120,18 @@ public class DigitClassification {
             for(Map.Entry<Integer, int[]> entry2 : t.entrySet()){
                 temp = entry2.getValue();
                 System.out.println("CLASS: " + entry.getKey() + " PIXEL:(" + entry2.getKey() + ") :" + temp[0] +":"+temp[1]);
+            }
+        }
+    }
+
+    private void printPixelProb(HashMap<Integer, HashMap<Integer, Double[]>> ha){
+        HashMap<Integer, Double[]> t = new HashMap<Integer, Double[]>();
+        for(Map.Entry<Integer, HashMap<Integer, Double[]>> entry : ha.entrySet()) {
+            t = entry.getValue();
+            Double[] temp;
+            for(Map.Entry<Integer, Double[]> entry2 : t.entrySet()){
+                temp = entry2.getValue();
+                System.out.println("CLASS: " + entry.getKey() + " PIXELPROB:(" + entry2.getKey() + ") :" + temp[0] +":"+temp[1]);
             }
         }
     }
@@ -53,8 +150,14 @@ public class DigitClassification {
 //        int pixelCount = 0 ;
 
         for (int i = 0; i < TRAINIMAGES; i++) {
-            int trainLabel = Integer.parseInt(bufferedReader2.readLine());
 
+            int trainLabel = Integer.parseInt(bufferedReader2.readLine());
+            if (!classCountsInTest.containsKey(trainLabel)){
+                classCountsInTest.put(trainLabel,1);
+            } else {
+                int t = classCountsInTest.get(trainLabel);
+                classCountsInTest.put(trainLabel,t+1);
+            }
 
             if (!testImagePixels.containsKey(trainLabel)) {
                 HashMap<Integer, int[]> t = new HashMap<Integer, int[]>();
@@ -104,7 +207,7 @@ public class DigitClassification {
                     testImagePixels.put(trainLabel, pixelDetails);
                 }
             }
-            printMap(testImagePixels);
+//            printMap(testImagePixels);
         }
 
     }

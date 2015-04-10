@@ -25,15 +25,12 @@ public class TextDocClassification {
     public TextDocClassification(String fileName, int labelCount) throws IOException {
         LABEL_COUNT = labelCount;
         confusionMatrix = new double[LABEL_COUNT][LABEL_COUNT];
-
         readFile(fileName);
-//        System.out.println(labelWordCount.get(3));
         for(int labelType = 0 ;labelType < LABEL_COUNT; labelType++){
             if (!labelWordCount.containsKey(labelType)) continue;
             calcTotalWords(labelType);
             labelProbCount.put(labelType,getProbCounts(labelType));
         }
-//        System.out.println(labelProbCount.get(0));
 
     }
 
@@ -57,7 +54,6 @@ public class TextDocClassification {
             }
 
         }
-//        System.out.println(res);
         return res;
     }
 
@@ -91,7 +87,6 @@ public class TextDocClassification {
             if (in_line.equals("")) continue;
             totalTrainingDoc++;
             temp = in_line.split(" ");
-//            System.out.println("LINE IS "+in_line);
             int labelType = Integer.parseInt(temp[0]);
             if (!labelOccuranceCount.containsKey(labelType)){
                 labelOccuranceCount.put(labelType,1);
@@ -99,31 +94,16 @@ public class TextDocClassification {
                 int t = labelOccuranceCount.get(labelType);
                 labelOccuranceCount.put(labelType,t + 1);
             }
-
-//            if (!labelRawCount.containsKey(labelType)) {
-//                labelRawCount.put(labelType,1);
-//            }else{
-//                int tempc = labelRawCount.get(labelType);
-//                labelRawCount.put(labelType,tempc++);
-//            }
             labelWordCount.put(labelType,getWordCounts(Arrays.copyOfRange(temp, 1, temp.length),labelType));
-
         }
     }
 
     private void calcLabelProb(){
-//        int total = 0;
-//        for (int i = 0 ;i < LABEL_COUNT ; i++ ){
-//            if (!labelWordCount.containsKey(i)) continue;
-//            total+=labelOccuranceCount.get(i);
-//        }
         for (int i = 0 ;i < LABEL_COUNT ; i++ ){
             if (!labelWordCount.containsKey(i)) continue;
             double t = (double) labelOccuranceCount.get(i) / totalTrainingDoc;
             labelOccuranceProb.put(i,t);
         }
-
-
     }
 
     private Double classificationProb(String[] st, Integer labelType){
@@ -151,8 +131,6 @@ public class TextDocClassification {
         return  totalProduct;
     }
     private void predictClassification(String fileName) throws  IOException{
-
-
         BufferedReader  bufferedReader = new BufferedReader(new FileReader(fileName));
         String in_line;
         String[] temp ;
