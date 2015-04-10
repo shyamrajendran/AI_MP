@@ -341,7 +341,7 @@ public class DigitClassification {
         System.out.println();
         System.out.println();
         System.out.println("**********************************************");
-        System.out.println("        NEWS CLASSIFICATION                   ");
+        System.out.println("        DIGIT IMAGE CLASSIFICATIO             ");
         System.out.println("**********************************************");
         dc.printConfusionMatrix();
     }
