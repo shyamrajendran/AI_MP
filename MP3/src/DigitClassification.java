@@ -9,7 +9,7 @@ import java.util.*;
 public class DigitClassification {
     private final int ROW = 28;
     private final int COLUMN = 28;
-    private final int TRAINIMAGES = 5000;
+    private final int TRAINIMAGES = 1;
 
 
     // per class count of Fij values Fij  = 28*row+col
@@ -31,8 +31,10 @@ public class DigitClassification {
         HashMap<Integer, int[]> t = new HashMap<Integer, int[]>();
         for(Map.Entry<Integer, HashMap<Integer, int[]>> entry : ha.entrySet()) {
             t = entry.getValue();
+            int[] temp;
             for(Map.Entry<Integer, int[]> entry2 : t.entrySet()){
-                System.out.println("CLASS: " + entry.getKey() + " PIXEL:(" + entry2.getKey() + ") :" + entry2.getValue());
+                temp = entry2.getValue();
+                System.out.println("CLASS: " + entry.getKey() + " PIXEL:(" + entry2.getKey() + ") :" + temp[0] +":"+temp[1]);
             }
         }
     }
@@ -46,7 +48,7 @@ public class DigitClassification {
         BufferedReader bufferedReader1 = new BufferedReader(new FileReader(images));
         BufferedReader bufferedReader2 = new BufferedReader(new FileReader(labels));
         int temp;
-        int pixelValues[];
+
         char pixel;
 //        int pixelCount = 0 ;
 
@@ -65,36 +67,46 @@ public class DigitClassification {
                 testImagePixels.put(trainLabel, t);
             }
             HashMap<Integer, int[]> pixelDetails = testImagePixels.get(trainLabel);
-            for (int j = 0; j < ROW; j++) {
-                String line = bufferedReader1.readLine();
-                int index;
-                for (index = 0; index < line.length(); index++) {
-//                    pixelCount++;
-                    pixel = line.charAt(index);
-                    pixelValues = pixelDetails.get(ROW * j + index);
-                    if (pixel == ' ') {
-                        temp = pixelValues[0] + 1;
-                    } else {
-                        temp = pixelValues[1] + 1;
-                    }
-                    pixelDetails.put(ROW*j+index, pixelValues);
-                }
+            int j;
+            int pixelArrayIndex;
+            String line;
+            for ( j = 0; j < ROW; j++) {
+                if ((  line = bufferedReader1.readLine()) != null ){
+                    int index = 0;
 
-                while ( index != COLUMN){
-                    pixelValues = pixelDetails.get(index);
-                    pixelValues[0]+=1;
-                    pixelDetails.put(index,pixelValues);
-                    index++;
-                }
+                    for (; index < line.length(); index++) {
+                        pixelArrayIndex = ROW * j + index;
+//                    pixelCount++;
+                        pixel = line.charAt(index);
+                        int pixelValues[];
+                        pixelValues = pixelDetails.get(pixelArrayIndex).clone();
+                        if (pixel == ' ') {
+                            pixelValues[0] = pixelValues[0] + 1;
+                        } else {
+                            pixelValues[1] = pixelValues[1] + 1;
+                        }
+                        pixelDetails.put(pixelArrayIndex, pixelValues);
+                    }
+                    int pixelValues[];
+                    while ( index != COLUMN){
+                        int t = ROW * j + index;
+                        pixelValues = pixelDetails.get(t).clone();
+                        pixelValues[0]+=1;
+                        pixelDetails.put(t,pixelValues);
+                        index++;
+                    }
 //                for(Map.Entry<Integer, int[]> entry : pixelDetails.entrySet()) {
 //                    pixelValues=entry.getValue();
 //                    pixelValues[0]=pixelValues[0]+(COLUMN-pixelCount);
 //                    pixelDetails.put(entry.getKey(), pixelValues);
 //                }
 //                pixelCount = 0;
-                testImagePixels.put(trainLabel, pixelDetails);
+                    testImagePixels.put(trainLabel, pixelDetails);
+                }
             }
+            printMap(testImagePixels);
         }
+
     }
 
 }
