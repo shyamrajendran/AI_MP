@@ -11,63 +11,47 @@ import java.util.*;
  */
 public class DigitClassification {
     private final int ROW = 28;
-    private final double LAPLACE = 4.0;
+    private final double LAPLACE = 4.0; // tune smoothing
     private final int COLUMN = 28;
-    private final int TRAINIMAGES = 5000;
-    private final int CLASSLABELS = 10;
-    private double[][] confusionMatrix ;
-    private int totalTests;
+    private final int TRAINIMAGES = 5000; // set low to debug
+    private final int CLASSLABELS = 10; // 0-9 values
+    private double[][] confusionMatrix ; // final matrix to print and calculate accuracy of prediction
+    private int totalTests; // total test labels read
+
+    // save occurance count of each class type in test data
     private HashMap<Integer, Integer> perClassTotal = new HashMap<Integer, Integer>();
 
-
-
-
-
-
-
     // per class count of Fij values Fij  = 28*row+col
-//    private HashMap<Integer, HashMap<Integer, Integer>> testImagePixels = new HashMap<Integer, HashMap<Integer, Integer>>();
-    private HashMap<Integer, HashMap<Integer, int[]>> testImagePixels = new HashMap<Integer, HashMap<Integer, int[]>>();
     // CLASS,HASH<index,[foregroundCount,backgroundCount]>
+    private HashMap<Integer, HashMap<Integer, int[]>> testImagePixels = new HashMap<Integer, HashMap<Integer, int[]>>();
 
-    private HashMap<Integer, Integer> classCountsInTest  = new HashMap<Integer, Integer>();
     // stores per class number of times its seen in test data
+    private HashMap<Integer, Integer> classCountsInTest  = new HashMap<Integer, Integer>();
 
-    private HashMap<Integer, Double> classProbInTest  = new HashMap<Integer, Double>();
     // stores prob of each class in testdata
+    private HashMap<Integer, Double> classProbInTest  = new HashMap<Integer, Double>();
 
-    private HashMap<Integer, int[]> classPixelCounts = new HashMap<Integer, int[]>();
     // per class  count of each type of pixels
+    private HashMap<Integer, int[]> classPixelCounts = new HashMap<Integer, int[]>();
 
-
-    private HashMap<Integer, HashMap<Integer, Double[]>> testImagePixelProb = new HashMap<Integer, HashMap<Integer, Double[]>>();
     // stores per class, per pixel prob it being foreground or background
-
+    private HashMap<Integer, HashMap<Integer, Double[]>> testImagePixelProb = new HashMap<Integer, HashMap<Integer, Double[]>>();
 
     // to store per class probabilty
     private HashMap<Integer, Double> classProb = new HashMap<Integer, Double>();
 
-
-
-
-
-
-
     public DigitClassification(String trainImages, String trainLabels) throws IOException {
         confusionMatrix = new double[ROW][COLUMN];
         readTrainingFile(trainImages, trainLabels);
-        //printMap(testImagePixels);
         calcClassProb();
         calcPixelCounts();
         calcPixelProb();
-//        printPixelProb(testImagePixelProb);
     }
 
     private void calcPixelCounts(){
         int t0=0;
         int t1=0;
         int[] tt;
-
         HashMap<Integer, int[]> t;
         for (int i = 0 ;i < CLASSLABELS ; i++ ){
             if(!testImagePixels.containsKey(i)) continue;
@@ -88,7 +72,6 @@ public class DigitClassification {
     }
 
     private void calcClassProb(){
-
         for (int i = 0 ;i < CLASSLABELS ; i++ ){
             if(!testImagePixels.containsKey(i)) continue;
             int t = classCountsInTest.get(i);
@@ -101,7 +84,6 @@ public class DigitClassification {
         HashMap<Integer, int[]> t ;
         int[] tt ;
         int[] tt2 ;
-//        HashMap<Integer, Double[]> p = new HashMap<Integer, Double[]>() ;
         double foreProb;
         double backProb;
         double foreCount;
@@ -117,11 +99,8 @@ public class DigitClassification {
             foreCount = tt[1];
             HashMap<Integer, Double[]> p = new HashMap<Integer, Double[]>();
             for(Map.Entry<Integer, int[]> entry : t.entrySet()) {
-                //get total count of times foreground or background has come
                 int index = entry.getKey();
-//                p = new HashMap<Integer, Double[]>() ;
                 tt2 = entry.getValue().clone();
-//                backProb = (double) (tt2[0] + LAPLACE) / (CLASSLABELS + backCount);
                 backProb = (double) (tt2[0] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * 2 );
                 foreProb = (double) (tt2[1] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * 2);
                 Double[] pixelProbs = new Double[2];
@@ -164,10 +143,7 @@ public class DigitClassification {
         BufferedReader bufferedReader1 = new BufferedReader(new FileReader(images));
         BufferedReader bufferedReader2 = new BufferedReader(new FileReader(labels));
         int temp;
-
         char pixel;
-//        int pixelCount = 0 ;
-
         for (int i = 0; i < TRAINIMAGES; i++) {
 
             int trainLabel = Integer.parseInt(bufferedReader2.readLine());
@@ -216,16 +192,9 @@ public class DigitClassification {
                         pixelDetails.put(t,pixelValues);
                         index++;
                     }
-//                for(Map.Entry<Integer, int[]> entry : pixelDetails.entrySet()) {
-//                    pixelValues=entry.getValue();
-//                    pixelValues[0]=pixelValues[0]+(COLUMN-pixelCount);
-//                    pixelDetails.put(entry.getKey(), pixelValues);
-//                }
-//                pixelCount = 0;
                     testImagePixels.put(trainLabel, pixelDetails);
                 }
             }
-//            printMap(testImagePixels);
         }
 
     }
@@ -235,7 +204,6 @@ public class DigitClassification {
         BufferedReader bufferedReader2 = new BufferedReader(new FileReader(testLables));
         String in_line;
         while((in_line = bufferedReader2.readLine()) != null){
-
             if (in_line.equals("")) continue;
             int[] testPixels = new int[ROW*COLUMN];
             totalTests++;
@@ -247,7 +215,6 @@ public class DigitClassification {
                 int t = perClassTotal.get(testLabel);
                 perClassTotal.put(testLabel,t+1);
             }
-
             char pixel;
             int flag;
             int raw_index ;
@@ -264,7 +231,6 @@ public class DigitClassification {
                     testPixels[raw_index] = flag;
                 }
             }
-            // finished reading all pixels for the image
             double[] decisionProbs = new double[CLASSLABELS];
             for(int i = 0; i<CLASSLABELS; i++){
                 if (!testImagePixels.containsKey(i)) continue;
@@ -273,7 +239,6 @@ public class DigitClassification {
             // find max and return the index
             int predictedLabel = max(decisionProbs);
             confusionMatrix[testLabel][predictedLabel]++;
-
         }
     }
 
@@ -307,7 +272,6 @@ public class DigitClassification {
         Double accuracy;
         Double t ;
         accuracy=0.0;
-
         System.out.println("TOTAL TEST DOCUMENTS READ   :" + totalTests);
         System.out.println("\n\n*** CONFUSION MATRIX ***\n");
         for (int i = 0 ;i < CLASSLABELS; i++){
@@ -320,7 +284,6 @@ public class DigitClassification {
                 }
             }
             System.out.println();
-
         }
         double a = accuracy/CLASSLABELS;
         System.out.println("--------------------------");
