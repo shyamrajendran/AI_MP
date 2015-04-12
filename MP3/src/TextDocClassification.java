@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class TextDocClassification {
     public int LABEL_COUNT;
-    private final double LAPLACE = 1.0;
+    private  double LAPLACE;
     private Integer totalTrainingDoc = 0;
     private Set<String> totalUniqueWords = new HashSet<String>();
     private double[][] confusionMatrix ;
@@ -22,8 +22,9 @@ public class TextDocClassification {
     private HashMap<Integer, HashMap<String, Integer>> labelWordCount = new HashMap<Integer, HashMap<String , Integer>>();
     private HashMap<Integer, HashMap<String, Double>> labelProbCount = new HashMap<Integer, HashMap<String , Double>>();
 
-    public TextDocClassification(String fileName, int labelCount) throws IOException {
+    public TextDocClassification(String fileName, int labelCount, int laplace) throws IOException {
         LABEL_COUNT = labelCount;
+        LAPLACE = (double) laplace;
         confusionMatrix = new double[LABEL_COUNT][LABEL_COUNT];
         readFile(fileName);
         for(int labelType = 0 ;labelType < LABEL_COUNT; labelType++){
@@ -168,57 +169,79 @@ public class TextDocClassification {
         }
     }
 
-    private  void printConfusionMatrix(){
+    private  void printConfusionMatrix(boolean debug, int K){
         Double accuracy = 0.0;
         Double t ;
-        System.out.println("TOTAL TEST DOCUMENTS READ   " + totalTestDoc);
+        if (debug){
+            System.out.println("TOTAL TEST DOCUMENTS READ   " + totalTestDoc);
+            System.out.println("\n\n*** CONFUSION MATRIX ***\n");
+        }
 //        for(int i=0; i<LABEL_COUNT; i++){
 //            System.out.println("TOTAL TEST DOCUMENTS OF TYPE "+i+" READ : "+labelTestOccuranceCount.get(i));
 //        }
-        System.out.println("\n\n*** CONFUSION MATRIX ***\n");
         for (int i = 0 ;i < LABEL_COUNT; i++){
             for (int j = 0 ; j < LABEL_COUNT ; j++){
                 t = confusionMatrix[i][j]/labelTestOccuranceCount.get(i)*100;
-                System.out.format("%10.3f", t);
-                System.out.print("%");
+                if (debug){
+                    System.out.format("%10.3f", t);
+                    System.out.print("%");
+                }
                 if ( i == j) {
                     accuracy+=t;
                 }
             }
-            System.out.println();
+            if (debug){
+                System.out.println();
+            }
 
         }
         double a = accuracy/LABEL_COUNT;
-        System.out.println("--------------------------");
-        System.out.print("OVERALL ACCURACY :");
-        System.out.format("%5.3f", a);
-        System.out.println("%");
-        System.out.println("---------------------------");
+        if (debug){
+            System.out.println("--------------------------");
+            System.out.print("OVERALL ACCURACY :");
+            System.out.format("%5.3f", a);
+            System.out.println("%");
+            System.out.println("---------------------------");
+        } else {
+            System.out.print(K+" ,");
+            System.out.format("%5.3f", a);
+            System.out.println();
+        }
+
     }
 
     public static  void main(String[] args) throws IOException {
-        System.out.println();
-        System.out.println();
-        System.out.println("**********************************************");
-        System.out.println("        EMAIL CLASSIFICATION                  ");
-        System.out.println("**********************************************");
-        TextDocClassification nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt",2);
-        String testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
-        nf.calcLabelProb();
-        nf.predictClassification(testFile);
-        nf.printConfusionMatrix();
+        TextDocClassification nf;
+        String testFile;
+//        System.out.println();
+//        System.out.println();
+//        System.out.println("**********************************************");
+//        System.out.println("        EMAIL CLASSIFICATION                  ");
+//        System.out.println("**********************************************");
+//        TextDocClassification nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt",2, 2);
+//        String testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
+////        nf.calcLabelProb();
+//        nf.predictClassification(testFile);
+//        nf.printConfusionMatrix();
 
         System.out.println();
         System.out.println();
         System.out.println("**********************************************");
-        System.out.println("        NEWS CLASSIFICATION                   ");
+        System.out.println("        EMAIL CLASSIFICATION                   ");
         System.out.println("**********************************************");
-        nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/8category/8category.training.txt",8);
-        testFile = "/Users/Sam/AI_MP/MP3/8category/8category.testing.txt";
-        nf.calcLabelProb();
-        nf.predictClassification(testFile);
-        nf.printConfusionMatrix();
 
+        for (int i=1; i<=50; i++){
+            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt",2, i);
+            testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
+            nf.calcLabelProb();
+            nf.predictClassification(testFile);
+            nf.printConfusionMatrix(false, i);
+//            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/8category/8category.training.txt",8,i);
+//            testFile = "/Users/Sam/AI_MP/MP3/8category/8category.testing.txt";
+//            nf.calcLabelProb();
+//            nf.predictClassification(testFile);
+//            nf.printConfusionMatrix(false, (int)i);
+        }
 
     }
 }

@@ -9,13 +9,19 @@ import java.util.*;
  */
 public class DigitClassification {
     private final int aSize = 2;
-
+    private final boolean ML = true;
     private double LAPLACE;// = 4.0; // tune smoothing
 
-    private final int ROW = 70;
-    private final int COLUMN = 60;
-    private final int TRAINIMAGES = 451; // set low to debug
-    private final int CLASSLABELS = 2; // 0-9 values
+//    private final int ROW = 70;
+//    private final int COLUMN = 60;
+//    private final int TRAINIMAGES = 451; // set low to debug
+//    private final int CLASSLABELS = 2; // 0-9 values
+
+    private final int ROW = 28;
+    private final int COLUMN = 28;
+    private final int TRAINIMAGES = 5000; // set low to debug
+    private final int CLASSLABELS = 10
+            ; // 0-9 values
 
     private double[][] confusionMatrix ; // final matrix to print and calculate accuracy of prediction
     private int totalTests; // total test labels read
@@ -33,10 +39,10 @@ public class DigitClassification {
     private HashMap<Integer, HashMap<Integer, int[]>> testImagePixels = new HashMap<Integer, HashMap<Integer, int[]>>();
 
     // stores per class number of times its seen in test data
-    private HashMap<Integer, Integer> classCountsInTest  = new HashMap<Integer, Integer>();
+    private HashMap<Integer, Integer> classCountsInTrain  = new HashMap<Integer, Integer>();
 
     // stores prob of each class in testdata
-    private HashMap<Integer, Double> classProbInTest  = new HashMap<Integer, Double>();
+    private HashMap<Integer, Double> classProbInTrain  = new HashMap<Integer, Double>();
 
     // per class  count of each type of pixels
     private HashMap<Integer, int[]> classPixelCounts = new HashMap<Integer, int[]>();
@@ -93,9 +99,9 @@ public class DigitClassification {
     private void calcClassProb(){
         for (int i = 0 ;i < CLASSLABELS ; i++ ){
             if(!testImagePixels.containsKey(i)) continue;
-            int t = classCountsInTest.get(i);
+            int t = classCountsInTrain.get(i);
             double d = (double) t / TRAINIMAGES;
-            classProbInTest.put(i,d);
+            classProbInTrain.put(i,d);
         }
     }
 
@@ -126,10 +132,10 @@ public class DigitClassification {
             for(Map.Entry<Integer, int[]> entry : t.entrySet()) {
                 int index = entry.getKey();
                 tt2 = entry.getValue().clone();
-                backProb = (double) (tt2[0] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * (aSize));
-                plusProb = (double) (tt2[1] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * (aSize));
+                backProb = (double) (tt2[0] + LAPLACE) / (classCountsInTrain.get(i) + LAPLACE * (aSize));
+                plusProb = (double) (tt2[1] + LAPLACE) / (classCountsInTrain.get(i) + LAPLACE * (aSize));
                 if (aSize>2)
-                    hashProb = (double) (tt2[2] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * (aSize));
+                    hashProb = (double) (tt2[2] + LAPLACE) / (classCountsInTrain.get(i) + LAPLACE * (aSize));
                 Double[] pixelProbs = new Double[aSize];
                 pixelProbs[0]=backProb;
                 pixelProbs[1]=plusProb;
@@ -180,11 +186,11 @@ public class DigitClassification {
         for (int i = 0; i < TRAINIMAGES; i++) {
 
             int trainLabel = Integer.parseInt(bufferedReader2.readLine());
-            if (!classCountsInTest.containsKey(trainLabel)){
-                classCountsInTest.put(trainLabel,1);
+            if (!classCountsInTrain.containsKey(trainLabel)){
+                classCountsInTrain.put(trainLabel, 1);
             } else {
-                int t = classCountsInTest.get(trainLabel);
-                classCountsInTest.put(trainLabel,t+1);
+                int t = classCountsInTrain.get(trainLabel);
+                classCountsInTrain.put(trainLabel, t + 1);
             }
 
             if (!testImagePixels.containsKey(trainLabel)) {
@@ -324,7 +330,9 @@ public class DigitClassification {
     }
     private double calcDecisionProb(int[] pixelValues, int classLabel){
         double resultProb=0.0 ;
-        resultProb = Math.log(classProbInTest.get(classLabel));
+        if (!ML){
+            resultProb = Math.log(classProbInTrain.get(classLabel));
+        }
         HashMap<Integer, Double[]> pixelProb = new HashMap<Integer, Double[]>();
         pixelProb =  testImagePixelProb.get(classLabel);
         int index =0;
@@ -477,26 +485,26 @@ public class DigitClassification {
 
     public static void main(String[] args) throws IOException {
 
-//        String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
-//        String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/traininglabels";
-//        String testImages = "/Users/Sam/AI_MP/MP3/digitdata/testimages";
-//        String testLabels = "/Users/Sam/AI_MP/MP3/digitdata/testlabels";
-//        System.out.println();
-//        System.out.println();
-//        System.out.println("**********************************************");
-//        System.out.println("        DIGIT IMAGE CLASSIFICATION : TERNARY  ");
-//        System.out.println("**********************************************");
-
-
-        String trainImages = "/Users/Sam/AI_MP/MP3/facedata/facedatatrain";
-        String trainLabels = "/Users/Sam/AI_MP/MP3/facedata/facedatatrainlabels";
-        String testImages = "/Users/Sam/AI_MP/MP3/facedata/facedatatest";
-        String testLabels = "/Users/Sam/AI_MP/MP3/facedata/facedatatestlabels";
+        String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
+        String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/traininglabels";
+        String testImages = "/Users/Sam/AI_MP/MP3/digitdata/testimages";
+        String testLabels = "/Users/Sam/AI_MP/MP3/digitdata/testlabels";
         System.out.println();
         System.out.println();
         System.out.println("**********************************************");
-        System.out.println("        FACE IMAGE CLASSIFICATION             ");
+        System.out.println("        DIGIT IMAGE CLASSIFICATION : TERNARY  ");
         System.out.println("**********************************************");
+
+
+//        String trainImages = "/Users/Sam/AI_MP/MP3/facedata/facedatatrain";
+//        String trainLabels = "/Users/Sam/AI_MP/MP3/facedata/facedatatrainlabels";
+//        String testImages = "/Users/Sam/AI_MP/MP3/facedata/facedatatest";
+//        String testLabels = "/Users/Sam/AI_MP/MP3/facedata/facedatatestlabels";
+//        System.out.println();
+//        System.out.println();
+//        System.out.println("**********************************************");
+//        System.out.println("        FACE IMAGE CLASSIFICATION             ");
+//        System.out.println("**********************************************");
 
 
 
