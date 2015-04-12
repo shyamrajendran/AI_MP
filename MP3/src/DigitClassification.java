@@ -8,8 +8,9 @@ import java.util.*;
  * Created by sam on 4/9/15.
  */
 public class DigitClassification {
+    private final int aSize = 3;
     private final int ROW = 28;
-    private final double LAPLACE = 4.0; // tune smoothing
+    private double LAPLACE;// = 4.0; // tune smoothing
     private final int COLUMN = 28;
     private final int TRAINIMAGES = 5000; // set low to debug
     private final int CLASSLABELS = 10; // 0-9 values
@@ -43,7 +44,9 @@ public class DigitClassification {
     // to store per class probabilty
     private HashMap<Integer, Double> classProb = new HashMap<Integer, Double>();
 
-    public DigitClassification(String trainImages, String trainLabels) throws IOException {
+    public DigitClassification(String trainImages, String trainLabels, double laplace) throws IOException {
+
+        LAPLACE = laplace;
         confusionMatrix = new double[CLASSLABELS][CLASSLABELS];
         readTrainingFile(trainImages, trainLabels);
         calcClassProb();
@@ -54,6 +57,8 @@ public class DigitClassification {
     private void calcPixelCounts(){
         int t0=0;
         int t1=0;
+        int t2=0;
+
         int[] tt;
         HashMap<Integer, int[]> t;
         for (int i = 0 ;i < CLASSLABELS ; i++ ){
@@ -64,12 +69,20 @@ public class DigitClassification {
                 tt = entry.getValue().clone();
                 t0+=tt[0];
                 t1+=tt[1];
+                if (aSize > 2){
+                    t2+=tt[2];
+                }
             }
-            int[] ttp = new int[2];
+            int[] ttp = new int[aSize];
             ttp[0]=t0;
             ttp[1]=t1;
+            if (aSize > 2){
+                ttp[2]=t2;
+            }
+
             t0=0;
             t1=0;
+            t2=0;
             classPixelCounts.put(i,ttp);
         }
     }
@@ -87,11 +100,14 @@ public class DigitClassification {
         HashMap<Integer, int[]> t ;
         int[] tt ;
         int[] tt2 ;
-        double foreProb;
-        double backProb;
-        double foreCount;
-        double backCount;
 
+        double backProb;
+        double plusProb;
+        double hashProb;
+
+        double plusCount;
+        double backCount;
+        double hashCount;
 
         double[] probData;
         for(int i=0; i<CLASSLABELS; i++){
@@ -99,17 +115,23 @@ public class DigitClassification {
             t = testImagePixels.get(i);
             tt = classPixelCounts.get(i);
             backCount = tt[0];
-            foreCount = tt[1];
+            plusCount = tt[1];
+            if (aSize>2)
+                hashCount = tt[2];
+
             HashMap<Integer, Double[]> p = new HashMap<Integer, Double[]>();
             for(Map.Entry<Integer, int[]> entry : t.entrySet()) {
-
                 int index = entry.getKey();
                 tt2 = entry.getValue().clone();
-                backProb = (double) (tt2[0] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * 2 );
-                foreProb = (double) (tt2[1] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * 2);
-                Double[] pixelProbs = new Double[2];
+                backProb = (double) (tt2[0] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * (aSize));
+                plusProb = (double) (tt2[1] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * (aSize));
+                if (aSize>2)
+                    hashProb = (double) (tt2[2] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * (aSize));
+                Double[] pixelProbs = new Double[aSize];
                 pixelProbs[0]=backProb;
-                pixelProbs[1]=foreProb;
+                pixelProbs[1]=plusProb;
+                if (aSize>2)
+                    pixelProbs[2]=hashProb;
                 p.put(index, pixelProbs);
 
             }
@@ -138,7 +160,11 @@ public class DigitClassification {
             Double[] temp;
             for(Map.Entry<Integer, Double[]> entry2 : t.entrySet()){
                 temp = entry2.getValue();
-                System.out.println("CLASS: " + entry.getKey() + " PIXELPROB:(" + entry2.getKey() + ") :" + temp[0] +":"+temp[1]);
+
+                if (aSize > 2)
+                    System.out.println("CLASS: " + entry.getKey() + " PIXELPROB:(" + entry2.getKey() + ") :" + temp[0] +":"+temp[1]+":"+temp[2]);
+                else
+                    System.out.println("CLASS: " + entry.getKey() + " PIXELPROB:(" + entry2.getKey() + ") :" + temp[0] +":"+temp[1]);
             }
         }
     }
@@ -160,7 +186,7 @@ public class DigitClassification {
 
             if (!testImagePixels.containsKey(trainLabel)) {
                 HashMap<Integer, int[]> t = new HashMap<Integer, int[]>();
-                int[] p = new int[2];// making all counts 0
+                int[] p = new int[aSize];// making all counts 0
                 for (int r = 0; r < ROW; r++) {
                     for (int c = 0; c < COLUMN; c++) {
                         t.put(ROW * r + c, p);
@@ -179,16 +205,28 @@ public class DigitClassification {
                         pixelArrayIndex = ROW * j + index;
 //                    pixelCount++;
                         pixel = line.charAt(index);
-                        int pixelValues[];
+                        int pixelValues[] = new int[aSize];
                         pixelValues = pixelDetails.get(pixelArrayIndex).clone();
-                        if (pixel == ' ') {
-                            pixelValues[0] = pixelValues[0] + 1;
+                        if (aSize > 2) {
+                            if (pixel == ' ') {
+                                pixelValues[0] = pixelValues[0] + 1;
+                            } else if (pixel == '+') {
+                                pixelValues[1] = pixelValues[1] + 1;
+                            } else {
+                                pixelValues[2] = pixelValues[2] + 1;
+                            }
                         } else {
-                            pixelValues[1] = pixelValues[1] + 1;
+                            if (pixel == ' ') {
+                                pixelValues[0] = pixelValues[0] + 1;
+                            } else {
+                                pixelValues[1] = pixelValues[1] + 1;
+                            }
                         }
+
+
                         pixelDetails.put(pixelArrayIndex, pixelValues);
                     }
-                    int pixelValues[];
+                    int pixelValues[] = new int[aSize];
                     while ( index != COLUMN){
                         int t = ROW * j + index;
                         pixelValues = pixelDetails.get(t).clone();
@@ -230,8 +268,10 @@ public class DigitClassification {
                     pixel = image_line.charAt(j);
                     if (pixel == ' '){
                         flag = 0;
-                    } else {
+                    } else if (pixel == '+') {
                         flag = 1;
+                    } else {
+                        flag = 2;
                     }
                     testPixels[raw_index] = flag;
                 }
@@ -284,7 +324,7 @@ public class DigitClassification {
         }
         return resultProb;
     }
-    private void findHighConfusion(double[][] confusionMatrix){
+    private void findHighConfusion(){
 //        int[] classIndex = new int[10];
         for(int i=0; i<confusionMatrix.length; i++){
                 classIndex[i]=max(confusionMatrix[i],i);
@@ -301,14 +341,14 @@ public class DigitClassification {
         for(Map.Entry<Integer, Double[]> entry : ha.entrySet()){
             writer1.write(Double.toString(entry.getValue()[1]));
             writer1.write(" ");
-            if (entry.getKey() == 27 ){
+            if (entry.getKey() == (ROW-1) ){
                 writer1.write("\n");
             }
         }
 
 
     }
-    private void findOdds(int[] classIndex) throws IOException {
+    private void findOdds() throws IOException {
         //odds(Fij=1, c1, c2) = P(Fij=1 | c1) / P(Fij=1 | c2).
         int c1;
         int c2;
@@ -385,54 +425,77 @@ public class DigitClassification {
                 writer.close();
             }
     }
-    private void printConfusionMatrix() throws IOException {
+    private void printConfusionMatrix(Boolean debug) throws IOException {
         Double accuracy;
         Double t ;
         accuracy=0.0;
-        System.out.println("TOTAL TEST DOCUMENTS READ   :" + totalTests);
-        System.out.println("\n\n*** CONFUSION MATRIX ***\n");
+        if (debug) {
+            System.out.println("TOTAL TEST DOCUMENTS READ   :" + totalTests);
+            System.out.println("\n\n*** CONFUSION MATRIX ***\n");
+        }
         for (int i = 0 ;i < CLASSLABELS; i++){
             for (int j = 0 ; j < CLASSLABELS ; j++){
                 t = confusionMatrix[i][j]/perClassTotal.get(i)*100;
-                System.out.format("%10.3f", t);
-                System.out.print("%");
+                if (debug){
+                    System.out.format("%10.3f", t);
+                    System.out.print("%");
+                }
                 if ( i == j) {
                     accuracy+=t;
                 }
             }
-            System.out.println();
+            if (debug){
+                System.out.println();
+            }
         }
         double a = accuracy/CLASSLABELS;
-        System.out.println("--------------------------");
-        System.out.print("OVERALL ACCURACY :");
-        System.out.format("%5.3f", a);
-        System.out.println("%");
-        System.out.println("---------------------------");
-        findHighConfusion(confusionMatrix);
-        findOdds(classIndex);
+
+        if (debug) {
+            System.out.println("--------------------------");
+            System.out.print("OVERALL ACCURACY :");
+            System.out.format("%5.3f", a);
+            System.out.println("%");
+            System.out.println("---------------------------");
+        } else {
+            System.out.println(LAPLACE+","+a);
+        }
+
 
     }
 
 
     public static void main(String[] args) throws IOException {
+
         String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
         String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/traininglabels";
         String testImages = "/Users/Sam/AI_MP/MP3/digitdata/testimages";
         String testLabels = "/Users/Sam/AI_MP/MP3/digitdata/testlabels";
-
-        DigitClassification dc = new DigitClassification(trainImages, trainLabels);
-        dc.predictDigit(testImages, testLabels);
         System.out.println();
         System.out.println();
         System.out.println("**********************************************");
-        System.out.println("        DIGIT IMAGE CLASSIFICATIO             ");
+        System.out.println("        DIGIT IMAGE CLASSIFICATION            ");
         System.out.println("**********************************************");
-        dc.printConfusionMatrix();
 
-//        dc.writeOddsMatrix(Boolean.FALSE);
-        dc.writeOddsMatrix(Boolean.TRUE);
-        // pass true for tableau import ; false for matrix
+        for(int i=1;i<=1;i++){
+            DigitClassification dc = new DigitClassification(trainImages, trainLabels,(double)i);
+            dc.predictDigit(testImages, testLabels);
+            dc.printConfusionMatrix(false);
+            dc.findHighConfusion();
+            dc.findOdds();
+//          dc.writeOddsMatrix(false);
+        }
+
+        System.out.println();
+        System.out.println();
+        System.out.println("**********************************************");
+        System.out.println("        DIGIT IMAGE CLASSIFICATION : TERNARY  ");
+        System.out.println("**********************************************");
+
+        for(int i=1;i<=50;i++){
+            DigitClassification dc = new DigitClassification(trainImages, trainLabels,(double)i);
+            dc.predictDigit(testImages, testLabels);
+            dc.printConfusionMatrix(false);
+        }
+//
     }
-
-
 }
