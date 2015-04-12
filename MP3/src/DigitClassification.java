@@ -354,7 +354,7 @@ public class DigitClassification {
 
     private void writeOddsMatrix(boolean flag) throws IOException{
         String fileName;
-        for(int c=0;c<2;c++){
+        for(int c=0;c<CLASSLABELS;c++){
                 File file = new File("/tmp/oddsMatrix"+c+".csv");
                 file.createNewFile();
                 FileWriter writer = new FileWriter(file);
@@ -412,6 +412,7 @@ public class DigitClassification {
         findOdds(classIndex);
 
     }
+
 
     public static void main(String[] args) throws IOException {
         String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
