@@ -17,7 +17,9 @@ public class DigitClassification {
     private int totalTests; // total test labels read
     private int[] classIndex = new int[10];
 
-    private HashMap<Integer, HashMap<Integer, Double>> pixelOddsPerClass = new HashMap<Integer, HashMap<Integer, Double>>();
+    private HashMap<Integer, HashMap<Integer, Double[]>> pixelOddsPerClass = new HashMap<Integer, HashMap<Integer, Double[]>>();
+
+
 
     // save occurance count of each class type in test data
     private HashMap<Integer, Integer> perClassTotal = new HashMap<Integer, Integer>();
@@ -291,7 +293,22 @@ public class DigitClassification {
 //        return classIndex
     }
 
-    private void findOdds(int[] classIndex){
+    private void printClassForeGroundProb(HashMap<Integer, Double[]> ha, String str, int classLabel) throws IOException {
+        File file1 = new File("/tmp/oddsMatrix"+classLabel+str+".csv");
+        file1.createNewFile();
+        FileWriter writer1 = new FileWriter(file1);
+
+        for(Map.Entry<Integer, Double[]> entry : ha.entrySet()){
+            writer1.write(Double.toString(entry.getValue()[1]));
+            writer1.write(" ");
+            if (entry.getKey() == 27 ){
+                writer1.write("\n");
+            }
+        }
+
+
+    }
+    private void findOdds(int[] classIndex) throws IOException {
         //odds(Fij=1, c1, c2) = P(Fij=1 | c1) / P(Fij=1 | c2).
         int c1;
         int c2;
@@ -301,23 +318,29 @@ public class DigitClassification {
         HashMap<Integer, Double[]> pixelProbC1 = new HashMap<Integer, Double[]>();
         HashMap<Integer, Double[]> pixelProbC2 = new HashMap<Integer, Double[]>();
 //        for(int index = 0;index< classIndex.length;index++){
+
         for(int index = 0;index< classIndex.length;index++){
-            HashMap<Integer, Double> pixelOdds = new HashMap<Integer, Double>();
+            HashMap<Integer, Double[]> pixelOdds = new HashMap<Integer, Double[]>();
             c1=index;
             c2=classIndex[index];
             pixelProbC1 =  testImagePixelProb.get(c1);
             pixelProbC2 =  testImagePixelProb.get(c2);
+
+//            printClassForeGroundProb(pixelProbC1, "numerator", index);
+//            printClassForeGroundProb(pixelProbC2, "denominator", index);
             for (int i=0;i<ROW*COLUMN; i++){
+                Double[] vl = new Double[3];
                 // for each row column index
                 p1=pixelProbC1.get(i)[1];
                 p2=pixelProbC2.get(i)[1];
                 oddsProb = p1/p2;
-                pixelOdds.put(i,oddsProb);
+                vl[0]=p1;
+                vl[1]=p2;
+                vl[2]=oddsProb;
+                pixelOdds.put(i,vl);
             }
             pixelOddsPerClass.put(index,pixelOdds);
         }
-
-
     }
 
     private void printOdds(HashMap<Integer, Double>  ha){
@@ -331,26 +354,27 @@ public class DigitClassification {
 
     private void writeOddsMatrix(boolean flag) throws IOException{
         String fileName;
-        for(int c=0;c<CLASSLABELS;c++){
+        for(int c=0;c<2;c++){
                 File file = new File("/tmp/oddsMatrix"+c+".csv");
                 file.createNewFile();
                 FileWriter writer = new FileWriter(file);
-                HashMap<Integer, Double> classOdds = new HashMap<Integer, Double>();
+                HashMap<Integer, Double[]> classOdds = new HashMap<Integer, Double[]>();
                 classOdds =  pixelOddsPerClass.get(c);
-                double t ;
+
                 for(int i=0; i<ROW;i++){
                     for(int j=0;j<COLUMN;j++){
+                        Double t[] = new Double[3] ;
                         t = classOdds.get(i * ROW+j);
                         if ( flag ) {
-                            writer.write(Integer.toString(i));
+                            writer.write(Double.toString(t[0]));
                             writer.write(",");
-                            writer.write(Integer.toString(j));
+                            writer.write(Double.toString(t[1]));
                             writer.write(",");
-                            writer.write(Double.toString(t));
+                            writer.write(Double.toString(t[2]));
                             writer.write("\n");
                         } else {
-                            writer.write(Double.toString(t));
-                            writer.write(" ");
+//                            writer.write(Double.toString(t));
+//                            writer.write(" ");
                         }
                     }
                     if ( !flag ) {
@@ -361,7 +385,7 @@ public class DigitClassification {
                 writer.close();
             }
     }
-    private void printConfusionMatrix(){
+    private void printConfusionMatrix() throws IOException {
         Double accuracy;
         Double t ;
         accuracy=0.0;
