@@ -8,15 +8,18 @@ import java.util.*;
  * Created by sam on 4/9/15.
  */
 public class DigitClassification {
-    private final int aSize = 3;
-    private final int ROW = 28;
+    private final int aSize = 2;
+
     private double LAPLACE;// = 4.0; // tune smoothing
-    private final int COLUMN = 28;
-    private final int TRAINIMAGES = 5000; // set low to debug
-    private final int CLASSLABELS = 10; // 0-9 values
+
+    private final int ROW = 70;
+    private final int COLUMN = 60;
+    private final int TRAINIMAGES = 451; // set low to debug
+    private final int CLASSLABELS = 2; // 0-9 values
+
     private double[][] confusionMatrix ; // final matrix to print and calculate accuracy of prediction
     private int totalTests; // total test labels read
-    private int[] classIndex = new int[10];
+    private int[] classIndex = new int[CLASSLABELS];
 
     private HashMap<Integer, HashMap<Integer, Double[]>> pixelOddsPerClass = new HashMap<Integer, HashMap<Integer, Double[]>>();
 
@@ -189,7 +192,7 @@ public class DigitClassification {
                 int[] p = new int[aSize];// making all counts 0
                 for (int r = 0; r < ROW; r++) {
                     for (int c = 0; c < COLUMN; c++) {
-                        t.put(ROW * r + c, p);
+                        t.put(COLUMN * r + c, p);
                     }
                 }
                 testImagePixels.put(trainLabel, t);
@@ -202,7 +205,7 @@ public class DigitClassification {
                 if ((  line = bufferedReader1.readLine()) != null ){
                     int index = 0;
                     for (; index < line.length(); index++) {
-                        pixelArrayIndex = ROW * j + index;
+                        pixelArrayIndex = COLUMN * j + index;
 //                    pixelCount++;
                         pixel = line.charAt(index);
                         int pixelValues[] = new int[aSize];
@@ -228,7 +231,7 @@ public class DigitClassification {
                     }
                     int pixelValues[] = new int[aSize];
                     while ( index != COLUMN){
-                        int t = ROW * j + index;
+                        int t = COLUMN * j + index;
                         pixelValues = pixelDetails.get(t).clone();
                         pixelValues[0]+=1;
                         pixelDetails.put(t,pixelValues);
@@ -264,14 +267,22 @@ public class DigitClassification {
             for(int i=0; i<ROW;i++){
                 String image_line = bufferedReader1.readLine();
                 for(int j=0; j<COLUMN; j++){
-                    raw_index = ROW*i+j;
+                    raw_index = COLUMN*i+j;
                     pixel = image_line.charAt(j);
-                    if (pixel == ' '){
-                        flag = 0;
-                    } else if (pixel == '+') {
-                        flag = 1;
+                    if (aSize > 2){
+                        if (pixel == ' '){
+                            flag = 0;
+                        } else if (pixel == '+') {
+                            flag = 1;
+                        } else {
+                            flag = 2;
+                        }
                     } else {
-                        flag = 2;
+                        if (pixel == ' '){
+                            flag = 0;
+                        } else  {
+                            flag = 1;
+                        }
                     }
                     testPixels[raw_index] = flag;
                 }
@@ -466,35 +477,33 @@ public class DigitClassification {
 
     public static void main(String[] args) throws IOException {
 
-        String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
-        String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/traininglabels";
-        String testImages = "/Users/Sam/AI_MP/MP3/digitdata/testimages";
-        String testLabels = "/Users/Sam/AI_MP/MP3/digitdata/testlabels";
+//        String trainImages = "/Users/Sam/AI_MP/MP3/digitdata/trainingimages";
+//        String trainLabels = "/Users/Sam/AI_MP/MP3/digitdata/traininglabels";
+//        String testImages = "/Users/Sam/AI_MP/MP3/digitdata/testimages";
+//        String testLabels = "/Users/Sam/AI_MP/MP3/digitdata/testlabels";
+//        System.out.println();
+//        System.out.println();
+//        System.out.println("**********************************************");
+//        System.out.println("        DIGIT IMAGE CLASSIFICATION : TERNARY  ");
+//        System.out.println("**********************************************");
+
+
+        String trainImages = "/Users/Sam/AI_MP/MP3/facedata/facedatatrain";
+        String trainLabels = "/Users/Sam/AI_MP/MP3/facedata/facedatatrainlabels";
+        String testImages = "/Users/Sam/AI_MP/MP3/facedata/facedatatest";
+        String testLabels = "/Users/Sam/AI_MP/MP3/facedata/facedatatestlabels";
         System.out.println();
         System.out.println();
         System.out.println("**********************************************");
-        System.out.println("        DIGIT IMAGE CLASSIFICATION            ");
+        System.out.println("        FACE IMAGE CLASSIFICATION             ");
         System.out.println("**********************************************");
+
+
 
         for(int i=1;i<=1;i++){
             DigitClassification dc = new DigitClassification(trainImages, trainLabels,(double)i);
             dc.predictDigit(testImages, testLabels);
-            dc.printConfusionMatrix(false);
-            dc.findHighConfusion();
-            dc.findOdds();
-//          dc.writeOddsMatrix(false);
-        }
-
-        System.out.println();
-        System.out.println();
-        System.out.println("**********************************************");
-        System.out.println("        DIGIT IMAGE CLASSIFICATION : TERNARY  ");
-        System.out.println("**********************************************");
-
-        for(int i=1;i<=50;i++){
-            DigitClassification dc = new DigitClassification(trainImages, trainLabels,(double)i);
-            dc.predictDigit(testImages, testLabels);
-            dc.printConfusionMatrix(false);
+            dc.printConfusionMatrix(true);
         }
 //
     }
