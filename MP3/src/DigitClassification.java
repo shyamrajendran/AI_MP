@@ -299,7 +299,8 @@ public class DigitClassification {
         double p2;
         HashMap<Integer, Double[]> pixelProbC1 = new HashMap<Integer, Double[]>();
         HashMap<Integer, Double[]> pixelProbC2 = new HashMap<Integer, Double[]>();
-        for(int index = 0;index< classIndex.length;index++){
+//        for(int index = 0;index< classIndex.length;index++){
+        for(int index = 0;index< 1;index++){
             c1=index;
             c2=classIndex[index];
             pixelProbC1 =  testImagePixelProb.get(c1);
@@ -385,7 +386,7 @@ public class DigitClassification {
         System.out.println("        DIGIT IMAGE CLASSIFICATIO             ");
         System.out.println("**********************************************");
         dc.printConfusionMatrix();
-//        dc.printOdds();
+        dc.printOdds();
         dc.writeOddsMatrix("/tmp/a.csv");
     }
 
