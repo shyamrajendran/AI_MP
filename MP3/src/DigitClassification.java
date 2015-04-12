@@ -1,8 +1,6 @@
 import org.omg.PortableInterceptor.INACTIVE;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -17,6 +15,8 @@ public class DigitClassification {
     private final int CLASSLABELS = 10; // 0-9 values
     private double[][] confusionMatrix ; // final matrix to print and calculate accuracy of prediction
     private int totalTests; // total test labels read
+    private int[] classIndex = new int[10];
+    private HashMap<Integer, Double> pixelOdds = new HashMap<Integer, Double>();
 
     // save occurance count of each class type in test data
     private HashMap<Integer, Integer> perClassTotal = new HashMap<Integer, Integer>();
@@ -41,7 +41,7 @@ public class DigitClassification {
     private HashMap<Integer, Double> classProb = new HashMap<Integer, Double>();
 
     public DigitClassification(String trainImages, String trainLabels) throws IOException {
-        confusionMatrix = new double[ROW][COLUMN];
+        confusionMatrix = new double[CLASSLABELS][CLASSLABELS];
         readTrainingFile(trainImages, trainLabels);
         calcClassProb();
         calcPixelCounts();
@@ -99,6 +99,7 @@ public class DigitClassification {
             foreCount = tt[1];
             HashMap<Integer, Double[]> p = new HashMap<Integer, Double[]>();
             for(Map.Entry<Integer, int[]> entry : t.entrySet()) {
+
                 int index = entry.getKey();
                 tt2 = entry.getValue().clone();
                 backProb = (double) (tt2[0] + LAPLACE) / (classCountsInTest.get(i) + LAPLACE * 2 );
@@ -199,6 +200,7 @@ public class DigitClassification {
 
     }
 
+
     private void predictDigit(String testImages, String testLables) throws IOException{
         BufferedReader bufferedReader1 = new BufferedReader(new FileReader(testImages));
         BufferedReader bufferedReader2 = new BufferedReader(new FileReader(testLables));
@@ -254,6 +256,18 @@ public class DigitClassification {
         return maxIndex;
     }
 
+    private int max(double[] probs,int skipIndex){
+        int maxIndex = -1;
+        double maxValue = -1.0;
+        for(int i=0; i<probs.length; i++){
+            if ( i == skipIndex) continue;
+            if (probs[i]>maxValue){
+                maxIndex = i;
+                maxValue = probs[i];
+            }
+        }
+        return maxIndex;
+    }
     private double calcDecisionProb(int[] pixelValues, int classLabel){
         double resultProb=0.0 ;
         resultProb = Math.log(classProbInTest.get(classLabel));
@@ -267,7 +281,68 @@ public class DigitClassification {
         }
         return resultProb;
     }
+    private void findHighConfusion(double[][] confusionMatrix){
+//        int[] classIndex = new int[10];
+        for(int i=0; i<confusionMatrix.length; i++){
+                classIndex[i]=max(confusionMatrix[i],i);
+        }
+        System.out.println(Arrays.toString(classIndex));
+//        return classIndex
+    }
 
+    private void findOdds(int[] classIndex){
+        //odds(Fij=1, c1, c2) = P(Fij=1 | c1) / P(Fij=1 | c2).
+        int c1;
+        int c2;
+        double oddsProb ;
+        double p1;
+        double p2;
+        HashMap<Integer, Double[]> pixelProbC1 = new HashMap<Integer, Double[]>();
+        HashMap<Integer, Double[]> pixelProbC2 = new HashMap<Integer, Double[]>();
+        for(int index = 0;index< classIndex.length;index++){
+            c1=index;
+            c2=classIndex[index];
+            pixelProbC1 =  testImagePixelProb.get(c1);
+            pixelProbC2 =  testImagePixelProb.get(c2);
+            for (int i=0;i<ROW*COLUMN; i++){
+                // for each row column inde
+                p1=pixelProbC1.get(i)[1];
+                p2=pixelProbC2.get(i)[1];
+                oddsProb = p1/p2;
+                pixelOdds.put(i,oddsProb);
+            }
+        }
+
+
+    }
+
+    private void printOdds(){
+        for(int i=0; i<ROW;i++){
+            for(int j=0;j<COLUMN;j++){
+                System.out.print(pixelOdds.get(i * ROW+j)+" ");
+            }
+            System.out.println();
+        }
+    }
+
+    private void writeOddsMatrix(String fileName) throws IOException{
+        File file = new File(fileName);
+        // creates the file
+        file.createNewFile();
+        FileWriter writer = new FileWriter(file);
+        double t ;
+        for(int i=0; i<ROW;i++){
+            for(int j=0;j<COLUMN;j++){
+                t = pixelOdds.get(i * ROW+j);
+                writer.write(Double.toString(t));
+                writer.write(" ");
+            }
+            writer.write("\n");
+        }
+        writer.flush();
+        writer.close();
+
+    }
     private void printConfusionMatrix(){
         Double accuracy;
         Double t ;
@@ -291,6 +366,9 @@ public class DigitClassification {
         System.out.format("%5.3f", a);
         System.out.println("%");
         System.out.println("---------------------------");
+        findHighConfusion(confusionMatrix);
+        findOdds(classIndex);
+
     }
 
     public static void main(String[] args) throws IOException {
@@ -307,6 +385,8 @@ public class DigitClassification {
         System.out.println("        DIGIT IMAGE CLASSIFICATIO             ");
         System.out.println("**********************************************");
         dc.printConfusionMatrix();
+//        dc.printOdds();
+        dc.writeOddsMatrix("/tmp/a.csv");
     }
 
 
