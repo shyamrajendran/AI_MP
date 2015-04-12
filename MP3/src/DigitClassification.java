@@ -329,27 +329,37 @@ public class DigitClassification {
         }
     }
 
-    private void writeOddsMatrix() throws IOException{
+    private void writeOddsMatrix(boolean flag) throws IOException{
         String fileName;
         for(int c=0;c<CLASSLABELS;c++){
-            File file = new File("/tmp/oddsMatrix"+c+".csv");
-            file.createNewFile();
-            FileWriter writer = new FileWriter(file);
-            HashMap<Integer, Double> classOdds = new HashMap<Integer, Double>();
-            classOdds =  pixelOddsPerClass.get(c);
-            double t ;
-            for(int i=0; i<ROW;i++){
-                for(int j=0;j<COLUMN;j++){
-                    t = classOdds.get(i * ROW+j);
-                    writer.write(Double.toString(t));
-                    writer.write(" ");
+                File file = new File("/tmp/oddsMatrix"+c+".csv");
+                file.createNewFile();
+                FileWriter writer = new FileWriter(file);
+                HashMap<Integer, Double> classOdds = new HashMap<Integer, Double>();
+                classOdds =  pixelOddsPerClass.get(c);
+                double t ;
+                for(int i=0; i<ROW;i++){
+                    for(int j=0;j<COLUMN;j++){
+                        t = classOdds.get(i * ROW+j);
+                        if ( flag ) {
+                            writer.write(Integer.toString(i));
+                            writer.write(",");
+                            writer.write(Integer.toString(j));
+                            writer.write(",");
+                            writer.write(Double.toString(t));
+                            writer.write("\n");
+                        } else {
+                            writer.write(Double.toString(t));
+                            writer.write(" ");
+                        }
+                    }
+                    if ( !flag ) {
+                        writer.write("\n");
+                    }
                 }
-                writer.write("\n");
+                writer.flush();
+                writer.close();
             }
-            writer.flush();
-            writer.close();
-        }
-
     }
     private void printConfusionMatrix(){
         Double accuracy;
@@ -394,7 +404,9 @@ public class DigitClassification {
         System.out.println("**********************************************");
         dc.printConfusionMatrix();
 
-        dc.writeOddsMatrix();
+//        dc.writeOddsMatrix(Boolean.FALSE);
+        dc.writeOddsMatrix(Boolean.TRUE);
+        // pass true for tableau import ; false for matrix
     }
 
 
