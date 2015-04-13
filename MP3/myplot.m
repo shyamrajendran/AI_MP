@@ -13,6 +13,14 @@ for i = 0:9
      v_mat_c1 = v_mat_c1';
      v_mat_c2 = v_mat_c2';
      v_mat_odds = v_mat_odds';
+     
+     for i =  1: 28
+         for j = 1:28
+             v_mat_odds(i,j) = log(v_mat_odds(i,j));
+             v_mat_c1(i,j) = log(v_mat_c1(i,j));
+             v_mat_c2(i,j) = log(v_mat_c2(i,j));
+         end
+     end
 
      h = figure
      subplot(1,3,1)
@@ -32,3 +40,27 @@ for i = 0:9
      saveas(h, strcat('fig', num2str(i)),'jpg');
     
 end
+
+
+
+
+% for i= 1:28
+%     for j =1:28
+%         if v(i,j) > 1
+%             v(i,j) = 1;
+%         else
+%             v(i,j) = 0;
+%         end
+%     end
+% end
+
+            
+%  figure(1)
+% %  image(v,'CDataMapping','scaled')
+% 
+%  
+% % caxis([-10,10])
+% %  surface(v,color_vec)
+% %  figure(2)
+%    surf(v)
+% %    caxis([-3,1])
