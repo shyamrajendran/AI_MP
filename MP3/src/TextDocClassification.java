@@ -20,10 +20,13 @@ public class TextDocClassification {
     private HashMap<Integer, HashMap<String, Integer>> labelWordCount = new HashMap<Integer, HashMap<String , Integer>>();
     private HashMap<Integer, HashMap<String, Double>> labelProbCount = new HashMap<Integer, HashMap<String , Double>>();
     private HashMap<Integer, String[]> perClassTopLikelihoodWords = new HashMap<Integer, String[]>();
+    private HashMap<Integer, HashMap<String, Double>> wordsOddPerClass = new HashMap<Integer, HashMap<String, Double>>();
+    private int[] classIndex ;
 
     public TextDocClassification(String fileName, int labelCount, int laplace) throws IOException {
         LABEL_COUNT = labelCount;
         LAPLACE = (double) laplace;
+        classIndex = new int[LABEL_COUNT];
         confusionMatrix = new double[LABEL_COUNT][LABEL_COUNT];
         readFile(fileName);
         for(int labelType = 0 ;labelType < LABEL_COUNT; labelType++){
@@ -121,6 +124,83 @@ public class TextDocClassification {
             double t = (double) labelOccuranceCount.get(i) / totalTrainingDoc;
             labelOccuranceProb.put(i,t);
         }
+    }
+
+    private void findOdds() throws IOException {
+        //odds(Fij=1, c1, c2) = P(Fij=1 | c1) / P(Fij=1 | c2).
+        int c1;
+        int c2;
+        double oddsProb ;
+        double p1;
+        double p2;
+        Double vl;
+
+        HashMap<String, Double> wordsProbC1 = new HashMap<String, Double>();
+        HashMap<String, Double> wordsProbC2 = new HashMap<String, Double>();
+//        for(int index = 0;index< classIndex.length;index++){
+
+        for(int index = 0;index< classIndex.length;index++){
+            HashMap<String, Double> wordOdds = new HashMap<String, Double>();
+            c1=index;
+            c2=classIndex[index];
+            wordsProbC1 =  labelProbCount.get(c1);
+            wordsProbC2 =  labelProbCount.get(c2);
+
+//            printClassForeGroundProb(pixelProbC1, "numerator", index);
+//            printClassForeGroundProb(pixelProbC2, "denominator", index);
+            for(Map.Entry<String, Double> entry: wordsProbC1.entrySet()) {
+
+                if(!wordsProbC2.containsKey(entry.getKey()))  continue;
+
+                // getting only words which are common among the two classes and finding max odd op
+                // 20 words with the highest log-odds ratio for that pair of classes.
+                p1=wordsProbC1.get(entry.getKey());
+                p2=wordsProbC2.get(entry.getKey());
+                oddsProb = p1/p2;
+                vl=Math.log(oddsProb);
+                wordOdds.put(entry.getKey(), vl);
+            }
+            wordsOddPerClass.put(c1,wordOdds);
+        }
+    }
+
+    private void printWordOddsPerClass() throws  IOException{
+
+        HashMap<String, Double> ha = new HashMap<String, Double>();
+        for(int i=0; i<LABEL_COUNT;i++){
+            System.out.println("CLASS :"+i);
+            File file1 = new File("/tmp/"+i+".csv");
+            file1.createNewFile();
+            FileWriter writer1 = new FileWriter(file1);
+            ha = wordsOddPerClass.get(i);
+            for(Map.Entry<String, Double> entry2 : ha.entrySet()) {
+                writer1.write(entry2.getKey());
+                writer1.write(",");
+                writer1.write(String.format( "%.10f", entry2.getValue() ));
+                writer1.write("\n");
+            }
+        }
+    }
+
+    private double max(double a, double b){
+        if (Double.compare(a,b) > 1){
+            return a;
+        } else {
+            return b;
+        }
+    }
+    private void findMaxOddPairs(){
+        double[] res= new double[LABEL_COUNT];
+        int index=0;
+        for(int i: classIndex){
+            res[index] = confusionMatrix[index][classIndex[index]];
+            index++;
+        }
+
+        Arrays.sort(res);
+        System.out.println(Arrays.toString(res));
+//        System.out.println(Arrays.toString(Arrays.copyOfRange(res, res.length,res.length-1)));
+//        ArrayUtils.reverse(int[] array)
     }
 
     private Double classificationProb(String[] st, Integer labelType){
@@ -226,6 +306,28 @@ public class TextDocClassification {
 
     }
 
+    private int max(double[] probs,int skipIndex){
+        int maxIndex = -1;
+        double maxValue = -1.0;
+        for(int i=0; i<probs.length; i++){
+            if ( i == skipIndex) continue;
+            if(Double.compare(probs[i],maxValue) > 0){
+                maxIndex = i;
+                maxValue = probs[i];
+            }
+        }
+        return maxIndex;
+    }
+    private void findHighConfusion(){
+//        int[] classIndex = new int[10];
+        for(int i=0; i<confusionMatrix.length; i++){
+            classIndex[i]=max(confusionMatrix[i],i);
+        }
+        System.out.println(Arrays.toString(classIndex));
+//        return classIndex
+    }
+
+
     public static  void main(String[] args) throws IOException {
         TextDocClassification nf;
         String testFile;
@@ -256,8 +358,12 @@ public class TextDocClassification {
 
             nf.calcLabelProb();
             nf.predictClassification(testFile);
-            nf.printConfusionMatrix(false, i);
-            nf.highestLikelihood();
+            nf.printConfusionMatrix(true, i);
+            nf.findHighConfusion();
+            nf.findOdds();
+            nf.findMaxOddPairs();
+//            nf.printWordOddsPerClass();
+//            nf.highestLikelihood();
         }
 
     }
