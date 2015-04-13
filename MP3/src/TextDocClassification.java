@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -21,6 +19,7 @@ public class TextDocClassification {
     private HashMap<Integer, Double> labelOccuranceProb = new HashMap<Integer, Double>(); // to store total words
     private HashMap<Integer, HashMap<String, Integer>> labelWordCount = new HashMap<Integer, HashMap<String , Integer>>();
     private HashMap<Integer, HashMap<String, Double>> labelProbCount = new HashMap<Integer, HashMap<String , Double>>();
+    private HashMap<Integer, String[]> perClassTopLikelihoodWords = new HashMap<Integer, String[]>();
 
     public TextDocClassification(String fileName, int labelCount, int laplace) throws IOException {
         LABEL_COUNT = labelCount;
@@ -32,9 +31,26 @@ public class TextDocClassification {
             calcTotalWords(labelType);
             labelProbCount.put(labelType,getProbCounts(labelType));
         }
-
     }
 
+
+
+    private void highestLikelihood() throws IOException {
+        HashMap<String, Double> ha = new HashMap<String, Double>();
+        for(Map.Entry<Integer, HashMap<String, Double>> entry : labelProbCount.entrySet()) {
+            File file1 = new File("/tmp/"+entry.getKey()+".csv");
+            file1.createNewFile();
+            FileWriter writer1 = new FileWriter(file1);
+            System.out.println("CLASS :"+entry.getKey());
+            ha = entry.getValue();
+            for(Map.Entry<String, Double> entry2 : ha.entrySet()) {
+                writer1.write(entry2.getKey());
+                writer1.write(",");
+                writer1.write(String.format( "%.10f", entry2.getValue() ));
+                writer1.write("\n");
+            }
+        }
+    }
     private HashMap<String, Integer> getWordCounts(String[] str, Integer labelType){
         HashMap<String , Integer> res  = new HashMap<String, Integer>();
         String[] temp = new String[2];
@@ -213,34 +229,35 @@ public class TextDocClassification {
     public static  void main(String[] args) throws IOException {
         TextDocClassification nf;
         String testFile;
-//        System.out.println();
-//        System.out.println();
-//        System.out.println("**********************************************");
-//        System.out.println("        EMAIL CLASSIFICATION                  ");
-//        System.out.println("**********************************************");
-//        TextDocClassification nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt",2, 2);
-//        String testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
-////        nf.calcLabelProb();
-//        nf.predictClassification(testFile);
-//        nf.printConfusionMatrix();
-
         System.out.println();
         System.out.println();
-        System.out.println("**********************************************");
-        System.out.println("        EMAIL CLASSIFICATION                   ");
-        System.out.println("**********************************************");
 
-        for (int i=1; i<=50; i++){
-            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt",2, i);
-            testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
+        for (int i=1; i<=1; i++){
+            //////////                  EMAIL                            ///////////////////////////////
+//            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt",2, i);
+//            testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
+//            System.out.println();
+//            System.out.println();
+//            System.out.println("**********************************************");
+//            System.out.println("        EMAIL CLASSIFICATION                   ");
+//            System.out.println("**********************************************");
+
+
+
+            //////////////////////////     NEWS                                   ////////////
+            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/8category/8category.training.txt",8,i);
+            testFile = "/Users/Sam/AI_MP/MP3/8category/8category.testing.txt";
+            System.out.println();
+            System.out.println();
+            System.out.println("**********************************************");
+            System.out.println("        NEWS CLASSIFICATION                   ");
+            System.out.println("**********************************************");
+
+
             nf.calcLabelProb();
             nf.predictClassification(testFile);
             nf.printConfusionMatrix(false, i);
-//            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/8category/8category.training.txt",8,i);
-//            testFile = "/Users/Sam/AI_MP/MP3/8category/8category.testing.txt";
-//            nf.calcLabelProb();
-//            nf.predictClassification(testFile);
-//            nf.printConfusionMatrix(false, (int)i);
+            nf.highestLikelihood();
         }
 
     }
