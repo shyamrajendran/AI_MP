@@ -26,17 +26,17 @@ for i = 0:9
      subplot(1,3,1)
      
      image(v_mat_c1,'CDataMapping','scaled')
-     title(strcat('c1Test',num2str(i)))
-
+%      title(strcat('c1',num2str(i)))
+     title('c1')
      subplot(1,3,2)
      image(v_mat_c2,'CDataMapping','scaled')
-     title(strcat('c2Test',num2str(i)))
-
+%      title(strcat('c2',num2str(i)))
+     title('c2')
      
      subplot(1,3,3)
      image(v_mat_odds,'CDataMapping','scaled')
-     title(strcat('oddsTest',num2str(i)))
-     
+%      title(strcat('oddsRatio',num2str(i)))
+     title('oddsRatio')
      saveas(h, strcat('fig', num2str(i)),'jpg');
     
 end
