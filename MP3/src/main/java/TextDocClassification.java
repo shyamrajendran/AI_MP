@@ -12,7 +12,7 @@ public class TextDocClassification {
     private Set<String> totalUniqueWords = new HashSet<String>();
     private double[][] confusionMatrix ;
     private Integer totalTestDoc = 0 ;
-
+    private  boolean EXTRA = false;
     private HashMap<Integer, Integer> labelRawCount = new HashMap<Integer, Integer>(); // to store total words
     private HashMap<Integer, Integer> labelOccuranceCount = new HashMap<Integer, Integer>(); // to store total words
     private HashMap<Integer, Integer> labelTestOccuranceCount = new HashMap<Integer, Integer>(); // to store total words
@@ -37,15 +37,22 @@ public class TextDocClassification {
     }
 
     public TextDocClassification(String dataFile, String labelFile, String mapFile,int laplace) throws IOException {
+        EXTRA = true;
         LAPLACE = (double) laplace;
-        classIndex = new int[LABEL_COUNT];
-        confusionMatrix = new double[LABEL_COUNT][LABEL_COUNT];
-        readFileExtra(dataFile, labelFile, mapFile);
+        classIndex = new int[21];
+        confusionMatrix = new double[21][21];
+        readFile(readFileExtra(dataFile, labelFile, mapFile,"trainParsed"));
+        for(int labelType = 0 ;labelType < LABEL_COUNT; labelType++){
+            if (!labelWordCount.containsKey(labelType)) continue;
+            calcTotalWords(labelType);
+            labelProbCount.put(labelType,getProbCounts(labelType));
+        }
+
     }
 
 
-    private void readFileExtra(String dataFile, String labelFile, String mapFile) throws  IOException {
-        File file1 = new File("newsTestFile.txt");
+    private String readFileExtra(String dataFile, String labelFile, String mapFile, String opFile) throws  IOException {
+        File file1 = new File(opFile);
         file1.createNewFile();
         FileWriter writer1 = new FileWriter(file1);
 
@@ -59,7 +66,8 @@ public class TextDocClassification {
         while((in_line = mapReader.readLine()) != null){
             localLabel++;
         }
-        LABEL_COUNT = localLabel;
+        LABEL_COUNT = localLabel+1;
+
         int docId;
         String str;
         List<String> strList ;
@@ -93,7 +101,7 @@ public class TextDocClassification {
         }
         writer1.flush();
         writer1.close();
-//
+        return opFile;
     }
     private void highestLikelihood() throws IOException {
         HashMap<String, Double> ha = new HashMap<String, Double>();
@@ -284,6 +292,10 @@ public class TextDocClassification {
         }
         return  totalProduct;
     }
+    private void predictClassificationExtra(String dataFile, String labelFile, String mapFile) throws IOException {
+        predictClassification(readFileExtra(dataFile, labelFile, mapFile, "testParsed"));
+    }
+
     private void predictClassification(String fileName) throws  IOException{
         BufferedReader  bufferedReader = new BufferedReader(new FileReader(fileName));
         String in_line;
@@ -307,8 +319,16 @@ public class TextDocClassification {
                 classificationProbs.add(t);
             }
             Double max = classificationProbs.get(0);
-            int index = 0;
-            int i=0;
+            int index;
+            int i;
+            if ( EXTRA ){
+                index = 1;
+                i=1;
+            } else {
+                index = 0;
+                i=0;
+            }
+
 
             for ( Double t : classificationProbs){
                 if ( t > max ) {
@@ -333,7 +353,9 @@ public class TextDocClassification {
 //            System.out.println("TOTAL TEST DOCUMENTS OF TYPE "+i+" READ : "+labelTestOccuranceCount.get(i));
 //        }
         for (int i = 0 ;i < LABEL_COUNT; i++){
+            if (!labelWordCount.containsKey(i)) continue;
             for (int j = 0 ; j < LABEL_COUNT ; j++){
+                if (!labelWordCount.containsKey(j)) continue;
                 t = confusionMatrix[i][j]/labelTestOccuranceCount.get(i)*100;
                 if (debug){
                     System.out.format("%10.3f", t);
@@ -422,23 +444,23 @@ public class TextDocClassification {
 //            nf.printWordOddsPerClass();
 //            nf.highestLikelihood();
 //            cation(String dataFile, String labelFile, String mapFile,int laplace) throws IOException {
+//            String testFile="newsParsedTrainFile.txt";
+            System.out.println();
+            System.out.println();
+            System.out.println("**********************************************");
+            System.out.println("        20 NEWS CLASSIFICATION                ");
+            System.out.println("**********************************************");
+
             nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/20news/train.data",
                     "/Users/Sam/AI_MP/MP3/20news/train.label","/Users/Sam/AI_MP/MP3/20news/train.map",i);
-//            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/20news/test.data"+
-//                    "/Users/Sam/AI_MP/MP3/20news/test.label",
-//                    "/Users/Sam/AI_MP/MP3/20news/test.map",
-//                    i);
-//            testFile = "/Users/Sam/AI_MP/MP3/8category/8category.testing.txt";
-//            System.out.println();
-//            System.out.println();
-//            System.out.println("**********************************************");
-//            System.out.println("        NEWS CLASSIFICATION                   ");
-//            System.out.println("**********************************************");
-//
-//
-//            nf.calcLabelProb();
+
+            nf.calcLabelProb();
+            nf.predictClassificationExtra("/Users/Sam/AI_MP/MP3/20news/test.data",
+                    "/Users/Sam/AI_MP/MP3/20news/test.label",
+                    "/Users/Sam/AI_MP/MP3/20news/test.map"
+            );
 //            nf.predictClassification(testFile);
-//            nf.printConfusionMatrix(true, i);
+            nf.printConfusionMatrix(true, i);
 //            nf.findHighConfusion();
 //            nf.findOdds();
 //            nf.findMaxOddPairs();
