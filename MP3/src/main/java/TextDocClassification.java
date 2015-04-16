@@ -79,14 +79,17 @@ public class TextDocClassification {
                 perLine.put(docId,tmp2);
             }
         }
-        int labelId;
-        String finalOp;
+
+        int index=1;
 
         while((in_line = labelReader.readLine()) != null){
+            int labelId;
+            String finalOp;
             labelId = Integer.parseInt(in_line.split(" ")[0]);
-            finalOp = in_line+" "+perLine.get(labelId);
+            finalOp = labelId+" "+perLine.get(index);
             writer1.write(finalOp);
             writer1.write("\n");
+            index++;
         }
         writer1.flush();
         writer1.close();
@@ -419,8 +422,8 @@ public class TextDocClassification {
 //            nf.printWordOddsPerClass();
 //            nf.highestLikelihood();
 //            cation(String dataFile, String labelFile, String mapFile,int laplace) throws IOException {
-            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/20news/test.data",
-                    "/Users/Sam/AI_MP/MP3/20news/test.label","/Users/Sam/AI_MP/MP3/20news/test.map",i);
+            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/20news/train.data",
+                    "/Users/Sam/AI_MP/MP3/20news/train.label","/Users/Sam/AI_MP/MP3/20news/train.map",i);
 //            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/20news/test.data"+
 //                    "/Users/Sam/AI_MP/MP3/20news/test.label",
 //                    "/Users/Sam/AI_MP/MP3/20news/test.map",
