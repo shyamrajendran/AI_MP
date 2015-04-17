@@ -415,8 +415,8 @@ public class TextDocClassification {
 
         for (int i=1; i<=1; i++){
             //////////                  EMAIL                            ///////////////////////////////
-//            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email.txt",2, i);
-//            testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email.txt";
+//            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/spam_detection/train_email_stemmed.txt",2, i);
+//            testFile = "/Users/Sam/AI_MP/MP3/spam_detection/test_email_stemmed.txt";
 //            System.out.println();
 //            System.out.println();
 //            System.out.println("**********************************************");
@@ -425,19 +425,19 @@ public class TextDocClassification {
 
 
 
-            //////////////////////////     NEWS                                   ////////////
-//            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/8category/8category.training.txt",8,i);
-//            testFile = "/Users/Sam/AI_MP/MP3/8category/8category.testing.txt";
-//            System.out.println();
-//            System.out.println();
-//            System.out.println("**********************************************");
-//            System.out.println("        NEWS CLASSIFICATION                   ");
-//            System.out.println("**********************************************");
+            ////////////////////////     NEWS                                   ////////////
+            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/8category/8category_training_stemmed.txt",8,i);
+            testFile = "/Users/Sam/AI_MP/MP3/8category/8category_testing_stemmed.txt";
+            System.out.println();
+            System.out.println();
+            System.out.println("**********************************************");
+            System.out.println("        NEWS CLASSIFICATION                   ");
+            System.out.println("**********************************************");
 //
 //
-//            nf.calcLabelProb();
-//            nf.predictClassification(testFile);
-//            nf.printConfusionMatrix(true, i);
+            nf.calcLabelProb();
+            nf.predictClassification(testFile);
+            nf.printConfusionMatrix(true, i);
 //            nf.findHighConfusion();
 //            nf.findOdds();
 //            nf.findMaxOddPairs();
@@ -445,22 +445,22 @@ public class TextDocClassification {
 //            nf.highestLikelihood();
 //            cation(String dataFile, String labelFile, String mapFile,int laplace) throws IOException {
 //            String testFile="newsParsedTrainFile.txt";
-            System.out.println();
-            System.out.println();
-            System.out.println("**********************************************");
-            System.out.println("        20 NEWS CLASSIFICATION                ");
-            System.out.println("**********************************************");
-
-            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/20news/train.data",
-                    "/Users/Sam/AI_MP/MP3/20news/train.label","/Users/Sam/AI_MP/MP3/20news/train.map",i);
-
-            nf.calcLabelProb();
-            nf.predictClassificationExtra("/Users/Sam/AI_MP/MP3/20news/test.data",
-                    "/Users/Sam/AI_MP/MP3/20news/test.label",
-                    "/Users/Sam/AI_MP/MP3/20news/test.map"
-            );
-//            nf.predictClassification(testFile);
-            nf.printConfusionMatrix(true, i);
+//            System.out.println();
+//            System.out.println();
+//            System.out.println("**********************************************");
+//            System.out.println("        20 NEWS CLASSIFICATION                ");
+//            System.out.println("**********************************************");
+//
+//            nf = new TextDocClassification("/Users/Sam/AI_MP/MP3/20news/train.data",
+//                    "/Users/Sam/AI_MP/MP3/20news/train.label","/Users/Sam/AI_MP/MP3/20news/train.map",i);
+//
+//            nf.calcLabelProb();
+//            nf.predictClassificationExtra("/Users/Sam/AI_MP/MP3/20news/test.data",
+//                    "/Users/Sam/AI_MP/MP3/20news/test.label",
+//                    "/Users/Sam/AI_MP/MP3/20news/test.map"
+//            );
+////            nf.predictClassification(testFile);
+//            nf.printConfusionMatrix(true, i);
 //            nf.findHighConfusion();
 //            nf.findOdds();
 //            nf.findMaxOddPairs();
