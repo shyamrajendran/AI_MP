@@ -13,7 +13,7 @@ public class ValueIteration {
     private String[] inputMap = new String[100];
     private double[] utility ;
     private double[] reward;
-    private ArrayList<Integer> states;
+    private ArrayList<Integer> states = new ArrayList<Integer>();
     private double delta ;
     private final int START_UTIL = 0;
     private int ROW = 0;
@@ -35,17 +35,21 @@ public class ValueIteration {
 
 
     private void findStatesAndCalcRewards(){
+        int index ;
         for(int i=0; i< ROW ;i++){
             for(int j=0; j< COL;j++){
-                if ( inputMap[COL*i+j].equals("0")){
-                    states.add(COL*i+j);
-                    reward[COL*i+j] = REWARD;
-                } else if (inputMap[COL*i+j].equals("1")){
-                    reward[COL*i+j] = 1;
-                } else if (inputMap[COL*i+j].equals("-1")) {
-                    reward[COL*i+j] = -1;
+                index = COL*i+j;
+                if ( inputMap[index].equals("0")){
+                    states.add(index);
+                    reward[index] = REWARD;
+                } else if (inputMap[index].equals("1")){
+                    states.add(index);
+                    reward[index] = 1;
+                } else if (inputMap[index].equals("-1")) {
+                    states.add(index);
+                    reward[index] = -1;
                 } else {
-                    reward[COL*i+j] = 0;
+                    reward[index] = 0;
                 }
             }
         }
@@ -83,6 +87,104 @@ public class ValueIteration {
         return result;
     }
 
+    private double actionUtility(int index, int action){
+        // action 0 1 2 3 : up left down right
+        int temp1 = -1 , temp2 = -1 , temp3 = -1 ;
+        double result;
+        switch (action){
+            case 0:
+                // see left and right
+                temp1 = index - 1;
+                temp2 = index + 1;
+                temp3 = index - COL; // the main action.
+                if ( temp1 % COL == 0 ) {
+                    temp1 = index;
+                }
+                if ( (temp2+1) % COL == 0 ) {
+                    temp2 = index;
+                }
+                if ( temp3 < 0 ) {
+                    temp3 = index;
+                }
+                break;
+            case 1:
+                // see bottom and top
+                temp3 = index - 1;
+                temp1 = index + 6;
+                temp2 = index - 6;
+                if ( temp1 > (ROW*COL)-1 ) {
+                    temp1 = index;
+                }
+                if ( temp2 < 0 ) {
+                    temp2 = index;
+                }
+                if ( temp3 < 0 ) {
+                    temp3 = index;
+                }
+                break;
+            case 2:
+                // see left and right
+                temp3 = index - 6;
+                temp1 = index - 1;
+                temp2 = index + 1;
+
+                if ( temp1 < 0 ) {
+                    temp1 = index;
+                }
+                if ( (temp2+1) % COL ==  0 ) {
+                    temp2 = index;
+                }
+                if ( temp3 < 0 ) {
+                    temp3 = index;
+                }
+                break;
+            case 3:
+                // see top and bottom
+                temp3 = index + 1;
+                temp1 = index - 6;
+                temp2 = index + 6;
+
+                if ( temp1 < 0 ) {
+                    temp1 = index;
+                }
+                if ( temp2 > (ROW*COL)+1 ) {
+                    temp2 = index;
+                }
+                if ( (temp3 + 1) % COL == 0 ) {
+                    temp3 = index;
+                }
+                break;
+
+        }
+
+        if ( inputMap[temp1].equals("W") ){
+            temp1 = index;
+        }
+        if ( inputMap[temp2].equals("W")){
+            temp2 = index;
+        }
+        if ( inputMap[temp3].equals("W")){
+            temp3 = index;
+        }
+
+        result = utility[temp3] * INTENDED_PROB;
+        result += utility[temp2] * OTHER_PROB;
+        result += utility[temp1] * OTHER_PROB;
+        return result;
+    }
+
+    private double findMax(int stateIndex){
+        double aptActionValue = Double.MIN_VALUE;
+        int aptAction = -1;
+        for(int action=0; action < 4 ; action++){
+            double temp = actionUtility(stateIndex, action);
+            if ( Double.compare(temp, aptActionValue) > 1 )  {
+                aptActionValue =  temp;
+                aptAction = action;
+            }
+        }
+        return aptActionValue;
+    }
     private double[] calcValueIteration(){
         double[] preUtility;
         int maxIteration = 50;
@@ -90,7 +192,7 @@ public class ValueIteration {
             preUtility = utility.clone();
             delta = 0;
             for(int s: states){
-                utility[s] = reward[s] + DISCOUNT_FACTOR * findMax();
+                utility[s] = reward[s] + DISCOUNT_FACTOR * findMax(s);
                 if ( delta < EPSILON * (1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR){
                     return preUtility;
                 }
@@ -100,11 +202,13 @@ public class ValueIteration {
                 return preUtility;
             }
         }
+
     }
 
     public static void main(String[] args) throws IOException {
         String fileName = "/Users/sam/AI_MP/MP4/GridWorld/files/map";
         ValueIteration vl = new ValueIteration(fileName);
         vl.printMap();
+        System.out.println(vl.calcValueIteration());
     }
 }

@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0039)http://artint.info/html/ArtInt_227.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><!-- XML file produced from file: ArtInt.tex
+     using Hyperlatex v 2.9-in-waiting-rk (c) Otfried Cheong, Tom Sgouros, Ryszard Kubiak
+     on Emacs 22.3.1, Mon Jun  7 20:27:08 2010 --><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Artificial Intelligence - foundations of computational agents -- 9.5.3 Value Iteration</title>
+<link rel="stylesheet" href="./Artificial Intelligence - foundations of computational agents -- 9.5.3 Value Iteration_files/styleBook.css" type="text/css">
+<script type="text/javascript" async="" src="./Artificial Intelligence - foundations of computational agents -- 9.5.3 Value Iteration_files/ga.js"></script><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-19416541-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script><style type="text/css"></style>
+<style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style></head>
+<body>
+
+<div id="wrap">
+
+	<!--header -->
+	<div id="header">			
+		<h1 id="logo-text"><a href="http://artint.info/index.html" title="">Artificial <br>Intelligence</a></h1>		
+		<p id="logo-subtext">foundations of computational agents</p>
+	<!--header ends-->					
+	</div>
+	
+	<!-- navigation starts-->	
+	<div id="nav">		
+<a href="http://artint.info/html/ArtInt_226.html"><img class="previous" alt="9.5.2 Value of an Optimal Policy" src="./Artificial Intelligence - foundations of computational agents -- 9.5.3 Value Iteration_files/arrow-left.gif"></a><a href="http://artint.info/html/ArtInt_224.html"><img class="up" alt="9.5 Decision Processes" src="./Artificial Intelligence - foundations of computational agents -- 9.5.3 Value Iteration_files/arrow-up.gif"></a><a href="http://artint.info/html/ArtInt_228.html"><img class="next" alt="9.5.4 Policy Iteration" src="./Artificial Intelligence - foundations of computational agents -- 9.5.3 Value Iteration_files/arrow-right.gif"></a><ul><li><a href="http://artint.info/index.html">Home</a></li><li><a href="http://artint.info/html/ArtInt_351.html">Index</a></li><li><a href="http://artint.info/html/ArtInt.html#cicontents">Contents</a></li></ul>
+	<!-- navigation ends-->	
+	</div>
+			
+	<!-- content starts -->
+	<div id="content">
+	
+		<div id="main">
+
+<h3>9.5.3 Value Iteration</h3>
+<p>Value iteration is a method of computing an optimal MDP policy and its
+value.
+</p>
+<p>Value iteration starts at the "end" and then works backward, refining an estimate of either <i>Q<sup>*</sup></i> or <i>V<sup>*</sup></i>. There is really no end,
+so it uses an arbitrary end point. Let <i>V<sub>k</sub></i> be the value function assuming there are <i>k</i> stages to go, and let <i>Q<sub>k</sub></i> be the <i>Q</i>-function assuming there are <i>k</i> stages to go. These
+can be defined recursively.
+Value iteration starts with an arbitrary function <i>V<sub>0</sub></i> and uses the following
+equations to get the functions for <i>k+1</i> stages to go from the functions for <i>k</i> stages
+to go:
+</p>
+<blockquote class="mathitalic"><i><table border="0"><tbody><tr>
+<td colspan="1" align="right">
+Q<sub>k+1</sub>(s,a) </td><td colspan="1" align="left">= ∑<sub>s'</sub> P(s'|s,a) (R(s,a,s')+ γV<sub>k</sub>(s'))
+&nbsp;for&nbsp;k ≥ 0</td></tr>
+<tr>
+<td colspan="1" align="right">V<sub>k</sub>(s) </td><td colspan="1" align="left">= max<sub>a</sub> Q<sub>k</sub>(s,a) &nbsp;for&nbsp;k&gt;0.
+</td></tr></tbody></table>
+</i></blockquote>
+<p>It can either save the <i>V[S]</i> array or the <i>Q[S,A]</i> array. Saving the <i>V</i>
+array results in less storage, but it is more difficult to determine
+an optimal action, and one more iteration is needed to determine
+which action results in the greatest value.
+</p>
+<hr>
+<div class="quote">
+1: <b>Procedure</b> Value_Iteration(<i>S,A,P,R,θ</i>)
+<br>2: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Inputs</b><br>3: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>S</i> is the set of all states
+<br>4: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>A</i> is the set of all actions
+<br>5: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>P</i> is state transition function specifying <i>P(s'|s,a)</i>
+<br>6: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>R</i> is a reward function <i>R(s,a,s')</i>
+<br>7: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>θ</i> a threshold, <i>θ&gt;0</i>
+<br>8: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Output</b><br>9: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>π[S]</i> approximately optimal policy
+<br>10: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>V[S]</i> value function
+<br>11: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Local</b><br>12: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;real array <i>V<sub>k</sub>[S]</i> is a sequence of value functions
+<br>13: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;action array <i>π[S]</i>
+<br>14: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assign <i>V<sub>0</sub>[S]</i> arbitrarily
+<br>15: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>k ←0</i>
+<br>16: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>repeat</b><br>17: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>k ←k+1</i>
+<br>18: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>for each</b> state <i>s</i> <b>do</b>
+<br>19: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>V<sub>k</sub>[s] = max<sub>a</sub> ∑<sub>s'</sub> P(s'|s,a) (R(s,a,s')+ γV<sub>k-1</sub>[s'])</i>
+<br>20: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>until</b> <i>∀s&nbsp;|V<sub>k</sub>[s]-V<sub>k-1</sub>[s]| &lt; θ</i>
+<br>21: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>for each</b> state <i>s</i> <b>do</b>
+<br>22: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>π[s] = argmax<sub>a</sub> ∑<sub>s'</sub> P(s'|s,a) (R(s,a,s')+ γV<sub>k</sub>[s'])</i>
+<br>23: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>return</b> <i>π,V<sub>k</sub></i>
+</div>
+<div class="center">
+<div class="caption">Figure 9.14: Value iteration for MDPs, storing <i>V</i></div>
+</div>
+<a name="val-iteration-fig"></a>
+<hr>
+<p><a href="http://artint.info/html/ArtInt_227.html#val-iteration-fig">Figure </a><a href="http://artint.info/html/ArtInt_227.html#val-iteration-fig">9.14</a> shows the value iteration algorithm
+when the <i>V</i> array is stored. This
+procedure converges no matter what is the initial value function <i>V<sub>0</sub></i>. 
+An initial value function that
+approximates <i>V<sup>*</sup></i> converges quicker than one that does not. The basis
+for many  abstraction techniques for MDPs is to use some heuristic method
+to approximate <i>V<sup>*</sup></i> and to use this as an initial seed for value iteration.
+</p>
+<div class="quote"><b>Example 9.26: </b><a name="VI-example">
+Consider</a> the 9 squares around the <i>+10</i> reward of
+<a href="http://artint.info/html/ArtInt_224.html#gridworld-ex">Example </a><a href="http://artint.info/html/ArtInt_224.html#gridworld-ex">9.25</a>. The discount is
+<i>γ=0.9</i>. Suppose the algorithm starts with
+<i>V<sub>0</sub>[s]=0</i> for all states <i>s</i>.
+<p>The values of <i>V<sub>1</sub></i>, <i>V<sub>2</sub></i>, and <i>V<sub>3</sub></i> (to one decimal point) for these nine cells is
+</p>
+<div class="center">
+<table border="1"><tbody><tr>
+<td colspan="1" align="center">0 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-0.1</i></td></tr>
+<tr>
+<td colspan="1" align="center">0 </td><td colspan="1" align="center"> 10 </td><td colspan="1" align="center"> <i>-0.1</i></td></tr>
+<tr>
+<td colspan="1" align="center">0 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-0.1</i>
+</td></tr></tbody></table>
+&nbsp;&nbsp;
+<table border="1"><tbody><tr>
+<td colspan="1" align="center">0 </td><td colspan="1" align="center"> <i>6.3</i> </td><td colspan="1" align="center"> <i>-0.1</i></td></tr>
+<tr>
+<td colspan="1" align="center"><i>6.3</i> </td><td colspan="1" align="center"> <i>9.8</i> </td><td colspan="1" align="center"> <i>6.2</i></td></tr>
+<tr>
+<td colspan="1" align="center">0 </td><td colspan="1" align="center"> <i>6.3</i> </td><td colspan="1" align="center"> <i>-0.1</i>
+</td></tr></tbody></table>
+&nbsp;&nbsp;
+<table border="1"><tbody><tr>
+<td colspan="1" align="center"><i>4.5</i> </td><td colspan="1" align="center"> <i>6.2</i> </td><td colspan="1" align="center"> <i>4.4</i></td></tr>
+<tr>
+<td colspan="1" align="center"><i>6.2</i> </td><td colspan="1" align="center"> <i>9.7</i> </td><td colspan="1" align="center"> <i>6.6</i></td></tr>
+<tr>
+<td colspan="1" align="center"><i>4.5</i> </td><td colspan="1" align="center"> <i>6.1</i> </td><td colspan="1" align="center"> <i>4.4</i>
+</td></tr></tbody></table>
+</div>
+<p>After the first step of value iteration, the nodes
+get their immediate expected reward. The center node in this figure is the <i>+10</i>
+reward state. The right nodes have a value of <i>-0.1</i>, with the optimal
+actions being up, left, and down; each of these has a <i>0.1</i> chance of
+crashing into the wall for a reward of <i>-1</i>.
+</p>
+<p>The middle grid shows <i>V<sub>2</sub></i>, the values after the second step of value
+iteration. Consider the node that is immediately to the left of the <i>+10</i>
+rewarding state. Its optimal value is to go to the right; it has a 0.7 chance
+of getting a reward of 10 in the following state, so that is worth 9
+(10 times the discount of <i>0.9</i>) to it now. The expected reward for
+the other possible resulting states is <i>0</i>. Thus, the value of this
+state is <i>0.7×9=6.3</i>.
+</p>
+<p>Consider the node immediately to the right of the <i>+10</i> rewarding
+state after the second step of value iteration. The agent's optimal
+action in this state is
+to go left. The value of this state is
+</p>
+<blockquote class="mathitalic"><i><table border="0"><tbody><tr>
+<td colspan="1" align="right">
+</td><td colspan="1" align="left">Prob</td><td colspan="1" align="left">Reward</td><td colspan="1" align="center"></td><td colspan="1" align="left">Future&nbsp;Value&nbsp;</td><td colspan="1" align="left"></td></tr>
+<tr>
+<td colspan="1" align="right"></td><td colspan="1" align="left">0.7×(</td><td colspan="1" align="left">0</td><td colspan="1" align="center">+</td><td colspan="1" align="left">0.9×10)</td><td colspan="1" align="left"> <em>Agent&nbsp;goes&nbsp;left</em></td></tr>
+<tr>
+<td colspan="1" align="right">+</td><td colspan="1" align="left">0.1×(</td><td colspan="1" align="left">0</td><td colspan="1" align="center">+</td><td colspan="1" align="left">0.9×-0.1)</td><td colspan="1" align="left"> <em>Agent&nbsp;goes&nbsp;up</em></td></tr>
+<tr>
+<td colspan="1" align="right">+</td><td colspan="1" align="left">0.1×(</td><td colspan="1" align="left">-1</td><td colspan="1" align="center">+</td><td colspan="1" align="left">0.9×-0.1)</td><td colspan="1" align="left"> <em>Agent&nbsp;goes&nbsp;right</em></td></tr>
+<tr>
+<td colspan="1" align="right">+</td><td colspan="1" align="left">0.1×(</td><td colspan="1" align="left">0</td><td colspan="1" align="center">+</td><td colspan="1" align="left">0.9×-0.1)</td><td colspan="1" align="left"> <em>Agent&nbsp;goes&nbsp;down</em>
+</td></tr></tbody></table>
+</i></blockquote>
+<p>which evaluates to 6.173.
+</p>
+<p>Notice also how the <i>+10</i> reward state now has a value less than 10. This
+is because the agent gets flung to one of the corners and these
+corners look bad at this stage.
+</p>
+<p>After the next step of value iteration, shown on the right-hand side
+of the figure, the effect of the +10 reward has progressed one more
+step. In particular, the corners shown get values that indicate
+a reward in 3 steps.
+</p>
+<p>An applet is available on the book web site showing the
+details of value iteration for this example.
+</p>
+</div>
+<p>The value iteration
+algorithm of <a href="http://artint.info/html/ArtInt_227.html#val-iteration-fig">Figure </a><a href="http://artint.info/html/ArtInt_227.html#val-iteration-fig">9.14</a> has an array for each
+stage, but it really only must store the current and the previous
+arrays. It can update one array based on values from the other.
+</p>
+<p>A common refinement of this algorithm is <b>asynchronous value
+iteration</b><a name="asynch-val-iteration">.</a> 
+Rather than sweeping through the states to
+create a new value function, asynchronous value
+iteration updates the states one at a
+time, in any order, and store the values in a single array.  Asynchronous value iteration can store either the
+<i>Q[s,a]</i> array or the <i>V[s]</i> array. 
+<a href="http://artint.info/html/ArtInt_227.html#async-val-iteration-fig">Figure </a><a href="http://artint.info/html/ArtInt_227.html#async-val-iteration-fig">9.15</a> shows asynchronous value iteration when
+the <i>Q</i> array is stored. 
+It converges faster and uses less space than value iteration and is
+the basis of some of the algorithms for <a href="http://artint.info/html/ArtInt_262.html">reinforcement
+learning</a>. Termination can be difficult
+to determine if the agent must guarantee a particular error,
+unless it is careful about how the actions and states are selected.
+Often, this procedure is run indefinitely and is always prepared to give its best estimate of the
+optimal action in a state when asked.
+</p>
+<hr>
+<div class="quote">
+1: <b>Procedure</b> Asynchronous_Value_Iteration(<i>S,A,P,R</i>)
+<br>2: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Inputs</b><br>3: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>S</i> is the set of all states
+<br>4: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>A</i> is the set of all actions
+<br>5: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>P</i> is state transition function specifying <i>P(s'|s,a)</i>
+<br>6: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>R</i> is a reward function <i>R(s,a,s')</i>
+<br>7: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Output</b><br>8: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>π[s]</i> approximately optimal policy
+<br>9: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>Q[S,A]</i> value function
+<br>10: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Local</b><br>11: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;real array <i>Q[S,A]</i>
+<br>12: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;action array <i>π[S]</i>
+<br>13: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;assign <i>Q[S,A]</i> arbitrarily
+<br>14: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>repeat</b><br>15: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;select a state <i>s</i>
+<br>16: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;select an action <i>a</i>
+<br>17: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>Q[s,a] = ∑<sub>s'</sub> P(s'|s,a) (R(s,a,s')+ γmax<sub>a'</sub> Q[s',a'])</i>
+<br>18: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>until</b> termination
+<br>19: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>for each</b>  state <i>s</i> <b>do</b>
+<br>20: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>π[s] = argmax<sub>a</sub> Q[s,a]</i>
+<br>21: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>return</b> <i>π,Q</i>
+</div>
+<div class="center">
+<div class="caption">Figure 9.15: Asynchronous value iteration for MDPs</div>
+</div>
+<a name="async-val-iteration-fig"></a>
+<hr>
+<p>Asynchronous value iteration could also be implemented by storing just the <i>V[s]</i>
+array. In that case, the algorithm selects a state <i>s</i> and carries out the update:
+</p>
+<blockquote class="mathitalic"><i>V[s]=max<sub>a</sub> ∑<sub>s'</sub> P(s'|s,a) (R(s,a,s')+ γV[s']).</i></blockquote>
+<p>Although this variant stores less information, it is more difficult to extract the
+policy. It requires one extra backup to determine which action
+<i>a</i> results in the maximum value. This can be done using
+</p>
+<blockquote class="mathitalic"><i>π[s]= argmax<sub>a</sub> ∑<sub>s'</sub> P(s'|s,a) (R(s,a,s')+ γV[s']).</i></blockquote>
+<div class="quote"><b>Example 9.27: </b>
+In <a href="http://artint.info/html/ArtInt_227.html#VI-example">Example </a><a href="http://artint.info/html/ArtInt_227.html#VI-example">9.26</a>, the state one step up and one step to
+the left of the +10 reward state only had its value updated after
+three value iterations, in which each iteration involved a
+sweep through all of the states.
+<p>In asynchronous value iteration, the <i>+10</i> reward state can be chosen
+first. Then the node to its left can be chosen, and its value will be
+<i>0.7×0.9×10=6.3</i>. Then the node above that node could be chosen,
+and its value would become <i>0.7×0.9×6.3=3.969</i>. Note that it has a value that reflects that it is close to
+a <i>+10</i> reward after considering 3 states, not 300 states, as does value
+iteration.
+</p>
+</div>
+
+		</div>
+		
+	<!-- content ends-->	
+	</div>
+		
+	<!-- footer starts -->		
+	<div id="footer">						
+		<p>	Copyright © 2010, <a href="http://cs.ubc.ca/~poole/">David Poole</a> and 
+  			<a href="http://cs.ubc.ca/~mack/">Alan
+                        Mackworth</a>. <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/2.5/ca/"><img alt="Creative Commons License" style="border-width:0" src="./Artificial Intelligence - foundations of computational agents -- 9.5.3 Value Iteration_files/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/2.5/ca/">Creative Commons Attribution-Noncommercial-No Derivative Works 2.5 Canada License</a>.
+   		</p>	
+	<!-- footer ends-->
+	</div>
+
+<!-- wrap ends here -->
+</div>
+
+
+</body></html>
