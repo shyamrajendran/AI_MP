@@ -81,10 +81,48 @@ public class ValueIteration {
         }
     }
 
-    private double findMax(){
-        double result = 0;
 
-        return result;
+    private boolean checkMove(int index, char moveDirection){
+        // moveDirection : U D L R [ up down left right ]
+        switch (moveDirection){
+            case 'U':
+                if ( index - COL < 0){
+                    return false;
+                }
+                break;
+            case 'D':
+                if ( index + COL > (ROW*COL+1)){
+                    return false;
+                }
+                break;
+            case 'R':
+                if ( index + 1 % COL == 0 ){
+                    return false;
+                }
+                break;
+            case 'L':
+                if ( index % COL == 0 ){
+                    return false;
+                }
+                break;
+        }
+        return true;
+    }
+
+    private int setMove(int index, char moveDirection ) {
+        if (checkMove(index, moveDirection)) {
+            switch (moveDirection) {
+                case 'U':
+                    return index + COL;
+                case 'D':
+                    return index + COL;
+                case 'R':
+                    return index + 1;
+                case 'L':
+                    return index - 1;
+            }
+        }
+        return index;
     }
 
     private double actionUtility(int index, int action){
@@ -92,69 +130,29 @@ public class ValueIteration {
         int temp1 = -1 , temp2 = -1 , temp3 = -1 ;
         double result;
         switch (action){
-            case 0:
-                // see left and right
-                temp1 = index - 1;
-                temp2 = index + 1;
-                temp3 = index - COL; // the main action.
-                if ( temp1 % COL == 0 ) {
-                    temp1 = index;
-                }
-                if ( (temp2+1) % COL == 0 ) {
-                    temp2 = index;
-                }
-                if ( temp3 < 0 ) {
-                    temp3 = index;
-                }
+            case 0: // up : left & right
+                temp3 = setMove(index, 'U');
+                temp1 = setMove(index, 'L');
+                temp2 = setMove(index, 'R');
                 break;
-            case 1:
-                // see bottom and top
-                temp3 = index - 1;
-                temp1 = index + 6;
-                temp2 = index - 6;
-                if ( temp1 > (ROW*COL)-1 ) {
-                    temp1 = index;
-                }
-                if ( temp2 < 0 ) {
-                    temp2 = index;
-                }
-                if ( temp3 < 0 ) {
-                    temp3 = index;
-                }
-                break;
-            case 2:
-                // see left and right
-                temp3 = index - 6;
-                temp1 = index - 1;
-                temp2 = index + 1;
 
-                if ( temp1 < 0 ) {
-                    temp1 = index;
-                }
-                if ( (temp2+1) % COL ==  0 ) {
-                    temp2 = index;
-                }
-                if ( temp3 < 0 ) {
-                    temp3 = index;
-                }
+            case 1: // left : down & up
+                temp3 = setMove(index, 'L');
+                temp1 = setMove(index, 'D');
+                temp2 = setMove(index, 'U');
+                break;
+
+            case 2: // down : right & left
+                temp3 = setMove(index, 'D');
+                temp1 = setMove(index, 'R');
+                temp2 = setMove(index, 'L');
                 break;
             case 3:
-                // see top and bottom
-                temp3 = index + 1;
-                temp1 = index - 6;
-                temp2 = index + 6;
-
-                if ( temp1 < 0 ) {
-                    temp1 = index;
-                }
-                if ( temp2 > (ROW*COL)+1 ) {
-                    temp2 = index;
-                }
-                if ( (temp3 + 1) % COL == 0 ) {
-                    temp3 = index;
-                }
+                // right : up &down
+                temp3 = setMove(index, 'R');
+                temp1 = setMove(index, 'U');
+                temp2 = setMove(index, 'D');
                 break;
-
         }
 
         if ( inputMap[temp1].equals("W") ){
@@ -174,11 +172,11 @@ public class ValueIteration {
     }
 
     private double findMax(int stateIndex){
-        double aptActionValue = Double.MIN_VALUE;
+        double aptActionValue = -1 * Double.MIN_VALUE;
         int aptAction = -1;
         for(int action=0; action < 4 ; action++){
             double temp = actionUtility(stateIndex, action);
-            if ( Double.compare(temp, aptActionValue) > 1 )  {
+            if ( Double.compare(temp, aptActionValue) > 0 )  {
                 aptActionValue =  temp;
                 aptAction = action;
             }
@@ -188,14 +186,26 @@ public class ValueIteration {
     private double[] calcValueIteration(){
         double[] preUtility;
         int maxIteration = 50;
+        double temp = EPSILON * ( (1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR ) ;
         while (true){
             preUtility = utility.clone();
             delta = 0;
             for(int s: states){
-                utility[s] = reward[s] + DISCOUNT_FACTOR * findMax(s);
-                if ( delta < EPSILON * (1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR){
-                    return preUtility;
+                System.out.println("STATE :"+s);
+                if ( inputMap[s].equals("1") || inputMap[s].equals("-1") ) {
+                    continue;
                 }
+
+                utility[s] = reward[s] + DISCOUNT_FACTOR * findMax(s);
+
+                if ( Double.compare(utility[s] - preUtility[s], delta) > 0) {
+                    delta = utility[s] - preUtility[s];
+                }
+
+
+            }
+            if (Double.compare(delta, temp) < 0 ) {
+                return preUtility;
             }
             maxIteration--;
             if (maxIteration < 0){
@@ -206,9 +216,10 @@ public class ValueIteration {
     }
 
     public static void main(String[] args) throws IOException {
+
         String fileName = "/Users/sam/AI_MP/MP4/GridWorld/files/map";
         ValueIteration vl = new ValueIteration(fileName);
         vl.printMap();
-        System.out.println(vl.calcValueIteration());
+        System.out.println(Arrays.toString(vl.calcValueIteration()));
     }
 }
