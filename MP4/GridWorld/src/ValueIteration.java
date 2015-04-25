@@ -1,9 +1,9 @@
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+
+import static java.lang.String.format;
 
 /**
  * Created by sam on 4/22/15.
@@ -28,12 +28,22 @@ public class ValueIteration {
         readFile(fileName);
         utility = new double[ROW*COL];
         reward = new double[ROW*COL];
-        Arrays.fill(utility, START_UTIL);
+//        Arrays.fill(utility, START_UTIL);
+        setStartUtility(utility);
         findStatesAndCalcRewards();
-
     }
 
-
+    private void setStartUtility(double[] utility){
+        for (int s=0; s<utility.length; s++){
+            if (inputMap[s].equals("1")) {
+                utility[s] = 1;
+            } else if (inputMap[s].equals("-1")){
+                utility[s] = -1;
+            } else if ( inputMap[s].equals("w") || inputMap[s].equals("0")){
+                utility[s] = 0;
+            }
+        }
+    }
     private void findStatesAndCalcRewards(){
         int index ;
         for(int i=0; i< ROW ;i++){
@@ -57,10 +67,21 @@ public class ValueIteration {
     private void printMap(){
         for(int i=0; i< ROW ;i++){
             for(int j=0; j< COL;j++){
-                System.out.print(inputMap[COL*i+j]+" ");
+                System.out.print(inputMap[COL*i+j]+"         ");
             }
             System.out.println();
         }
+    }
+
+    private void printUtil(double[] utility){
+        for(int i=0; i< ROW ;i++){
+            for(int j=0; j< COL;j++){
+                System.out.format("%10.4f", utility[COL * i + j]);
+                System.out.print(" ");
+            }
+            System.out.println();
+        }
+
     }
 
     private void readFile(String fileName) throws IOException {
@@ -86,17 +107,17 @@ public class ValueIteration {
         // moveDirection : U D L R [ up down left right ]
         switch (moveDirection){
             case 'U':
-                if ( index - COL < 0){
+                if ( (index - COL) < 0){
                     return false;
                 }
                 break;
             case 'D':
-                if ( index + COL > (ROW*COL+1)){
+                if ( (index + COL) > (ROW*COL-1)){
                     return false;
                 }
                 break;
             case 'R':
-                if ( index + 1 % COL == 0 ){
+                if ( (index + 1) % COL == 0 ){
                     return false;
                 }
                 break;
@@ -113,7 +134,7 @@ public class ValueIteration {
         if (checkMove(index, moveDirection)) {
             switch (moveDirection) {
                 case 'U':
-                    return index + COL;
+                    return index - COL;
                 case 'D':
                     return index + COL;
                 case 'R':
@@ -189,20 +210,20 @@ public class ValueIteration {
         double temp = EPSILON * ( (1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR ) ;
         while (true){
             preUtility = utility.clone();
+            System.out.println("************** ITERATION MAX :" + maxIteration  + "********");
+            printUtil(preUtility);
+            System.out.println("=========================================================================");
             delta = 0;
             for(int s: states){
-                System.out.println("STATE :"+s);
-                if ( inputMap[s].equals("1") || inputMap[s].equals("-1") ) {
-                    continue;
-                }
-
+//                System.out.println("STATE :"+s);
+//                if ( inputMap[s].equals("1") || inputMap[s].equals("-1") ) {
+//                    continue;
+//                }
                 utility[s] = reward[s] + DISCOUNT_FACTOR * findMax(s);
-
-                if ( Double.compare(utility[s] - preUtility[s], delta) > 0) {
-                    delta = utility[s] - preUtility[s];
-                }
-
-
+                delta = Double.max(delta, Math.abs(utility[s] - preUtility[s]));
+//                if ( Double.compare(utility[s] - preUtility[s], delta) > 0) {
+//                    delta = utility[s] - preUtility[s];
+//                }
             }
             if (Double.compare(delta, temp) < 0 ) {
                 return preUtility;
@@ -216,10 +237,10 @@ public class ValueIteration {
     }
 
     public static void main(String[] args) throws IOException {
-
         String fileName = "/Users/sam/AI_MP/MP4/GridWorld/files/map";
         ValueIteration vl = new ValueIteration(fileName);
         vl.printMap();
-        System.out.println(Arrays.toString(vl.calcValueIteration()));
+        System.out.println(" ** ");
+        vl.printUtil(vl.calcValueIteration());
     }
 }
