@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 import static java.lang.String.format;
@@ -204,11 +202,26 @@ public class ValueIteration {
         }
         return aptActionValue;
     }
-    private double[] calcValueIteration(){
+
+    // write to file
+    private void writeOp(){
+
+
+    }
+
+    private double[] calcValueIteration() throws IOException {
+        String opFile = "mapChart.csv";
+        File file1 = new File(opFile);
+        file1.createNewFile();
+        FileWriter writer1 = new FileWriter(file1);
+
         double[] preUtility;
-        int maxIteration = 50;
+        int maxIteration = 0;
         double temp = EPSILON * ( (1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR ) ;
         while (true){
+            writer1.write(Integer.toString(maxIteration));
+            writer1.write(",");
+
             preUtility = utility.clone();
             System.out.println("************** ITERATION MAX :" + maxIteration  + "********");
             printUtil(preUtility);
@@ -225,11 +238,20 @@ public class ValueIteration {
 //                    delta = utility[s] - preUtility[s];
 //                }
             }
+            for (double s: utility){
+                writer1.write(Double.toString(s));
+                writer1.write(",");
+            }
+            writer1.write("\n");
             if (Double.compare(delta, temp) < 0 ) {
+                writer1.flush();
+                writer1.close();
                 return preUtility;
             }
-            maxIteration--;
-            if (maxIteration < 0){
+            maxIteration++;
+            if (maxIteration > 500){
+                writer1.flush();
+                writer1.close();
                 return preUtility;
             }
         }
