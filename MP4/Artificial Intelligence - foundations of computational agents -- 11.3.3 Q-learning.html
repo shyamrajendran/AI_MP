@@ -1,0 +1,336 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!-- saved from url=(0039)http://artint.info/html/ArtInt_265.html -->
+<html xmlns="http://www.w3.org/1999/xhtml"><!-- XML file produced from file: ArtInt.tex
+     using Hyperlatex v 2.9-in-waiting-rk (c) Otfried Cheong, Tom Sgouros, Ryszard Kubiak
+     on Emacs 22.3.1, Mon Jun  7 20:27:11 2010 --><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Artificial Intelligence - foundations of computational agents -- 11.3.3 Q-learning</title>
+<link rel="stylesheet" href="./Artificial Intelligence - foundations of computational agents -- 11.3.3 Q-learning_files/styleBook.css" type="text/css">
+<script type="text/javascript" async="" src="./Artificial Intelligence - foundations of computational agents -- 11.3.3 Q-learning_files/ga.js"></script><script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-19416541-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+<style id="style-1-cropbar-clipper">/* Copyright 2014 Evernote Corporation. All rights reserved. */
+.en-markup-crop-options {
+    top: 18px !important;
+    left: 50% !important;
+    margin-left: -100px !important;
+    width: 200px !important;
+    border: 2px rgba(255,255,255,.38) solid !important;
+    border-radius: 4px !important;
+}
+
+.en-markup-crop-options div div:first-of-type {
+    margin-left: 0px !important;
+}
+</style><style type="text/css"></style></head>
+<body>
+
+<div id="wrap">
+
+	<!--header -->
+	<div id="header">			
+		<h1 id="logo-text"><a href="http://artint.info/index.html" title="">Artificial <br>Intelligence</a></h1>		
+		<p id="logo-subtext">foundations of computational agents</p>
+	<!--header ends-->					
+	</div>
+	
+	<!-- navigation starts-->	
+	<div id="nav">		
+<a href="http://artint.info/html/ArtInt_264.html"><img class="previous" alt="11.3.2 Temporal Differences" src="./Artificial Intelligence - foundations of computational agents -- 11.3.3 Q-learning_files/arrow-left.gif"></a><a href="http://artint.info/html/ArtInt_262.html"><img class="up" alt="11.3 Reinforcement Learning" src="./Artificial Intelligence - foundations of computational agents -- 11.3.3 Q-learning_files/arrow-up.gif"></a><a href="http://artint.info/html/ArtInt_266.html"><img class="next" alt="11.3.4 Exploration and Exploitation" src="./Artificial Intelligence - foundations of computational agents -- 11.3.3 Q-learning_files/arrow-right.gif"></a><ul><li><a href="http://artint.info/index.html">Home</a></li><li><a href="http://artint.info/html/ArtInt_351.html">Index</a></li><li><a href="http://artint.info/html/ArtInt.html#cicontents">Contents</a></li></ul>
+	<!-- navigation ends-->	
+	</div>
+			
+	<!-- content starts -->
+	<div id="content">
+	
+		<div id="main">
+
+<h3>11.3.3 Q-learning</h3>
+<p>In Q-learning and related algorithms, an agent tries to learn the
+optimal policy from its history of
+interaction with the environment. A <b>history</b><a name="id1"> of</a> an agent is a sequence of state-action-rewards:
+</p>
+<blockquote class="mathitalic"><i>⟨s<sub>0</sub>,a<sub>0</sub>,r<sub>1</sub>,s<sub>1</sub>,a<sub>1</sub>,r<sub>2</sub>,s<sub>2</sub>,a<sub>2</sub>,r<sub>3</sub>,s<sub>3</sub>,a<sub>3</sub>,r<sub>4</sub>,s<sub>4</sub>...⟩,</i></blockquote>
+<p>which means that the agent was in state <i>s<sub>0</sub></i> and did action <i>a<sub>0</sub></i>,
+which resulted in it receiving reward <i>r<sub>1</sub></i> and being in state <i>s<sub>1</sub></i>;
+then it did action  <i>a<sub>1</sub></i>,
+received reward <i>r<sub>2</sub></i>, and ended up in state <i>s<sub>2</sub></i>; then it did action  <i>a<sub>2</sub></i>,
+received reward <i>r<sub>3</sub></i>, and ended up in state <i>s<sub>3</sub></i>; and so on.
+</p>
+<p>We treat this history of interaction as a sequence of experiences,
+where an <b>experience</b><a name="id2"> is</a> a tuple
+</p>
+<blockquote class="mathitalic"><i>⟨s,a,r,s'⟩,</i></blockquote>
+<p>which means that the agent was in state <i>s</i>, it did action <i>a</i>, it received 
+reward <i>r</i>, and it went into state <i>s'</i>. These experiences will be the data
+from which the agent can learn what to do. As in decision-theoretic
+planning, the aim is for the agent to maximize its value, which
+is usually the <a href="http://artint.info/html/ArtInt_224.html#discounted-reward">discounted reward</a>.
+</p>
+<p><a href="http://artint.info/html/ArtInt_226.html">Recall</a> that <i>Q<sup>*</sup>(s,a)</i><a name="id3">,</a> where <i>a</i> is an action and <i>s</i> is a state, is
+the expected value (cumulative discounted reward) of doing <i>a</i> in state <i>s</i> and then following the
+optimal policy.
+</p>
+<p><b>Q-learning</b><a name="id4"> uses</a> temporal differences to estimate the
+value of <i>Q<sup>*</sup>(s,a)</i>. 
+In Q-learning, the agent
+maintains a table of <i>Q[S,A]</i>, where <i>S</i> is the set of states and <i>A</i>
+is the set of actions. <i>Q[s,a]</i> represents its current estimate of
+<i>Q<sup>*</sup>(s,a)</i>.
+</p>
+<p>An experience <i>⟨s,a,r,s'⟩</i> provides one data
+point for the value of <i>Q(s,a)</i>. The data point is that the agent
+received the future value of
+<i>r+ γV(s')</i>, where <i>V(s') =max<sub>a'</sub> Q(s',a')</i>; this is the actual
+current reward plus the discounted estimated future value. This new
+data point is called a <b>return</b><a name="id5">.</a> The agent
+can use the 
+temporal difference equation (<a href="http://artint.info/html/ArtInt_264.html#TD-eqn">11.3.2</a>) to update its estimate for
+<i>Q(s,a)</i>:
+</p>
+<blockquote class="mathitalic"><i>Q[s,a] ←Q[s,a] + α(r+ γmax<sub>a'</sub> Q[s',a'] -
+Q[s,a])</i></blockquote>
+<p>or, equivalently,
+</p>
+<blockquote class="mathitalic"><i>Q[s,a] ←(1-α) Q[s,a] + α(r+ γmax<sub>a'</sub> Q[s',a']).</i></blockquote>
+<p>Figure <a href="http://artint.info/html/ArtInt_265.html#Q-learning-fig">11.10</a> shows the Q-learning
+controller. This assumes that <i>α</i> is fixed; if <i>α</i> is
+varying, there will be a different count for each state-action pair
+and the algorithm would also have to keep track of this count.
+</p>
+<hr>
+<div class="quote">
+<b>controller</b> <em>Q-learning</em>(<i>S,A,γ,α</i>)
+<br>2: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Inputs</b><br>3: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>S</i> is a set of states
+<br>4: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>A</i> is a set of actions
+<br>5: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>γ</i> the discount
+<br>6: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>α</i> is the step size
+<br>7: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Local</b><br>8: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;real array <i>Q[S,A]</i>
+<br>9: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;previous state <i>s</i>
+<br>10: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;previous action <i>a</i>
+<br>11: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initialize <i>Q[S,A]</i> arbitrarily
+<br>12: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;observe current state <i>s</i>
+<br>13: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>repeat</b><br>14: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;select and carry out an action <i>a</i>
+<br>15: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;observe reward <i>r</i> and state <i>s'</i>
+<br>16: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>Q[s,a] ←Q[s,a] + α(r+ γmax<sub>a'</sub> Q[s',a'] -
+Q[s,a])</i>
+<br>17: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>s ←s'</i>
+<br>18: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>until</b> termination</div>
+<div class="center">
+<div class="caption">Figure 11.10: Q-learning controller</div>
+</div>
+<a name="Q-learning-fig"></a>
+<hr>
+<p>Q-learning learns an optimal policy no matter
+which policy the agent is actually following (i.e., which action <i>a</i>
+it selects for any state <i>s</i>) as long as there is no bound on the
+number of times it tries an action in any state (i.e., it does not
+always do the same subset of actions in a state). Because it learns
+an optimal policy no matter which policy it is carrying out, it is called an <b>off-policy</b><a name="id7"> method.</a>
+</p>
+<div class="quote"><b>Example 11.9: </b><a name="tiny-q-ex1">
+Consider</a> the domain <a href="http://artint.info/html/ArtInt_262.html#tiny-rl-ex">Example </a><a href="http://artint.info/html/ArtInt_262.html#tiny-rl-ex">11.7</a>, shown in
+<a href="http://artint.info/html/ArtInt_262.html#tiny-rl-fig">Figure </a><a href="http://artint.info/html/ArtInt_262.html#tiny-rl-fig">11.8</a>.  Here is a sequence of <i>⟨s,a,r,s'⟩</i>
+experiences, and the update, where <i>γ=0.9</i> and <i>α=0.2</i>, and
+all of the <i>Q</i>-values are initialized to 0 (to two decimal points):
+<div class="center">
+<table border="1"><tbody><tr>
+<td colspan="1" align="left">
+<i>s</i> </td><td colspan="1" align="left"> <i>a</i> </td><td colspan="1" align="right"> <i>r</i> </td><td colspan="1" align="left"> <i>s'</i> </td><td colspan="1" align="left"> Update</td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>0</sub></i> </td><td colspan="1" align="left"> <i>upC</i> </td><td colspan="1" align="right"> <i>-1</i> </td><td colspan="1" align="left"> <i>s<sub>2</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>0</sub>,upC]=-0.2</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>2</sub></i> </td><td colspan="1" align="left"> <i>up</i> </td><td colspan="1" align="right"> 0 </td><td colspan="1" align="left"> <i>s<sub>4</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>2</sub>,up]=0</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>4</sub></i> </td><td colspan="1" align="left"> <i>left</i> </td><td colspan="1" align="right"> 10 </td><td colspan="1" align="left"> <i>s<sub>0</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>4</sub>,left]=2.0</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>0</sub></i> </td><td colspan="1" align="left"> <i>upC</i> </td><td colspan="1" align="right"> <i>-1</i> </td><td colspan="1" align="left"> <i>s<sub>2</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>0</sub>,upC]=-0.36</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>2</sub></i> </td><td colspan="1" align="left"> <i>up</i> </td><td colspan="1" align="right"> 0 </td><td colspan="1" align="left"> <i>s<sub>4</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>2</sub>,up]=0.36</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>4</sub></i> </td><td colspan="1" align="left"> <i>left</i> </td><td colspan="1" align="right"> 10 </td><td colspan="1" align="left"> <i>s<sub>0</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>4</sub>,left]=3.6</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>0</sub></i> </td><td colspan="1" align="left"> <i>up</i> </td><td colspan="1" align="right"> <i>0</i> </td><td colspan="1" align="left"> <i>s<sub>2</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>0</sub>,upC]=0.06</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>2</sub></i> </td><td colspan="1" align="left"> <i>up</i> </td><td colspan="1" align="right"> <i>-100</i> </td><td colspan="1" align="left"> <i>s<sub>2</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>2</sub>,up]=-19.65</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>2</sub></i> </td><td colspan="1" align="left"> <i>up</i> </td><td colspan="1" align="right"> 0 </td><td colspan="1" align="left"> <i>s<sub>4</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>2</sub>,up]=-15.07</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>s<sub>4</sub></i> </td><td colspan="1" align="left"> <i>left</i> </td><td colspan="1" align="right"> 10 </td><td colspan="1" align="left"> <i>s<sub>0</sub></i> </td><td colspan="1" align="left"> <i>Q[s<sub>4</sub>,left]=4.89</i>
+</td></tr></tbody></table>
+</div>
+<p>Notice how the reward of <i>-100</i> is averaged in with the other
+rewards. After the experience of receiving the <i>-100</i> reward, <i>Q[s<sub>2</sub>,up]</i> gets the value 
+</p>
+<blockquote class="mathitalic"><i>0.8×0.36 + 0.2×(-100+0.9×0.36) = -19.65</i></blockquote>
+<p>At the next step, the same action is carried out with a different
+outcome, and <i>Q[s<sub>2</sub>,up]</i> gets the value 
+</p>
+<blockquote class="mathitalic"><i>0.8×-19.65 + 0.2×(0+0.9×3.6) = -15.07</i></blockquote>
+<p>After more experiences going <i>up</i> from <i>s<sub>2</sub></i> and not receiving the
+reward of <i>-100</i>, the large negative reward will eventually be averaged in with the positive
+rewards and eventually have less influence on the value of
+<i>Q[s<sub>2</sub>,up]</i>, until going <i>up</i> in state <i>s<sub>2</sub></i> once again receives a reward of <i>-100</i>.
+</p>
+</div>
+<p>It is instructive to consider how using <i>α<sub>k</sub></i> to average the
+rewards works when the earlier estimates are much worse than more
+recent estimates. The following example shows the effect of a
+sequence of deterministic actions. Note that when an action is
+deterministic we can use <i>α=1</i>.
+</p>
+<div class="quote"><b>Example 11.10: </b><a name="tiny-q-ex">
+Consider</a> the domain <a href="http://artint.info/html/ArtInt_262.html#tiny-rl-ex">Example </a><a href="http://artint.info/html/ArtInt_262.html#tiny-rl-ex">11.7</a>, shown in
+<a href="http://artint.info/html/ArtInt_262.html#tiny-rl-fig">Figure </a><a href="http://artint.info/html/ArtInt_262.html#tiny-rl-fig">11.8</a>. Suppose that the agent has the experience 
+<blockquote class="mathitalic"><i>⟨s<sub>0</sub>,right,0,s<sub>1</sub>,upC,-1,s<sub>3</sub>,upC,-1,s<sub>5</sub>,left,0,s<sub>4</sub>,left,10,s<sub>0</sub>⟩</i></blockquote>
+<p>and repeats this sequence of actions a number of times. (Note that a
+real Q-learning agent would not keep repeating the same actions,
+particularly when some of them look bad, but we will assume this to
+let us understand how Q-learning works.)
+</p>
+<hr>
+This is a trace of Q-learning described in <a href="http://artint.info/html/ArtInt_265.html#tiny-q-ex">Example </a><a href="http://artint.info/html/ArtInt_265.html#tiny-q-ex">11.10</a>.
+<p>(a) Q-learning for a deterministic sequence of actions with a separate
+<i>α<sub>k</sub></i>-value for each state-action pair, <i>α<sub>k</sub>=1/k</i>.
+</p>
+<div class="center">
+<table border="1"><tbody><tr>
+<td colspan="1" align="left">Iteration </td><td colspan="1" align="center"> <i>Q[s<sub>0</sub>,right]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>1</sub>,upC]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>3</sub>,upC]</i> </td><td colspan="1" align="center">
+<i>Q[s<sub>5</sub>,left]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>4</sub>,left]</i></td></tr>
+<tr>
+<td colspan="1" align="left">1 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">2 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> 4.5 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">3 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> 0.35 </td><td colspan="1" align="center"> 6.0 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">4 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-0.92</i> </td><td colspan="1" align="center"> 1.36 </td><td colspan="1" align="center"> 6.75 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">10 </td><td colspan="1" align="center"> 0.03 </td><td colspan="1" align="center"> 0.51 </td><td colspan="1" align="center"> 4 </td><td colspan="1" align="center"> 8.1 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">100 </td><td colspan="1" align="center"> 2.54 </td><td colspan="1" align="center"> 4.12 </td><td colspan="1" align="center"> 6.82 </td><td colspan="1" align="center"> 9.5 </td><td colspan="1" align="center"> 11.34</td></tr>
+<tr>
+<td colspan="1" align="left">1000 </td><td colspan="1" align="center"> 4.63 </td><td colspan="1" align="center"> 5.93 </td><td colspan="1" align="center"> 8.46 </td><td colspan="1" align="center"> 11.3 </td><td colspan="1" align="center"> 13.4</td></tr>
+<tr>
+<td colspan="1" align="left">10,000 </td><td colspan="1" align="center"> 6.08 </td><td colspan="1" align="center"> 7.39 </td><td colspan="1" align="center"> 9.97 </td><td colspan="1" align="center"> 12.83 </td><td colspan="1" align="center"> 14.9</td></tr>
+<tr>
+<td colspan="1" align="left">100,000 </td><td colspan="1" align="center"> 7.27 </td><td colspan="1" align="center"> 8.58 </td><td colspan="1" align="center"> 11.16 </td><td colspan="1" align="center"> 14.02 </td><td colspan="1" align="center"> 16.08</td></tr>
+<tr>
+<td colspan="1" align="left">1,000,000 </td><td colspan="1" align="center"> 8.21 </td><td colspan="1" align="center"> 9.52 </td><td colspan="1" align="center"> 12.1 </td><td colspan="1" align="center"> 14.96 </td><td colspan="1" align="center"> 17.02</td></tr>
+<tr>
+<td colspan="1" align="left">10,000,000 </td><td colspan="1" align="center"> 8.96 </td><td colspan="1" align="center"> 10.27 </td><td colspan="1" align="center"> 12.85 </td><td colspan="1" align="center"> 15.71 </td><td colspan="1" align="center"> 17.77</td></tr>
+<tr>
+<td colspan="1" align="left"><i>∞</i> </td><td colspan="1" align="center"> 11.85 </td><td colspan="1" align="center"> 13.16 </td><td colspan="1" align="center"> 15.74 </td><td colspan="1" align="center"> 18.6 </td><td colspan="1" align="center"> 20.66
+</td></tr></tbody></table>
+</div>
+<p>(b) Q-learning for a deterministic sequence of actions with
+<i>α=1</i>:
+</p>
+<div class="center">
+<table border="1"><tbody><tr>
+<td colspan="1" align="left">Iteration </td><td colspan="1" align="center"> <i>Q[s<sub>0</sub>,right]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>1</sub>,upC]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>3</sub>,upC]</i> </td><td colspan="1" align="center">
+<i>Q[s<sub>5</sub>,left]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>4</sub>,left]</i></td></tr>
+<tr>
+<td colspan="1" align="left">1 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">2 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> 9 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">3 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> <i>-1</i> </td><td colspan="1" align="center"> 7.1 </td><td colspan="1" align="center"> 9 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">4 </td><td colspan="1" align="center"> 0 </td><td colspan="1" align="center"> 5.39 </td><td colspan="1" align="center"> 7.1 </td><td colspan="1" align="center"> 9 </td><td colspan="1" align="center"> 10</td></tr>
+<tr>
+<td colspan="1" align="left">5 </td><td colspan="1" align="center"> 4.85 </td><td colspan="1" align="center"> 5.39 </td><td colspan="1" align="center"> 7.1 </td><td colspan="1" align="center"> 9 </td><td colspan="1" align="center"> 14.37</td></tr>
+<tr>
+<td colspan="1" align="left">6 </td><td colspan="1" align="center"> 4.85 </td><td colspan="1" align="center"> 5.39 </td><td colspan="1" align="center"> 7.1 </td><td colspan="1" align="center"> 12.93 </td><td colspan="1" align="center"> 14.37</td></tr>
+<tr>
+<td colspan="1" align="left">10 </td><td colspan="1" align="center"> 7.72 </td><td colspan="1" align="center"> 8.57 </td><td colspan="1" align="center"> 10.64 </td><td colspan="1" align="center"> 15.25 </td><td colspan="1" align="center"> 16.94</td></tr>
+<tr>
+<td colspan="1" align="left">20 </td><td colspan="1" align="center"> 10.41 </td><td colspan="1" align="center"> 12.22 </td><td colspan="1" align="center"> 14.69 </td><td colspan="1" align="center"> 17.43 </td><td colspan="1" align="center"> 19.37</td></tr>
+<tr>
+<td colspan="1" align="left">30 </td><td colspan="1" align="center"> 11.55 </td><td colspan="1" align="center"> 12.83 </td><td colspan="1" align="center"> 15.37 </td><td colspan="1" align="center"> 18.35 </td><td colspan="1" align="center"> 20.39</td></tr>
+<tr>
+<td colspan="1" align="left">40 </td><td colspan="1" align="center"> 11.74 </td><td colspan="1" align="center"> 13.09 </td><td colspan="1" align="center"> 15.66 </td><td colspan="1" align="center"> 18.51 </td><td colspan="1" align="center"> 20.57</td></tr>
+<tr>
+<td colspan="1" align="left"><i>∞</i> </td><td colspan="1" align="center"> 11.85 </td><td colspan="1" align="center"> 13.16 </td><td colspan="1" align="center"> 15.74 </td><td colspan="1" align="center"> 18.6 </td><td colspan="1" align="center"> 20.66
+</td></tr></tbody></table>
+</div>
+<p>(c) <i>Q</i>-values after full exploration and convergence:
+</p>
+<div class="center">
+<table border="1"><tbody><tr>
+<td colspan="1" align="left">Iteration </td><td colspan="1" align="center"> <i>Q[s<sub>0</sub>,right]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>1</sub>,upC]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>3</sub>,upC]</i> </td><td colspan="1" align="center">
+<i>Q[s<sub>5</sub>,left]</i> </td><td colspan="1" align="center"> <i>Q[s<sub>4</sub>,left]</i></td></tr>
+<tr>
+<td colspan="1" align="left"><i>∞</i> </td><td colspan="1" align="center"> 19.5 </td><td colspan="1" align="center"> 21.14 </td><td colspan="1" align="center"> 24.08 </td><td colspan="1" align="center"> 27.87 </td><td colspan="1" align="center"> 30.97
+</td></tr></tbody></table>
+</div>
+<div class="center">
+<div class="caption">Figure 11.11: Updates for a particular run of Q-learning</div>
+</div>
+<a name="tiny-q-trace-fig"></a>
+<hr>
+<p><a href="http://artint.info/html/ArtInt_265.html#tiny-q-trace-fig">Figure </a><a href="http://artint.info/html/ArtInt_265.html#tiny-q-trace-fig">11.11</a> shows how the <i>Q</i>-values are updated
+though a repeated execution of this action sequence. In both of these
+tables, the <i>Q</i>-values are initialized to 0.
+</p>
+<ol type="a"><li>In the top run
+there is a separate <i>α<sub>k</sub></i>-value for each state-action
+pair. Notice how, in iteration 1, only the immediate rewards are
+updated. In iteration 2, there is a one-step backup from the positive
+rewards. Note that the <i>-1</i> is not backed up because another action
+is available that has a <i>Q</i>-value of 0. In the third iteration, there is a
+two-step backup. <i>Q[s<sub>3</sub>,upC]</i> is updated because of the reward of
+10, two steps ahead; its value is the average of its experiences: <i>(-1
++ -1 + (-1+0.9×6))/3</i>.
+</li><li>The second run is where <i>α=1</i>; thus, it only takes into
+account the current estimate. Again, the reward is backed up one step
+in each iteration. In the third iteration,  <i>Q[s<sub>3</sub>,upC]</i> is updated because of the reward of
+10 two steps ahead, but with <i>α=1</i>, the algorithm ignores its previous
+estimates and uses its new experience,  <i>-1+0.9×0.9</i>. Having
+<i>α=1</i> converges much faster than when <i>α<sub>k</sub>=1/k</i>, but <i>α=1</i> only converges when the actions are
+deterministic because <i>α=1</i> implicitly assumes that the last reward and resulting
+state are representative of future ones. 
+</li><li>If the algorithm is run allowing the agent to explore, as is
+normal, some of the <i>Q</i>-values after convergence are shown in part (c). 
+Note that, because there are
+stochastic actions, <i>α</i> cannot be 1 for the algorithm to
+converge. Note that the <i>Q</i>-values are larger than for the deterministic
+sequence of actions because these actions do not form an optimal policy.
+</li></ol>
+<p>The final policy after convergence is to do <i>up</i> in state <i>s<sub>0</sub></i>, <i>upC</i>
+in state <i>s<sub>2</sub></i>, <i>up</i> in states <i>s<sub>1</sub></i> and <i>s<sub>3</sub></i>, and <i>left</i> in
+states <i>s<sub>4</sub></i> and <i>s<sub>5</sub></i>.
+</p>
+<p>You can run the applet for this example that is available on the book web
+site. Try different initializations, and try varying <i>α</i>.
+</p>
+</div>
+
+		</div>
+		
+	<!-- content ends-->	
+	</div>
+		
+	<!-- footer starts -->		
+	<div id="footer">						
+		<p>	Copyright © 2010, <a href="http://cs.ubc.ca/~poole/">David Poole</a> and 
+  			<a href="http://cs.ubc.ca/~mack/">Alan
+                        Mackworth</a>. <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/2.5/ca/"><img alt="Creative Commons License" style="border-width:0" src="http://i.creativecommons.org/l/by-nc-nd/2.5/ca/80x15.png"></a><br>This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/2.5/ca/">Creative Commons Attribution-Noncommercial-No Derivative Works 2.5 Canada License</a>.
+   		</p>	
+	<!-- footer ends-->
+	</div>
+
+<!-- wrap ends here -->
+</div>
+
+
+</body></html>

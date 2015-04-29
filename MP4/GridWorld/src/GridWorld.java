@@ -1,12 +1,11 @@
 import java.io.*;
 import java.util.ArrayList;
-
-import static java.lang.String.format;
+import java.util.HashMap;
 
 /**
  * Created by sam on 4/22/15.
  */
-public class ValueIteration {
+public class GridWorld {
 
     private String[] inputMap = new String[100];
     private double[] utility ;
@@ -21,8 +20,10 @@ public class ValueIteration {
     private final double REWARD = -0.4;
     private final double INTENDED_PROB = 0.8;
     private final double OTHER_PROB = 0.1;
+    private String[] actionsAvailable = {"U","D","L","R"};
+    private HashMap<Integer, HashMap<String, Integer>> stateActionFreq = new HashMap<Integer, HashMap<String, Integer>>();
 
-    public ValueIteration(String fileName) throws IOException {
+    public GridWorld(String fileName) throws IOException {
         readFile(fileName);
         utility = new double[ROW*COL];
         reward = new double[ROW*COL];
@@ -30,6 +31,7 @@ public class ValueIteration {
         setStartUtility(utility);
         findStatesAndCalcRewards();
     }
+
 
     private void setStartUtility(double[] utility){
         for (int s=0; s<utility.length; s++){
@@ -47,7 +49,7 @@ public class ValueIteration {
         for(int i=0; i< ROW ;i++){
             for(int j=0; j< COL;j++){
                 index = COL*i+j;
-                if ( inputMap[index].equals("0")){
+                if ( inputMap[index].equals("0") || inputMap[index].equals("S")){
                     states.add(index);
                     reward[index] = REWARD;
                 } else if (inputMap[index].equals("1")){
@@ -203,12 +205,47 @@ public class ValueIteration {
         return aptActionValue;
     }
 
-    // write to file
-    private void writeOp(){
+
+    private void initStateActionFreq(){
+        int index;
+        HashMap<String , Integer > actionUtils;
+        for (int i = 0; i < ROW; i++){
+            for (int j = 0; j < COL; j++){
+                index =  COL*i+j;
+                actionUtils = new HashMap<String, Integer>();
+                for (String a : actionsAvailable){
+                    actionUtils.put(a,0);
+                }
+                stateActionFreq.put(index,actionUtils);
+            }
+        }
+    }
+    private void calcTDQ() {
+//        function Q-LEARNING-AGENT(percept) returns an action
+//        inputs: percept, a percept indicating the current state s′ and reward signal r′ persistent: Q, a table of action values indexed by state and action, initially zero
+//        Nsa , a table of frequencies for state–action pairs, initially zero s, a, r, the previous state, action, and reward, initially null
+//        if TERMINAL?(s) then Q[s,None]←r′ if s is not null then
+//        increment Nsa [s , a ]
+//        Q[s,a]←Q[s,a] + α(Nsa[s,a])(r + γ maxa′ s,a,r ←s′,argmaxa′ f(Q[s′,a′],Nsa[s′,a′]),r′
+//        return a
+
+//        https://raw.githubusercontent.com/aima-java/aima-java/AIMA3e/aima-core/src/main/java/aima/core/learning/reinforcement/agent/QLearningAgent.java
+        initStateActionFreq();
+        int maxIter = 50;
+        int loopCount = 0;
+
+        while (true){
+            if ( loopCount == maxIter) break;
+
+            loopCount++;
+        }
+        double alpha;
+
+
+
 
 
     }
-
     private double[] calcValueIteration() throws IOException {
         String opFile = "mapChart.csv";
         File file1 = new File(opFile);
@@ -217,7 +254,7 @@ public class ValueIteration {
 
         double[] preUtility;
         int maxIteration = 0;
-        double temp = EPSILON * ( (1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR ) ;
+        double loopCheck = EPSILON * ( (1 - DISCOUNT_FACTOR) / DISCOUNT_FACTOR ) ;
         while (true){
             writer1.write(Integer.toString(maxIteration));
             writer1.write(",");
@@ -243,7 +280,7 @@ public class ValueIteration {
                 writer1.write(",");
             }
             writer1.write("\n");
-            if (Double.compare(delta, temp) < 0 ) {
+            if (Double.compare(delta, loopCheck) < 0 ) {
                 writer1.flush();
                 writer1.close();
                 return preUtility;
@@ -260,7 +297,7 @@ public class ValueIteration {
 
     public static void main(String[] args) throws IOException {
         String fileName = "/Users/sam/AI_MP/MP4/GridWorld/files/map";
-        ValueIteration vl = new ValueIteration(fileName);
+        GridWorld vl = new GridWorld(fileName);
         vl.printMap();
         System.out.println(" ** ");
         vl.printUtil(vl.calcValueIteration());
