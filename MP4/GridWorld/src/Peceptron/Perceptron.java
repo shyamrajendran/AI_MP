@@ -145,7 +145,7 @@ public class Perceptron {
             }
         }
         System.out.println("At test num mismatched " + numMisMatched);
-        System.out.println("perceptron accuracy" + Double.toString(100.0 - (numMisMatched * 100.0/TESTIMAGES)));
+        System.out.println("perceptron accuracy " + Double.toString(100.0 - (numMisMatched * 100.0/TESTIMAGES)));
     }
 
 
