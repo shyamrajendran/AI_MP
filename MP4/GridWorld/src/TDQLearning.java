@@ -64,7 +64,7 @@ public class TDQLearning {
     public static final int NE = 10;
     public static final double DISCOUNT_FACTOR = 0.99;
     public static final double RPLUS = 1.0;
-    public static final double LEARNING_THRESHOLD = 0.1;
+    public static final double LEARNING_THRESHOLD = 0.01;
 
     int time_step = 0;
     GridLocation[][] grid = null;
@@ -191,7 +191,6 @@ public class TDQLearning {
                 }
             }
         }
-        time_step = 0;
     }
 
     public Map<State, Map<Action, Double>> getQsaClone() {
@@ -207,6 +206,7 @@ public class TDQLearning {
 
     private Action tdMax(State state) {
         double max = Double.NEGATIVE_INFINITY;
+        List<Action> max_actions = new ArrayList<>();
         Action retAction = Action.NORTH;
         for (Action a : Action.values()) {
             double val;
@@ -217,9 +217,15 @@ public class TDQLearning {
             }
             if (val > max) {
                 max = val;
-                retAction = a;
+                max_actions = new ArrayList<>();
+                max_actions.add(a);
+            }
+            if (val == max) {
+                max_actions.add(a);
             }
         }
+        Random random = new Random();
+        retAction = max_actions.get(random.nextInt(max_actions.size()));
         return retAction;
     }
 
@@ -240,8 +246,10 @@ public class TDQLearning {
             for (Action action : Action.values()) {
                 if (Math.abs(qsa1.get(state).get(action) - qsa2.get(state).get(action)) >= LEARNING_THRESHOLD)
                     return false;
-                if (nsa.get(state).get(action) < NE)
+                if (!grid[state.y][state.x].isWall && qsa2.get(state).get(action) < 85)
                     return false;
+//                if (nsa.get(state).get(action) < NE)
+//                    return false;
             }
         }
         return true;
@@ -255,7 +263,7 @@ public class TDQLearning {
         while (true) {
             time_step = 0;
             old_qsa = getQsaClone();
-            tdLearning(state);
+            tdLearning(state, num_runs);
             num_runs++;
             System.out.println("Num Runs = " + num_runs);
             printWriter.write(num_runs + ", ");
@@ -268,46 +276,76 @@ public class TDQLearning {
             if (hasConverged(old_qsa, qsa))
                 break;
             Random random = new Random();
-            int y = random.nextInt(6);
-            int x = random.nextInt(6);
-            state = new State(y, x);
-            if (num_runs >= 1000000)
+//            int y = random.nextInt(6);
+//            int x = random.nextInt(6);
+            int num = random.nextInt(36);
+            state = new State(num / grid.length, num % grid[0].length);
+            if (num_runs >= 10000)
                 break;
         }
         printWriter.close();
     }
 
-    public void tdLearning(State state) {
-        if (grid[state.y][state.x].isWall ) {
-            if (time_step != 0) {
-                System.out.println("Haaw how is this possible ");
-                System.exit(0);
+    public void tdLearning(State state, int numRun) {
+        for (int i = 0; i < 10000; i++) {
+            if (grid[state.y][state.x].isWall ) {
+                if (time_step != 0) {
+                    System.out.println("Haaw how is this possible ");
+                    System.exit(0);
+                }
+                return;
             }
-            return;
+            Action action = tdMax(state);
+            State next_state = getProbableState(state, action);
+
+            double old_qsa = qsa.get(state).get(action);
+            double rs = grid[state.y][state.x].reward;
+            double maxqsa = getMaxQValue(next_state);
+
+            double new_qsa = old_qsa + getAlpha(numRun) * (rs + (DISCOUNT_FACTOR * maxqsa) - old_qsa);
+
+            qsa.get(state).put(action, new_qsa);
+
+            int old_nsa = nsa.get(state).get(action);
+            nsa.get(state).put(action, old_nsa + 1);
+
+            time_step++;
+
+            state = next_state;
         }
-        Action action = tdMax(state);
-        State next_state = getProbableState(state, action);
-
-        double old_qsa = qsa.get(state).get(action);
-        double rs = grid[state.y][state.x].reward;
-        double maxqsa = getMaxQValue(next_state);
-
-        double new_qsa = old_qsa + getAlpha(time_step) * (rs + DISCOUNT_FACTOR * maxqsa - old_qsa);
-
-        //System.out.println(state + ":" + old_qsa + "->" + new_qsa);
-
-        if (time_step > 1000)
-            return;
-
-        qsa.get(state).put(action, new_qsa);
-
-        int old_nsa = nsa.get(state).get(action);
-        nsa.get(state).put(action, old_nsa + 1);
-
-        time_step++;
-
-        tdLearning(next_state);
     }
+
+//    public void tdLearnings(State state) {
+//        if (grid[state.y][state.x].isWall ) {
+//            if (time_step != 0) {
+//                System.out.println("Haaw how is this possible ");
+//                System.exit(0);
+//            }
+//            return;
+//        }
+//        Action action = tdMax(state);
+//        State next_state = getProbableState(state, action);
+//
+//        double old_qsa = qsa.get(state).get(action);
+//        double rs = grid[state.y][state.x].reward;
+//        double maxqsa = getMaxQValue(next_state);
+//
+//        double new_qsa = old_qsa + getAlpha(time_step) * (rs + (DISCOUNT_FACTOR * maxqsa) - old_qsa);
+//
+//        //System.out.println(state + ":" + old_qsa + "->" + new_qsa);
+//
+//        if (time_step > 10000)
+//            return;
+//
+//        qsa.get(state).put(action, new_qsa);
+//
+//        int old_nsa = nsa.get(state).get(action);
+//        nsa.get(state).put(action, old_nsa + 1);
+//
+//        time_step++;
+//
+//        tdLearning(next_state);
+//    }
 
 
     public static void main(String[] args) throws IOException {
