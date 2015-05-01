@@ -20,6 +20,7 @@ class Feature {
 public class TextClassification {
     private final int TRAINING_SIZE = 1900;
     private final int TEST_SIZE = 263;
+    private final boolean BIAS = false;
 
     private final int CLASS_SIZE = 8;
 
@@ -34,11 +35,20 @@ public class TextClassification {
 
     private void initWeights(boolean byRandom) {
         for (int i = 0; i < CLASS_SIZE; i++) {
-            for (int r = 0; r < dictionary.length; r++) {
-                if (byRandom) {
-                    weight_per_class[i][r] = Math.random();
+            if (BIAS) {
+                for (int r = 0; r < dictionary.length + 1; r++) {
+                    if (byRandom) {
+                        weight_per_class[i][r] = Math.random();
+                    }
+                    else {weight_per_class[i][r] = 0.0;}
                 }
-                else {weight_per_class[i][r] = 0.0;}
+            } else {
+                for (int r = 0; r < dictionary.length; r++) {
+                    if (byRandom) {
+                        weight_per_class[i][r] = Math.random();
+                    }
+                    else {weight_per_class[i][r] = 0.0;}
+                }
             }
         }
     }
@@ -77,17 +87,31 @@ public class TextClassification {
 
         for (int i = 0; i < lines.size(); i++) {
             line = lines.get(i);
-            int[] word_freq = new int[dictionary.length];
+            int[] word_freq;
+            if (BIAS) {
+                word_freq = new int[dictionary.length + 1];
+                word_freq[0] = 1;
+            } else {
+                word_freq = new int[dictionary.length];
+            }
             String[] word_nums = line.split(" ");
             for (String word_map : word_nums) {
                 String word = word_map.split(":")[0];
                 int freq = Integer.parseInt(word_map.split(":")[1]);
-                word_freq[reverseWordMap.get(word)] = freq;
+                if (BIAS) {
+                    word_freq[reverseWordMap.get(word) + 1] = freq;
+                } else {
+                    word_freq[reverseWordMap.get(word)] = freq;
+                }
             }
             featureVector[i] = new Feature(word_freq);
         }
 
-        weight_per_class = new double[CLASS_SIZE][dictionary.length];
+        if (BIAS) {
+            weight_per_class = new double[CLASS_SIZE][dictionary.length + 1];
+        } else {
+            weight_per_class = new double[CLASS_SIZE][dictionary.length];
+        }
         initWeights(false);
     }
 
@@ -106,12 +130,22 @@ public class TextClassification {
 
             line = line.substring(index);
             String[] word_nums = line.split(" ");
-            int[] word_freq = new int[dictionary.length];
+            int[] word_freq;
+            if (BIAS) {
+                word_freq = new int[dictionary.length + 1];
+                word_freq[0] = 1;
+            } else {
+                word_freq = new int[dictionary.length];
+            }
             for (String word_num : word_nums) {
                 String word = word_num.split(":")[0];
                 int freq = Integer.parseInt(word_num.split(":")[1]);
                 if (!reverseWordMap.containsKey(word)) continue;
-                word_freq[reverseWordMap.get(word)] = freq;
+                if (BIAS) {
+                    word_freq[reverseWordMap.get(word) + 1] = freq;
+                } else {
+                    word_freq[reverseWordMap.get(word)] = freq;
+                }
             }
             testFeatureVector[line_num] = new Feature(word_freq);
             line_num++;
@@ -123,8 +157,14 @@ public class TextClassification {
         int maxCValue = Integer.MIN_VALUE;
         for (int c = 0; c < CLASS_SIZE; c++) {
             int dotProduct = 0;
-            for (int r = 0; r < dictionary.length; r++) {
-                dotProduct += weight_per_class[c][r] * feature.word_freq[r];
+            if (BIAS) {
+                for (int r = 0; r < dictionary.length + 1; r++) {
+                    dotProduct += weight_per_class[c][r] * feature.word_freq[r];
+                }
+            } else {
+                for (int r = 0; r < dictionary.length; r++) {
+                    dotProduct += weight_per_class[c][r] * feature.word_freq[r];
+                }
             }
             if (dotProduct > maxCValue) {
                 maxClass = c;
@@ -148,9 +188,16 @@ public class TextClassification {
                 int predicted_label = getMaxClass(featureVector[t]);
 
                 if (predicted_label != actual_label) {
-                    for (int r = 0; r < dictionary.length; r++) {
-                        weight_per_class[actual_label][r] += getAlpha(timeStep) * featureVector[t].word_freq[r];
-                        weight_per_class[predicted_label][r] -= getAlpha(timeStep) * featureVector[t].word_freq[r];
+                    if (BIAS) {
+                        for (int r = 0; r < dictionary.length + 1; r++) {
+                            weight_per_class[actual_label][r] += getAlpha(timeStep) * featureVector[t].word_freq[r];
+                            weight_per_class[predicted_label][r] -= getAlpha(timeStep) * featureVector[t].word_freq[r];
+                        }
+                    } else {
+                        for (int r = 0; r < dictionary.length; r++) {
+                            weight_per_class[actual_label][r] += getAlpha(timeStep) * featureVector[t].word_freq[r];
+                            weight_per_class[predicted_label][r] -= getAlpha(timeStep) * featureVector[t].word_freq[r];
+                        }
                     }
                     numMisMatched++;
                 }
