@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -60,10 +61,10 @@ enum Action {
 }
 
 public class TDQLearning {
-    public static final int NE = 50;
+    public static final int NE = 10;
     public static final double DISCOUNT_FACTOR = 0.99;
     public static final double RPLUS = 1.0;
-    public static final double LEARNING_THRESHOLD = 0.01;
+    public static final double LEARNING_THRESHOLD = 0.1;
 
     int time_step = 0;
     GridLocation[][] grid = null;
@@ -246,25 +247,44 @@ public class TDQLearning {
         return true;
     }
 
-    public void tdLearning() {
+    public void tdLearning() throws IOException {
         Map<State, Map<Action, Double>> old_qsa;
         int num_runs = 0;
+        PrintWriter printWriter = new PrintWriter("out.csv");
+        State state = start_state;
         while (true) {
+            time_step = 0;
+            old_qsa = getQsaClone();
+            tdLearning(state);
+            num_runs++;
+            System.out.println("Num Runs = " + num_runs);
+            printWriter.write(num_runs + ", ");
+            for (int row = 0; row < grid.length; row++) {
+                for (int col = 0; col < grid[row].length; col++) {
+                    printWriter.write(getMaxQValue(new State(row, col)) + ",");
+                }
+            }
+            printWriter.write("\n");
+            if (hasConverged(old_qsa, qsa))
+                break;
             Random random = new Random();
             int y = random.nextInt(6);
             int x = random.nextInt(6);
-            State start_state = new State(y, x);
-            time_step = 0;
-            old_qsa = getQsaClone();
-            tdLearning(start_state);
-            num_runs++;
-            System.out.println("NUM RUN " + num_runs);
-            if (hasConverged(old_qsa, qsa))
+            state = new State(y, x);
+            if (num_runs >= 1000000)
                 break;
         }
+        printWriter.close();
     }
 
     public void tdLearning(State state) {
+        if (grid[state.y][state.x].isWall ) {
+            if (time_step != 0) {
+                System.out.println("Haaw how is this possible ");
+                System.exit(0);
+            }
+            return;
+        }
         Action action = tdMax(state);
         State next_state = getProbableState(state, action);
 
@@ -274,7 +294,7 @@ public class TDQLearning {
 
         double new_qsa = old_qsa + getAlpha(time_step) * (rs + DISCOUNT_FACTOR * maxqsa - old_qsa);
 
-        System.out.println(state + ":" + old_qsa + "->" + new_qsa);
+        //System.out.println(state + ":" + old_qsa + "->" + new_qsa);
 
         if (time_step > 1000)
             return;
@@ -288,8 +308,6 @@ public class TDQLearning {
 
         tdLearning(next_state);
     }
-
-    public State getStartState() {return start_state;}
 
 
     public static void main(String[] args) throws IOException {
