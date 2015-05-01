@@ -24,6 +24,8 @@ public class Perceptron {
     private final int TESTIMAGES = 1000; // set low to debug
     private final boolean BIAS = true;
     private final boolean CYCLE_DATA = true;
+    private final boolean RANDOM_INITIALIZATION = true;
+    private final int MAX_EPOCH = 100;
 
     private final int CLASS_SIZE = 10;
 
@@ -95,7 +97,7 @@ public class Perceptron {
             weight_per_class = new double[CLASS_SIZE][ROW * COLUMN + 1];
         else
             weight_per_class = new double[CLASS_SIZE][ROW * COLUMN];
-        initWeights(true);
+        initWeights(RANDOM_INITIALIZATION);
     }
 
     private void readTestFile(String imagesFile, String labelsFile) throws IOException {
@@ -202,7 +204,7 @@ public class Perceptron {
             }
             timeStep++;
             System.out.println("At timestep "+ timeStep + " num mismatched = " + numMisMatched);
-        } while (numMisMatched != 0);
+        } while (timeStep < MAX_EPOCH && numMisMatched != 0);
         System.out.println(timeStep);
     }
 

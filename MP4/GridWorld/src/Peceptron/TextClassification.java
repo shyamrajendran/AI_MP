@@ -22,6 +22,8 @@ public class TextClassification {
     private final int TEST_SIZE = 263;
     private final boolean BIAS = false;
     private final boolean CYCLE_DATA = true;
+    private final boolean RANDOM_INITIALIZATION = true;
+    private final int MAX_EPOCH = 100;
 
     private final int CLASS_SIZE = 8;
 
@@ -113,7 +115,7 @@ public class TextClassification {
         } else {
             weight_per_class = new double[CLASS_SIZE][dictionary.length];
         }
-        initWeights(false);
+        initWeights(RANDOM_INITIALIZATION);
     }
 
     public void readTestFile(String file) throws IOException {
@@ -219,7 +221,7 @@ public class TextClassification {
             }
             timeStep++;
             System.out.println("At timestep "+ timeStep + " num mismatched = " + numMisMatched);
-        } while (numMisMatched != 0);
+        } while (timeStep < MAX_EPOCH && numMisMatched != 0);
         System.out.println(timeStep);
     }
 
