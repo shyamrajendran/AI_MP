@@ -23,6 +23,7 @@ public class Perceptron {
     private final int TRAINIMAGES = 5000; // set low to debug
     private final int TESTIMAGES = 1000; // set low to debug
     private final boolean BIAS = true;
+    private final boolean CYCLE_DATA = true;
 
     private final int CLASS_SIZE = 10;
 
@@ -167,7 +168,21 @@ public class Perceptron {
         int numMisMatched;
         do {
             numMisMatched = 0;
-            for (int t = 0; t < TRAINIMAGES; t++) {
+            int[] train_index = new int[TRAINIMAGES];
+            for (int i = 0; i < TRAINIMAGES; i++) {
+                train_index[i] = i;
+            }
+            if (CYCLE_DATA) {
+                Random rand = new Random();
+                for (int i = TRAINIMAGES - 1; i > 0; i--) {
+                    int n = rand.nextInt(i + 1);
+                    train_index[i] = train_index[i] ^ train_index[n];
+                    train_index[n] = train_index[i] ^ train_index[n];
+                    train_index[i] = train_index[n] ^ train_index[i];
+                }
+            }
+            for (int x = 0; x < TRAINIMAGES; x++) {
+                int t = train_index[x];
                 int actual_label = training_labels[t];
                 int predicted_label = getMaxClass(images[t]);
 

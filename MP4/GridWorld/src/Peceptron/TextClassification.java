@@ -21,6 +21,7 @@ public class TextClassification {
     private final int TRAINING_SIZE = 1900;
     private final int TEST_SIZE = 263;
     private final boolean BIAS = false;
+    private final boolean CYCLE_DATA = true;
 
     private final int CLASS_SIZE = 8;
 
@@ -183,7 +184,21 @@ public class TextClassification {
         int numMisMatched;
         do {
             numMisMatched = 0;
-            for (int t = 0; t < TRAINING_SIZE; t++) {
+            int[] train_index = new int[TRAINING_SIZE];
+            for (int i = 0; i < TRAINING_SIZE; i++) {
+                train_index[i] = i;
+            }
+            if (CYCLE_DATA) {
+                Random rand = new Random();
+                for (int i = TRAINING_SIZE - 1; i > 0; i--) {
+                    int n = rand.nextInt(i + 1);
+                    train_index[i] = train_index[i] ^ train_index[n];
+                    train_index[n] = train_index[i] ^ train_index[n];
+                    train_index[i] = train_index[n] ^ train_index[i];
+                }
+            }
+            for (int x = 0; x < TRAINING_SIZE; x++) {
+                int t = train_index[x];
                 int actual_label = training_labels[t];
                 int predicted_label = getMaxClass(featureVector[t]);
 
