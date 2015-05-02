@@ -238,12 +238,122 @@ public class TextClassification {
         System.out.println("At test num mismatched " + numMisMatched);
         System.out.println("perceptron accuracy " + Double.toString(100.0 - (numMisMatched * 100.0/TEST_SIZE)));
     }
+    private double getDistance(Feature feature1, Feature feature2) {
+        double dot_product = 0.0;
+        double ai = 0.0;
+        double bi = 0.0;
+        for (int i = 0; i < dictionary.length; i++) {
+            int p1 = feature1.word_freq[i];
+            int p2 = feature2.word_freq[i];
+            dot_product += p1 * p2;
+            ai += p1 * p1;
+            bi += p2 * p2;
+        }
+        return 1.0 - ((dot_product) / (Math.sqrt(ai) * Math.sqrt(bi)));
+    }
+
+    class QueueItem {
+        Double distance;
+        Integer label;
+        QueueItem(double distance, int label) {
+            this.distance = distance;
+            this.label = label;
+        }
+    }
+
+    public void runKNN(int k) {
+        PriorityQueue<QueueItem> priorityQueue = new PriorityQueue<>(new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                QueueItem q1 = (QueueItem) o1;
+                QueueItem q2 = (QueueItem) o2;
+                if (q1.distance > q2.distance) return -1;
+                else if (q1.distance < q2.distance) return 1;
+                return 0;
+            }
+        });
+
+        int num_mismatch = 0;
+        for (int i = 0; i < TEST_SIZE; i++) {
+            int original_label = test_labels[i];
+            for (int t = 0; t < TRAINING_SIZE; t++) {
+                double distance = getDistance(testFeatureVector[i], featureVector[t]);
+                int class_label = training_labels[t];
+                if (priorityQueue.size() < k) {
+                    priorityQueue.add(new QueueItem(distance, class_label));
+                } else {
+                    if (priorityQueue.peek().distance > distance) {
+                        priorityQueue.poll();
+                        priorityQueue.add(new QueueItem(distance, class_label));
+                    }
+                }
+            }
+            int[] label_count = new int[CLASS_SIZE];
+            int max_label = 0;
+            int max_count = 0;
+            int queue_size = priorityQueue.size();
+            for (int p = 0; p < queue_size; p++) {
+                QueueItem queueItem = priorityQueue.poll();
+                label_count[queueItem.label]++;
+            }
+
+            for (int l = 0; l < CLASS_SIZE; l++) {
+                if (label_count[l] > max_count) {
+                    max_label = l;
+                    max_count = label_count[l];
+                }
+            }
+            if (original_label != max_label) num_mismatch++;
+        }
+        double percentage_accuracy = 100.0 - (100.0 * num_mismatch) / TEST_SIZE;
+        System.out.println(k + ", " + percentage_accuracy);
+        //System.out.println("KNN Accuracy is " + percentage_accuracy);
+    }
+//    public void runPerceptronGradientDescent() {
+//        int timeStep = 0;
+//        int numMisMatched = 0;
+//        do {
+//            numMisMatched = 0;
+//            for (int t = 0; t < TRAINING_SIZE; t++) {
+//                int actual_label = training_labels[t];
+//                int predicted_label = getMaxClass(featureVector[t]);
+//                //w ← w +α(y － f (x))σ (w ・x)(1－σ (w ・x))x
+//                if (actual_label == predicted_label) continue;
+//                numMisMatched++;
+//
+//                double dotproduct = 0.0;
+//                for (int r = 0; r < ROW * COLUMN; r++) {
+//                    dotproduct += weight_per_class[actual_label][r] * images[t].image_pixel[r];
+//                }
+//                for (int r = 0; r < ROW * COLUMN; r++) {
+//                    weight_per_class[actual_label][r] +=
+//                            getAlpha(timeStep) * images[t].image_pixel[r] * sigmoid(dotproduct) *
+//                                    (1 - sigmoid(dotproduct));
+//                }
+//                System.out.println("Dot product = " + dotproduct + " sigmoid = " + sigmoid(dotproduct));
+//                dotproduct = 0.0;
+//                for (int r = 0; r < ROW * COLUMN; r++) {
+//                    dotproduct += weight_per_class[predicted_label][r] * images[t].image_pixel[r];
+//                }
+//                System.out.println("Dot product = " + dotproduct + " sigmoid = " + sigmoid(dotproduct));
+//                for (int r = 0; r < ROW * COLUMN; r++) {
+//                    weight_per_class[predicted_label][r] -=
+//                            getAlpha(timeStep) * images[t].image_pixel[r] * sigmoid(dotproduct) *
+//                                    (1 - sigmoid(dotproduct));
+//                }
+//            }
+//            timeStep++;
+//            System.out.println("TimeStep = " + timeStep + " Mismatch = " + numMisMatched);
+//        } while (numMisMatched != 0);
+//    }
 
     public static void main(String[] args) throws IOException {
         TextClassification textClassification = new TextClassification();
         textClassification.readTrainingFile("/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/8category/8category_training.txt");
         textClassification.readTestFile("/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/8category/8category_testing.txt");
-        textClassification.runPerceptron();
-        textClassification.testPerceptron();
+//        textClassification.runPerceptron();
+//        textClassification.testPerceptron();
+        for (int runs = 1; runs < 100; runs++)
+            textClassification.runKNN(runs);
     }
 }

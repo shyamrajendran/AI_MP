@@ -3,7 +3,9 @@ package Peceptron;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 /**
@@ -17,15 +19,15 @@ class Image {
     }
 }
 
-public class Perceptron {
+public class DigitClassification {
     private final int ROW = 28;
     private final int COLUMN = 28;
     private final int TRAINIMAGES = 5000; // set low to debug
     private final int TESTIMAGES = 1000; // set low to debug
-    private final boolean BIAS = true;
+    private final boolean BIAS = false;
     private final boolean CYCLE_DATA = true;
     private final boolean RANDOM_INITIALIZATION = true;
-    private final int MAX_EPOCH = 100;
+    private final int MAX_EPOCH = 500;
 
     private final int CLASS_SIZE = 10;
 
@@ -222,17 +224,131 @@ public class Perceptron {
         System.out.println("perceptron accuracy " + Double.toString(100.0 - (numMisMatched * 100.0/TESTIMAGES)));
     }
 
+    private double getDistance(Image image1, Image image2) {
+        double dist = 0.0;
+        double normal = 0.0;
+        for (int i = 0; i < ROW * COLUMN; i++) {
+            int p1 = image1.image_pixel[i];
+            int p2 = image2.image_pixel[i];
+            dist += (p1 - p2) * (p1 - p2);
+            normal += p2 * p2;
+        }
+        return Math.sqrt(dist) / (Math.sqrt(normal));
+    }
+
+    class QueueItem {
+        Double distance;
+        Integer label;
+        QueueItem(double distance, int label) {
+            this.distance = distance;
+            this.label = label;
+        }
+    }
+
+    public void runKNN(int k) {
+        PriorityQueue<QueueItem> priorityQueue = new PriorityQueue<>(new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                QueueItem q1 = (QueueItem) o1;
+                QueueItem q2 = (QueueItem) o2;
+                if (q1.distance > q2.distance) return -1;
+                else if (q1.distance < q2.distance) return 1;
+                return 0;
+            }
+        });
+
+        int num_mismatch = 0;
+        for (int i = 0; i < TESTIMAGES; i++) {
+            int original_label = test_labels[i];
+            for (int t = 0; t < TRAINIMAGES; t++) {
+                double distance = getDistance(test_images[i], images[t]);
+                int class_label = training_labels[t];
+                if (priorityQueue.size() < k) {
+                    priorityQueue.add(new QueueItem(distance, class_label));
+                } else {
+                    if (priorityQueue.peek().distance > distance) {
+                        priorityQueue.poll();
+                        priorityQueue.add(new QueueItem(distance, class_label));
+                    }
+                }
+            }
+            int[] label_count = new int[CLASS_SIZE];
+            int max_label = 0;
+            int max_count = 0;
+            int queue_size = priorityQueue.size();
+            for (int p = 0; p < queue_size; p++) {
+                QueueItem queueItem = priorityQueue.poll();
+                label_count[queueItem.label]++;
+            }
+
+            for (int l = 0; l < CLASS_SIZE; l++) {
+                if (label_count[l] > max_count) {
+                    max_label = l;
+                    max_count = label_count[l];
+                }
+            }
+            if (original_label != max_label) num_mismatch++;
+        }
+        double percentage_accuracy = 100.0 - (100.0 * num_mismatch) / TESTIMAGES;
+        System.out.println(k + ", " + percentage_accuracy);
+    }
+
+    double sigmoid(double x) {
+        return 1.0 / (1.0 + Math.pow(Math.E, -1 * x));
+    }
+
+    public void runPerceptronGradientDescent() {
+        int timeStep = 0;
+        int numMisMatched = 0;
+        do {
+            numMisMatched = 0;
+            for (int t = 0; t < TRAINIMAGES; t++) {
+                int actual_label = training_labels[t];
+                int predicted_label = getMaxClass(images[t]);
+                //w ← w +α(y － f (x))σ (w ・x)(1－σ (w ・x))x
+                if (actual_label == predicted_label) continue;
+                numMisMatched++;
+
+                double dotproduct = 0.0;
+                for (int r = 0; r < ROW * COLUMN; r++) {
+                    dotproduct += weight_per_class[actual_label][r] * images[t].image_pixel[r];
+                }
+                for (int r = 0; r < ROW * COLUMN; r++) {
+                    weight_per_class[actual_label][r] +=
+                            getAlpha(timeStep) * images[t].image_pixel[r] * sigmoid(dotproduct) *
+                                    (1 - sigmoid(dotproduct));
+                }
+                System.out.println("Dot product = " + dotproduct + " sigmoid = " + sigmoid(dotproduct));
+                dotproduct = 0.0;
+                for (int r = 0; r < ROW * COLUMN; r++) {
+                    dotproduct += weight_per_class[predicted_label][r] * images[t].image_pixel[r];
+                }
+                System.out.println("Dot product = " + dotproduct + " sigmoid = " + sigmoid(dotproduct));
+                for (int r = 0; r < ROW * COLUMN; r++) {
+                    weight_per_class[predicted_label][r] -=
+                            getAlpha(timeStep) * images[t].image_pixel[r] * sigmoid(dotproduct) *
+                                    (1 - sigmoid(dotproduct));
+                }
+            }
+            timeStep++;
+            System.out.println("TimeStep = " + timeStep + " Mismatch = " + numMisMatched);
+        } while (numMisMatched != 0);
+    }
+
     public static void main(String[] args) throws IOException {
         String trainImages = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/digitdata/trainingimages";
         String trainLabels = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/digitdata/traininglabels";
         String testImages = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/digitdata/testimages";
         String testLabels = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/digitdata/testlabels";
 
-        Perceptron perceptron = new Perceptron();
-        perceptron.readTrainingFile(trainImages, trainLabels);
-        perceptron.readTestFile(testImages, testLabels);
-        perceptron.runPerceptron();
-        perceptron.testPerceptron();
+        DigitClassification digitClassification = new DigitClassification();
+        digitClassification.readTrainingFile(trainImages, trainLabels);
+        digitClassification.readTestFile(testImages, testLabels);
+        //digitClassification.runPerceptronGradientDescent();
+        //digitClassification.testPerceptron();
+
+        for (int runs = 1; runs < 100; runs++)
+            digitClassification.runKNN(runs);
 
     }
 }
