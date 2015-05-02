@@ -24,7 +24,7 @@ public class TextClassification {
     private final boolean CYCLE_DATA = true;
     private final boolean RANDOM_INITIALIZATION = true;
     private final int MAX_EPOCH = 100;
-
+    private double[][] confusionMatrix;
     private final int CLASS_SIZE = 8;
 
     private double[][] weight_per_class;
@@ -34,7 +34,13 @@ public class TextClassification {
     Feature[] featureVector;
     Feature[] testFeatureVector;
 
+    private HashMap<Integer, Integer> perClassTotal = new HashMap<Integer, Integer>();
+
     String[] dictionary;
+
+    TextClassification() {
+        confusionMatrix = new double[CLASS_SIZE][CLASS_SIZE];
+    }
 
     private void initWeights(boolean byRandom) {
         for (int i = 0; i < CLASS_SIZE; i++) {
@@ -131,6 +137,15 @@ public class TextClassification {
 
             test_labels[line_num] = Integer.parseInt(line.substring(0, index - 1));
 
+            Integer key = test_labels[line_num];
+            if (!perClassTotal.containsKey(key)) {
+                perClassTotal.put(key, 1);
+            } else {
+                Integer val = perClassTotal.get(key);
+                val++;
+                perClassTotal.put(key, val);
+            }
+
             line = line.substring(index);
             String[] word_nums = line.split(" ");
             int[] word_freq;
@@ -225,12 +240,15 @@ public class TextClassification {
         System.out.println(timeStep);
     }
 
-    public void testPerceptron() {
+    public void testPerceptron(boolean confusion) {
         int numMisMatched = 0;
         for (int t = 0; t < TEST_SIZE; t++) {
             int actual_label = test_labels[t];
             int predicted_label = getMaxClass(testFeatureVector[t]);
 
+            if (confusion) {
+                confusionMatrix[actual_label][predicted_label]++;
+            }
             if (predicted_label != actual_label) {
                 numMisMatched++;
             }
@@ -238,6 +256,7 @@ public class TextClassification {
         System.out.println("At test num mismatched " + numMisMatched);
         System.out.println("perceptron accuracy " + Double.toString(100.0 - (numMisMatched * 100.0/TEST_SIZE)));
     }
+
     private double getDistance(Feature feature1, Feature feature2) {
         double dot_product = 0.0;
         double ai = 0.0;
@@ -347,13 +366,49 @@ public class TextClassification {
 //        } while (numMisMatched != 0);
 //    }
 
+    private void printConfusionMatrix(Boolean debug) throws IOException {
+        Double accuracy;
+        Double t ;
+        accuracy=0.0;
+        if (debug) {
+            System.out.println("\n\n*** CONFUSION MATRIX ***\n");
+        }
+        for (int i = 0 ;i < CLASS_SIZE; i++){
+            for (int j = 0 ; j < CLASS_SIZE ; j++){
+                t = confusionMatrix[i][j]/perClassTotal.get(i)*100;
+                if (debug){
+                    System.out.format("%10.3f", t);
+                    System.out.print("%");
+                }
+                if ( i == j) {
+                    accuracy+=t;
+                }
+            }
+            if (debug){
+                System.out.println();
+            }
+        }
+        double a = accuracy/CLASS_SIZE;
+
+        if (debug) {
+            System.out.println("--------------------------");
+            System.out.print("OVERALL ACCURACY :");
+            System.out.format("%5.3f", a);
+            System.out.println("%");
+            System.out.println("---------------------------");
+        }
+
+
+    }
+
     public static void main(String[] args) throws IOException {
         TextClassification textClassification = new TextClassification();
-        textClassification.readTrainingFile("/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/8category/8category_training.txt");
-        textClassification.readTestFile("/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/8category/8category_testing.txt");
-//        textClassification.runPerceptron();
-//        textClassification.testPerceptron();
-        for (int runs = 1; runs < 100; runs++)
-            textClassification.runKNN(runs);
+        textClassification.readTrainingFile("/Users/saikat/Documents/UIUC/spring_2015/cs440/mp/AI_MP/MP4/GridWorld/8category/8category_training.txt");
+        textClassification.readTestFile("/Users/saikat/Documents/UIUC/spring_2015/cs440/mp/AI_MP/MP4/GridWorld/8category/8category_testing.txt");
+        textClassification.runPerceptron();
+        textClassification.testPerceptron(true);
+        textClassification.printConfusionMatrix(true);
+//        for (int runs = 1; runs < 100; runs++)
+//            textClassification.runKNN(runs);
     }
 }
