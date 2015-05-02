@@ -16,7 +16,7 @@ public class GridWorld {
     private int ROW = 0;
     private int COL = 0;
     private final double DISCOUNT_FACTOR = 0.99;
-    private final double EPSILON = 0.001;
+    private final double EPSILON = 1;
     private final double REWARD = -0.4;
     private final double INTENDED_PROB = 0.8;
     private final double OTHER_PROB = 0.1;
@@ -319,13 +319,14 @@ public class GridWorld {
                 writer1.write(",");
             }
             writer1.write("\n");
+//            System.out.println("DELTA : LOOPCHECK"+delta+":"+loopCheck);
             if (Double.compare(delta, loopCheck) < 0 ) {
                 writer1.flush();
                 writer1.close();
                 return preUtility;
             }
             maxIteration++;
-            if (maxIteration > 500){
+            if (maxIteration > 1000){
                 writer1.flush();
                 writer1.close();
                 return preUtility;

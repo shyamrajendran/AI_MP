@@ -287,7 +287,7 @@ public class TDQLearning {
     }
 
     public void tdLearning(State state, int numRun) {
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 1000; i++) {
             if (grid[state.y][state.x].isWall ) {
                 if (time_step != 0) {
                     System.out.println("Haaw how is this possible ");
@@ -297,7 +297,6 @@ public class TDQLearning {
             }
             Action action = tdMax(state);
             State next_state = getProbableState(state, action);
-
             double old_qsa = qsa.get(state).get(action);
             double rs = grid[state.y][state.x].reward;
             double maxqsa = getMaxQValue(next_state);
@@ -349,7 +348,7 @@ public class TDQLearning {
 
 
     public static void main(String[] args) throws IOException {
-        String file = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/files/map";
+        String file = "/Users/sam/AI_MP/MP4/GridWorld/files/map";
         TDQLearning tdqLearning = new TDQLearning();
         tdqLearning.readConfig(file);
         tdqLearning.tdLearning();

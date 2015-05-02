@@ -24,7 +24,7 @@ public class DigitClassification {
     private final int TESTIMAGES = 1000; // set low to debug
     private final boolean BIAS = false;
     private final boolean CYCLE_DATA = false;
-    private final boolean RANDOM_INITIALIZATION = false;
+    private final boolean RANDOM_INITIALIZATION = true;
     private static final int MAX_EPOCH = 500;
     private final int CLASS_SIZE = 10;
     private static double[][] confusionMatrix;
