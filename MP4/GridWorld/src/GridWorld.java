@@ -64,6 +64,40 @@ public class GridWorld {
             }
         }
     }
+
+    private String findOptimalPolicy(int index){
+        double action = 0;
+        for (int i = 0; i < 4; i++){
+           action =  findMax(index, true);
+        }
+        switch ((int)Math.round(action)){
+            case 0:
+                return "UP";
+            case 1:
+                return "<-";
+            case 2:
+                return "DOWN";
+            case 3:
+                return "->";
+        }
+        return "";
+    }
+    private void printOptimalPolicy(){
+        int index;
+        for(int i = 0; i < ROW; i++){
+            for (int j = 0; j < COL; j++){
+                index = COL*i+j;
+                if (!inputMap[index].equals("W")){
+                    System.out.print(findOptimalPolicy(index));
+                } else {
+                    System.out.print("#");
+                }
+                System.out.print("\t");
+            }
+            System.out.println();
+        }
+
+    }
     private void printMap(){
         for(int i=0; i< ROW ;i++){
             for(int j=0; j< COL;j++){
@@ -192,7 +226,7 @@ public class GridWorld {
         return result;
     }
 
-    private double findMax(int stateIndex){
+    private double findMax(int stateIndex, boolean returnAction){
         double aptActionValue = -1 * Double.MIN_VALUE;
         int aptAction = -1;
         for(int action=0; action < 4 ; action++){
@@ -202,7 +236,12 @@ public class GridWorld {
                 aptAction = action;
             }
         }
-        return aptActionValue;
+        if ( returnAction ){
+            return aptAction;
+        } else {
+            return aptActionValue;
+        }
+
     }
 
 
@@ -269,7 +308,7 @@ public class GridWorld {
 //                if ( inputMap[s].equals("1") || inputMap[s].equals("-1") ) {
 //                    continue;
 //                }
-                utility[s] = reward[s] + DISCOUNT_FACTOR * findMax(s);
+                utility[s] = reward[s] + DISCOUNT_FACTOR * findMax(s,false);
                 delta = Double.max(delta, Math.abs(utility[s] - preUtility[s]));
 //                if ( Double.compare(utility[s] - preUtility[s], delta) > 0) {
 //                    delta = utility[s] - preUtility[s];
@@ -301,5 +340,6 @@ public class GridWorld {
         vl.printMap();
         System.out.println(" ** ");
         vl.printUtil(vl.calcValueIteration());
+        vl.printOptimalPolicy();
     }
 }
