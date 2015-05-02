@@ -1,8 +1,6 @@
 package Peceptron;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.PriorityQueue;
@@ -25,11 +23,13 @@ public class DigitClassification {
     private final int TRAINIMAGES = 5000; // set low to debug
     private final int TESTIMAGES = 1000; // set low to debug
     private final boolean BIAS = false;
-    private final boolean CYCLE_DATA = true;
-    private final boolean RANDOM_INITIALIZATION = true;
-    private final int MAX_EPOCH = 500;
-
+    private final boolean CYCLE_DATA = false;
+    private final boolean RANDOM_INITIALIZATION = false;
+    private static final int MAX_EPOCH = 500;
     private final int CLASS_SIZE = 10;
+    private static double[][] confusionMatrix;
+    private boolean confusion = false;
+    private HashMap<Integer, Integer> perClassTotal = new HashMap<Integer, Integer>();
 
     private Image[] images;
     private int[] training_labels;
@@ -38,6 +38,11 @@ public class DigitClassification {
     private int[] test_labels;
 
     private double[][] weight_per_class;
+
+    DigitClassification() {
+        confusionMatrix = new double[CLASS_SIZE][CLASS_SIZE];
+        int a = 0;
+    }
 
     private void initWeights(boolean byRandom) {
         for (int i = 0; i < CLASS_SIZE; i++) {
@@ -112,6 +117,15 @@ public class DigitClassification {
         for (int i = 0; i < TESTIMAGES; i++) {
             test_labels[i] = Integer.parseInt(bufferedReader2.readLine());
 
+            Integer key = test_labels[i];
+            if (!perClassTotal.containsKey(key)) {
+                perClassTotal.put(key, 1);
+            } else {
+                Integer val = perClassTotal.get(key);
+                val++;
+                perClassTotal.put(key, val);
+            }
+
             int[] pixel_data;
             if (BIAS) {
                 pixel_data = new int[ROW * COLUMN + 1];
@@ -167,7 +181,7 @@ public class DigitClassification {
         return 1000.0 / (1000.0 + timeStep);
     }
 
-    public void runPerceptron() {
+    public int runPerceptron(int epochs) {
         int timeStep = 0;
         int numMisMatched;
         do {
@@ -205,23 +219,29 @@ public class DigitClassification {
                 }
             }
             timeStep++;
-            System.out.println("At timestep "+ timeStep + " num mismatched = " + numMisMatched);
-        } while (timeStep < MAX_EPOCH && numMisMatched != 0);
+            //System.out.println("At timestep "+ timeStep + " num mismatched = " + numMisMatched);
+        } while (timeStep < epochs && numMisMatched != 0);
         System.out.println(timeStep);
+        return timeStep;
     }
 
-    public void testPerceptron() {
+    public double testPerceptron(boolean confusion) {
         int numMisMatched = 0;
         for (int t = 0; t < TESTIMAGES; t++) {
             int actual_label = test_labels[t];
             int predicted_label = getMaxClass(test_images[t]);
 
+            if (confusion) {
+                confusionMatrix[actual_label][predicted_label]++;
+            }
             if (predicted_label != actual_label) {
                 numMisMatched++;
             }
         }
         System.out.println("At test num mismatched " + numMisMatched);
-        System.out.println("perceptron accuracy " + Double.toString(100.0 - (numMisMatched * 100.0/TESTIMAGES)));
+        double accuracy = 100.0 - (numMisMatched * 100.0/TESTIMAGES);
+        System.out.println("perceptron accuracy " + Double.toString(accuracy));
+        return accuracy;
     }
 
     private double getDistance(Image image1, Image image2) {
@@ -335,11 +355,68 @@ public class DigitClassification {
         } while (numMisMatched != 0);
     }
 
+    public void generateEpochAccuracyData() {
+        PrintWriter bw = null;
+        try {
+            bw = new PrintWriter(new FileWriter("train_epoch_accuracy"));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        for (int i = 1; i < 100; i++) {
+            initWeights(false);
+            int iter = runPerceptron(i);
+            double accuracy = testPerceptron(false);
+            bw.write(Integer.toString(iter));
+            bw.write(",");
+            bw.write(Double.toString(accuracy));
+            bw.write("\n");
+        }
+        bw.close();
+
+    }
+
+    private void printConfusionMatrix(Boolean debug) throws IOException {
+        Double accuracy;
+        Double t ;
+        accuracy=0.0;
+        if (debug) {
+            System.out.println("\n\n*** CONFUSION MATRIX ***\n");
+        }
+        for (int i = 0 ;i < CLASS_SIZE; i++){
+            for (int j = 0 ; j < CLASS_SIZE ; j++){
+                t = confusionMatrix[i][j]/perClassTotal.get(i)*100;
+                if (debug){
+                    System.out.format("%10.3f", t);
+                    System.out.print("%");
+                }
+                if ( i == j) {
+                    accuracy+=t;
+                }
+            }
+            if (debug){
+                System.out.println();
+            }
+        }
+        double a = accuracy/CLASS_SIZE;
+
+        if (debug) {
+            System.out.println("--------------------------");
+            System.out.print("OVERALL ACCURACY :");
+            System.out.format("%5.3f", a);
+            System.out.println("%");
+            System.out.println("---------------------------");
+        }
+
+
+    }
     public static void main(String[] args) throws IOException {
-        String trainImages = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/digitdata/trainingimages";
-        String trainLabels = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/digitdata/traininglabels";
-        String testImages = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/digitdata/testimages";
-        String testLabels = "/home/manshu/Templates/EXEs/team_retinaa/AI_MP/MP4/GridWorld/digitdata/testlabels";
+        String trainImages = "/Users/saikat/Documents/UIUC/spring_2015/cs440/mp/AI_MP/MP4/GridWorld/digitdata/trainingimages";
+        String trainLabels = "/Users/saikat/Documents/UIUC/spring_2015/cs440/mp/AI_MP/MP4/GridWorld/digitdata/traininglabels";
+        String testImages = "/Users/saikat/Documents/UIUC/spring_2015/cs440/mp/AI_MP/MP4/GridWorld/digitdata/testimages";
+        String testLabels = "/Users/saikat/Documents/UIUC/spring_2015/cs440/mp/AI_MP/MP4/GridWorld/digitdata/testlabels";
 
         DigitClassification digitClassification = new DigitClassification();
         digitClassification.readTrainingFile(trainImages, trainLabels);
@@ -347,8 +424,14 @@ public class DigitClassification {
         //digitClassification.runPerceptronGradientDescent();
         //digitClassification.testPerceptron();
 
-        for (int runs = 1; runs < 100; runs++)
-            digitClassification.runKNN(runs);
+        //digitClassification.generateEpochAccuracyData();
+        digitClassification.runPerceptron(500);
+        digitClassification.testPerceptron(true);
+        digitClassification.printConfusionMatrix(true);
+//        digitClassification.runPerceptron(MAX_EPOCH);
+//        for (int runs = 1; runs < 100; runs++)
+//            digitClassification.runKNN(runs);
+
 
     }
 }
