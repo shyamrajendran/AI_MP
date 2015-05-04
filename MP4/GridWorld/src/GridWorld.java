@@ -17,7 +17,7 @@ public class GridWorld {
     private int COL = 0;
     private final double DISCOUNT_FACTOR = 0.99;
     private final double EPSILON = 1;
-    private final double REWARD = -0.4;
+    private final double REWARD = -0.04;
     private final double INTENDED_PROB = 0.8;
     private final double OTHER_PROB = 0.1;
     private String[] actionsAvailable = {"U","D","L","R"};
