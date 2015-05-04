@@ -61,7 +61,7 @@ enum Action {
 }
 
 public class TDQLearning {
-    public static final int NE = 10;
+    public static final int NE = 100;
     public static final double DISCOUNT_FACTOR = 0.99;
     public static final double RPLUS = 1.0;
     public static final double LEARNING_THRESHOLD = 0.01;
@@ -287,7 +287,7 @@ public class TDQLearning {
     }
 
     public void tdLearning(State state, int numRun) {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             if (grid[state.y][state.x].isWall ) {
                 if (time_step != 0) {
                     System.out.println("Haaw how is this possible ");
