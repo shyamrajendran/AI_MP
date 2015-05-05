@@ -7,7 +7,7 @@ import java.util.HashMap;
  */
 public class GridWorld {
 
-    private String[] inputMap = new String[100];
+    private String[] inputMap = new String[10000];
     private double[] utility ;
     private double[] reward;
     private ArrayList<Integer> states = new ArrayList<Integer>();
@@ -336,7 +336,7 @@ public class GridWorld {
     }
 
     public static void main(String[] args) throws IOException {
-        String fileName = "/Users/sam/AI_MP/MP4/GridWorld/files/map";
+        String fileName = "/Users/sam/AI_MP/MP4/GridWorld/files/map3";
         GridWorld vl = new GridWorld(fileName);
         vl.printMap();
         System.out.println(" ** ");

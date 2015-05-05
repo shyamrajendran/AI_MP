@@ -63,7 +63,7 @@ enum Action {
 public class TDQLearning {
     public static final int NE = 100;
     public static final double DISCOUNT_FACTOR = 0.99;
-    public static final double RPLUS = 1.0;
+    public static final double RPLUS = 100;
     public static final double LEARNING_THRESHOLD = 0.01;
 
     int time_step = 0;
